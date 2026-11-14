@@ -328,13 +328,17 @@ public static class LastFlameProjectSetup
         background.sprite = _squareSprite;
         background.color = new Color(0.035f, 0.055f, 0.085f, 0.9f);
 
-        CreateText(root.transform, "Caption", "ЗАПАС ОГНЯ", 18, TextAnchor.UpperLeft,
+        Text captionText = CreateText(root.transform, "Caption", "ЗАПАС ОГНЯ", 18, TextAnchor.UpperLeft,
             new Color(1f, 0.83f, 0.57f, 1f),
             new Vector2(14f, -8f), new Vector2(190f, 26f), new Vector2(0f, 1f), new Vector2(0f, 1f));
+        // Left-aligned text must use a top-left pivot, not a centered pivot.
+        captionText.rectTransform.pivot = new Vector2(0f, 1f);
 
         Text valueText = CreateText(root.transform, "Value", "75 / 100", 16, TextAnchor.UpperRight,
             Color.white, new Vector2(-14f, -8f), new Vector2(112f, 26f),
             new Vector2(1f, 1f), new Vector2(1f, 1f));
+        // Keep the right-aligned value inside the meter's right padding.
+        valueText.rectTransform.pivot = new Vector2(1f, 1f);
 
         GameObject sliderRoot = CreateRectRoot("FlameSlider", new Vector2(0f, 1f), new Vector2(0f, 1f),
             new Vector2(0f, 1f), new Vector2(14f, -46f), new Vector2(312f, 24f));
