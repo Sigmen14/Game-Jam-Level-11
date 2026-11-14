@@ -47,18 +47,11 @@ public sealed class AudioSettingsController : MonoBehaviour
         {
             sfxSlider.SetValueWithoutNotify(_sfxVolume);
         }
-        else
-        {
-            Debug.LogError("AudioSettingsController: assign the SFX slider in the Inspector.", this);
         }
 
         if (musicSlider != null)
         {
             musicSlider.SetValueWithoutNotify(_musicVolume);
-        }
-        else
-        {
-            Debug.LogError("AudioSettingsController: assign the Music slider in the Inspector.", this);
         }
 
         ApplySfxVolume();
