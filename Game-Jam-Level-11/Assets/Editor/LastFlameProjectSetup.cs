@@ -29,6 +29,7 @@ public static class LastFlameProjectSetup
     private const string WindWidgetPath = "Assets/Prefabs/UI/UI_WindWarning.prefab";
     private const string StartPanelPath = "Assets/Prefabs/UI/UI_StartPanel.prefab";
     private const string ResultPanelPath = "Assets/Prefabs/UI/UI_ResultPanel.prefab";
+    private const string SettingsPanelPath = "Assets/Prefabs/UI/UI_SettingsPanel.prefab";
     private const string ArtFolder = "Assets/Art/LastFlame";
     private const string SettingsFolder = "Assets/Settings/InputActionReferences";
 
@@ -63,12 +64,8 @@ public static class LastFlameProjectSetup
             GameObject flameWidget = CreateFlameWidget();
             GameObject timerWidget = CreateTimerWidget();
             GameObject windWidget = CreateWindWidget();
-            GameObject startPanel = CreatePanelPrefab(
-                StartPanelPath,
-                "ПОСЛЕДНИЙ ОГОНЁК",
-                "Продержись 180 секунд. Собирай топливо и не дай пламени погаснуть.",
-                "WASD — движение     SPACE — защита (медленнее)",
-                "НАЧАТЬ");
+            GameObject startPanel = CreateMainMenuPanelPrefab();
+            GameObject settingsPanel = CreateSettingsPanelPrefab();
             GameObject resultPanel = CreatePanelPrefab(
                 ResultPanelPath,
                 "ОГОНЁК ПОГАС",
@@ -77,7 +74,7 @@ public static class LastFlameProjectSetup
                 "ЕЩЁ РАЗ");
 
             GameObject hudPrefab = CreateHudPrefab(
-                flameWidget, timerWidget, windWidget, startPanel, resultPanel);
+                flameWidget, timerWidget, windWidget, startPanel, settingsPanel, resultPanel);
 
             BuildMainScene(playerPrefab, pickupPrefab, coverPrefab, hudPrefab);
             AssetDatabase.SaveAssets();
@@ -286,9 +283,15 @@ public static class LastFlameProjectSetup
         collider.isTrigger = true;
         collider.radius = 0.34f;
 
+        AudioSource pickupSource = root.AddComponent<AudioSource>();
+        pickupSource.playOnAwake = false;
+        pickupSource.spatialBlend = 0f;
+        pickupSource.volume = 0.8f;
+
         FuelPickup pickup = root.AddComponent<FuelPickup>();
         SetObjectReference(pickup, "pickupCollider", collider);
         SetObjectReference(pickup, "pickupVisual", renderer);
+        SetObjectReference(pickup, "pickupAudio", pickupSource);
         SetFloat(pickup, "fuelAmount", 25f);
         SetFloat(pickup, "respawnDelay", 8f);
 
@@ -396,6 +399,149 @@ public static class LastFlameProjectSetup
         return SavePrefabAndDestroy(root, WindWidgetPath);
     }
 
+    private static GameObject CreateMainMenuPanelPrefab()
+    {
+        GameObject root = CreateRectRoot("UI_StartPanel", Vector2.zero, Vector2.one,
+            new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+
+        Image shade = root.AddComponent<Image>();
+        shade.sprite = _squareSprite;
+        shade.color = new Color(0.015f, 0.025f, 0.045f, 0.95f);
+
+        CreateText(root.transform, "Title", "ПОСЛЕДНИЙ ОГОНЁК", 54, TextAnchor.MiddleCenter,
+            new Color(1f, 0.77f, 0.38f, 1f), new Vector2(0f, 190f), new Vector2(1300f, 100f),
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+
+        CreateText(root.transform, "Detail", "Продержись 180 секунд. Собирай топливо и не дай пламени погаснуть.",
+            24, TextAnchor.MiddleCenter, new Color(0.9f, 0.92f, 0.96f, 1f),
+            new Vector2(0f, 105f), new Vector2(1150f, 60f),
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+
+        CreateMenuButton(root.transform, "PlayButton", "ИГРАТЬ", new Vector2(0f, 5f));
+        CreateMenuButton(root.transform, "SettingsButton", "НАСТРОЙКИ", new Vector2(0f, -85f));
+        CreateMenuButton(root.transform, "ExitButton", "ВЫХОД", new Vector2(0f, -175f));
+
+        CreateText(root.transform, "Controls", "WASD — движение     SPACE — защита (медленнее)",
+            18, TextAnchor.MiddleCenter, new Color(0.66f, 0.75f, 0.84f, 1f),
+            new Vector2(0f, -300f), new Vector2(1000f, 45f),
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+
+        return SavePrefabAndDestroy(root, StartPanelPath);
+    }
+
+    private static GameObject CreateSettingsPanelPrefab()
+    {
+        GameObject root = CreateRectRoot("UI_SettingsPanel", Vector2.zero, Vector2.one,
+            new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+
+        Image shade = root.AddComponent<Image>();
+        shade.sprite = _squareSprite;
+        shade.color = new Color(0.015f, 0.025f, 0.045f, 0.97f);
+
+        CreateText(root.transform, "Title", "НАСТРОЙКИ ЗВУКА", 48, TextAnchor.MiddleCenter,
+            new Color(1f, 0.77f, 0.38f, 1f), new Vector2(0f, 190f), new Vector2(1100f, 90f),
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+
+        CreateText(root.transform, "SfxLabel", "ЗВУКОВЫЕ ЭФФЕКТЫ (SFX)", 22, TextAnchor.MiddleLeft,
+            Color.white, new Vector2(-300f, 72f), new Vector2(420f, 44f),
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+
+        CreateText(root.transform, "MusicLabel", "ГРОМКОСТЬ МУЗЫКИ", 22, TextAnchor.MiddleLeft,
+            Color.white, new Vector2(-300f, -65f), new Vector2(420f, 44f),
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+
+        Text sfxValueText;
+        Slider sfxSlider = CreateSettingsSlider(root.transform, "SfxSlider",
+            new Vector2(-10f, 25f), 0.8f, out sfxValueText);
+        Text musicValueText;
+        Slider musicSlider = CreateSettingsSlider(root.transform, "MusicSlider",
+            new Vector2(-10f, -112f), 0.65f, out musicValueText);
+
+        GameObject backButtonObject = CreateMenuButton(
+            root.transform, "BackButton", "НАЗАД", new Vector2(0f, -245f), new Vector2(300f, 64f));
+
+        // Settings UI stays in its own prefab and exposes its controls to HUDView/AudioSettingsController.
+        GameObject prefab = SavePrefabAndDestroy(root, SettingsPanelPath);
+        return prefab;
+    }
+
+    private static GameObject CreateMenuButton(
+        Transform parent, string name, string label, Vector2 position, Vector2? size = null)
+    {
+        Vector2 buttonSize = size ?? new Vector2(360f, 70f);
+        GameObject buttonObject = CreateRectRoot(name, new Vector2(0.5f, 0.5f),
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), position, buttonSize);
+        buttonObject.transform.SetParent(parent, false);
+
+        Image buttonImage = buttonObject.AddComponent<Image>();
+        buttonImage.sprite = _squareSprite;
+        buttonImage.color = new Color(0.95f, 0.55f, 0.16f, 1f);
+
+        Button button = buttonObject.AddComponent<Button>();
+        button.targetGraphic = buttonImage;
+        button.transition = Selectable.Transition.ColorTint;
+        ColorBlock colors = button.colors;
+        colors.normalColor = new Color(1f, 0.69f, 0.29f, 1f);
+        colors.highlightedColor = new Color(1f, 0.82f, 0.46f, 1f);
+        colors.pressedColor = new Color(0.8f, 0.36f, 0.1f, 1f);
+        button.colors = colors;
+
+        CreateText(buttonObject.transform, "Label", label, 24, TextAnchor.MiddleCenter,
+            new Color(0.08f, 0.06f, 0.04f, 1f), Vector2.zero, buttonSize - new Vector2(12f, 8f),
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+
+        return buttonObject;
+    }
+
+    private static Slider CreateSettingsSlider(
+        Transform parent, string name, Vector2 position, float initialValue, out Text valueText)
+    {
+        GameObject sliderRoot = CreateRectRoot(name, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            new Vector2(0.5f, 0.5f), position, new Vector2(560f, 38f));
+        sliderRoot.transform.SetParent(parent, false);
+
+        Image background = sliderRoot.AddComponent<Image>();
+        background.sprite = _squareSprite;
+        background.color = new Color(0.12f, 0.15f, 0.2f, 1f);
+
+        GameObject fillObject = CreateRectRoot("Fill", Vector2.zero, Vector2.one,
+            new Vector2(0f, 0.5f), Vector2.zero, Vector2.zero);
+        fillObject.transform.SetParent(sliderRoot.transform, false);
+        RectTransform fillRect = fillObject.GetComponent<RectTransform>();
+        fillRect.offsetMin = new Vector2(8f, 8f);
+        fillRect.offsetMax = new Vector2(-8f, -8f);
+
+        Image fillImage = fillObject.AddComponent<Image>();
+        fillImage.sprite = _squareSprite;
+        fillImage.color = new Color(1f, 0.64f, 0.19f, 1f);
+
+        GameObject handleObject = CreateRectRoot("Handle",
+            new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
+            new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(30f, 30f));
+        handleObject.transform.SetParent(sliderRoot.transform, false);
+
+        Image handleImage = handleObject.AddComponent<Image>();
+        handleImage.sprite = _circleSprite;
+        handleImage.color = new Color(1f, 0.9f, 0.69f, 1f);
+
+        Slider slider = sliderRoot.AddComponent<Slider>();
+        slider.minValue = 0f;
+        slider.maxValue = 1f;
+        slider.wholeNumbers = false;
+        slider.direction = Slider.Direction.LeftToRight;
+        slider.fillRect = fillRect;
+        slider.handleRect = handleObject.GetComponent<RectTransform>();
+        slider.targetGraphic = handleImage;
+        slider.value = Mathf.Clamp01(initialValue);
+
+        valueText = CreateText(parent, name + "Value", Mathf.RoundToInt(initialValue * 100f) + "%",
+            20, TextAnchor.MiddleRight, new Color(1f, 0.85f, 0.58f, 1f),
+            new Vector2(340f, position.y), new Vector2(90f, 42f),
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+
+        return slider;
+    }
+
     private static GameObject CreatePanelPrefab(
         string path, string title, string detail, string controls, string buttonText)
     {
@@ -421,30 +567,18 @@ public static class LastFlameProjectSetup
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
         }
 
-        GameObject buttonObject = CreateRectRoot("ActionButton", new Vector2(0.5f, 0.5f),
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(0f, -160f), new Vector2(270f, 66f));
-        buttonObject.transform.SetParent(root.transform, false);
-
-        Image buttonImage = buttonObject.AddComponent<Image>();
-        buttonImage.sprite = _squareSprite;
-        buttonImage.color = new Color(0.95f, 0.55f, 0.16f, 1f);
-
-        Button button = buttonObject.AddComponent<Button>();
-        button.targetGraphic = buttonImage;
-
-        CreateText(buttonObject.transform, "Label", buttonText, 22, TextAnchor.MiddleCenter,
-            new Color(0.08f, 0.06f, 0.04f, 1f), Vector2.zero, new Vector2(260f, 62f),
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+        GameObject buttonObject = CreateMenuButton(
+            root.transform, "ActionButton", buttonText, new Vector2(0f, -160f), new Vector2(270f, 66f));
 
         return SavePrefabAndDestroy(root, path);
     }
 
-    private static GameObject CreateHudPrefab(
+        private static GameObject CreateHudPrefab(
         GameObject flameWidget,
         GameObject timerWidget,
         GameObject windWidget,
         GameObject startPanel,
+        GameObject settingsPanel,
         GameObject resultPanel)
     {
         GameObject root = CreateRectRoot("UI_HUD", Vector2.zero, Vector2.one,
@@ -469,10 +603,13 @@ public static class LastFlameProjectSetup
         GameObject timerInstance = InstantiatePrefabUnder(timerWidget, hudContent.transform);
         GameObject windInstance = InstantiatePrefabUnder(windWidget, hudContent.transform);
         GameObject startInstance = InstantiatePrefabUnder(startPanel, root.transform);
+        GameObject settingsInstance = InstantiatePrefabUnder(settingsPanel, root.transform);
         GameObject resultInstance = InstantiatePrefabUnder(resultPanel, root.transform);
+        settingsInstance.SetActive(false);
         resultInstance.SetActive(false);
 
         HUDView view = root.AddComponent<HUDView>();
+        AudioSettingsController audioSettings = root.AddComponent<AudioSettingsController>();
         Slider flameSlider = flameInstance.GetComponentInChildren<Slider>(true);
         Image flameFill = flameInstance.transform.Find("FlameSlider/Fill").GetComponent<Image>();
         Text flameValue = flameInstance.transform.Find("Value").GetComponent<Text>();
@@ -480,8 +617,17 @@ public static class LastFlameProjectSetup
         Text windText = windInstance.GetComponentInChildren<Text>(true);
         Text resultTitle = resultInstance.transform.Find("Title").GetComponent<Text>();
         Text resultTime = resultInstance.transform.Find("Detail").GetComponent<Text>();
-        Button startButton = startInstance.GetComponentInChildren<Button>(true);
+
+        Button playButton = startInstance.transform.Find("PlayButton").GetComponent<Button>();
+        Button settingsButton = startInstance.transform.Find("SettingsButton").GetComponent<Button>();
+        Button exitButton = startInstance.transform.Find("ExitButton").GetComponent<Button>();
         Button retryButton = resultInstance.GetComponentInChildren<Button>(true);
+        Button settingsBackButton = settingsInstance.transform.Find("BackButton").GetComponent<Button>();
+
+        Slider sfxSlider = settingsInstance.transform.Find("SfxSlider").GetComponent<Slider>();
+        Slider musicSlider = settingsInstance.transform.Find("MusicSlider").GetComponent<Slider>();
+        Text sfxValueText = settingsInstance.transform.Find("SfxSliderValue").GetComponent<Text>();
+        Text musicValueText = settingsInstance.transform.Find("MusicSliderValue").GetComponent<Text>();
 
         SetObjectReference(view, "flameSlider", flameSlider);
         SetObjectReference(view, "flameFillImage", flameFill);
@@ -491,15 +637,32 @@ public static class LastFlameProjectSetup
         SetObjectReference(view, "windWarningText", windText);
         SetObjectReference(view, "hudContentRoot", hudContent);
         SetObjectReference(view, "startPanel", startInstance);
+        SetObjectReference(view, "settingsPanel", settingsInstance);
         SetObjectReference(view, "resultPanel", resultInstance);
         SetObjectReference(view, "resultTitleText", resultTitle);
         SetObjectReference(view, "resultTimeText", resultTime);
-        // Button callbacks are stored in the prefab's persistent UnityEvents,
-        // not registered dynamically during gameplay.
-        UnityEventTools.AddPersistentListener(startButton.onClick, view.OnStartButtonClicked);
+
+        SetObjectReference(audioSettings, "sfxSlider", sfxSlider);
+        SetObjectReference(audioSettings, "musicSlider", musicSlider);
+        SetObjectReference(audioSettings, "sfxValueText", sfxValueText);
+        SetObjectReference(audioSettings, "musicValueText", musicValueText);
+
+        // Every button/slider event is serialized in the prefab before Play Mode.
+        UnityEventTools.AddPersistentListener(playButton.onClick, view.OnPlayButtonClicked);
+        UnityEventTools.AddPersistentListener(settingsButton.onClick, view.OnSettingsButtonClicked);
+        UnityEventTools.AddPersistentListener(exitButton.onClick, view.OnExitButtonClicked);
         UnityEventTools.AddPersistentListener(retryButton.onClick, view.OnRetryButtonClicked);
-        PrefabUtility.RecordPrefabInstancePropertyModifications(startButton);
+        UnityEventTools.AddPersistentListener(settingsBackButton.onClick, view.OnSettingsBackButtonClicked);
+        UnityEventTools.AddPersistentListener(sfxSlider.onValueChanged, audioSettings.SetSfxVolume);
+        UnityEventTools.AddPersistentListener(musicSlider.onValueChanged, audioSettings.SetMusicVolume);
+
+        PrefabUtility.RecordPrefabInstancePropertyModifications(playButton);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(settingsButton);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(exitButton);
         PrefabUtility.RecordPrefabInstancePropertyModifications(retryButton);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(settingsBackButton);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(sfxSlider);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(musicSlider);
 
         GameObject prefab = SavePrefabAndDestroy(root, HudPrefabPath);
         return prefab;
@@ -531,6 +694,15 @@ public static class LastFlameProjectSetup
         FlameMeter flameMeter = playerObject.GetComponent<FlameMeter>();
 
         GameObject systemsRoot = new GameObject("GameSystems");
+        GameObject audioRoot = new GameObject("Audio");
+        audioRoot.transform.SetParent(systemsRoot.transform, false);
+
+        AudioSource musicSource = audioRoot.AddComponent<AudioSource>();
+        musicSource.playOnAwake = false;
+        musicSource.loop = true;
+        musicSource.spatialBlend = 0f;
+        musicSource.volume = 0.65f;
+
         WindController wind = systemsRoot.AddComponent<WindController>();
         SetFloat(wind, "intervalBetweenGusts", 12f);
         SetFloat(wind, "warningDuration", 1.2f);
@@ -582,6 +754,14 @@ public static class LastFlameProjectSetup
         GameObject hudObject = (GameObject)PrefabUtility.InstantiatePrefab(hudPrefab);
         hudObject.name = "UI_HUD";
         HUDView hudView = hudObject.GetComponent<HUDView>();
+        AudioSettingsController audioSettings = hudObject.GetComponent<AudioSettingsController>();
+
+        AudioSource[] sfxSources = pickups
+            .Select(pickup => pickup != null ? pickup.GetComponent<AudioSource>() : null)
+            .Where(source => source != null)
+            .ToArray();
+        SetObjectArray(audioSettings, "sfxSources", sfxSources.Cast<Object>().ToArray());
+        SetObjectArray(audioSettings, "musicSources", new Object[] { musicSource });
 
         GameManager gameManager = systemsRoot.AddComponent<GameManager>();
         SetFloat(gameManager, "matchDuration", 180f);
