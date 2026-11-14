@@ -328,11 +328,15 @@ public static class LastFlameProjectSetup
         background.sprite = _squareSprite;
         background.color = new Color(0.035f, 0.055f, 0.085f, 0.9f);
 
-        Text captionText = CreateText(root.transform, "Caption", "ЗАПАС ОГНЯ", 18, TextAnchor.UpperLeft,
+        // Center the heading over the meter. This keeps the full label visible
+        // even when the game view uses a narrow aspect ratio or a scaled Canvas.
+        Text captionText = CreateText(root.transform, "Caption", "ЗАПАС ОГНЯ", 16, TextAnchor.UpperCenter,
             new Color(1f, 0.83f, 0.57f, 1f),
-            new Vector2(14f, -8f), new Vector2(190f, 26f), new Vector2(0f, 1f), new Vector2(0f, 1f));
-        // Left-aligned text must use a top-left pivot, not a centered pivot.
-        captionText.rectTransform.pivot = new Vector2(0f, 1f);
+            Vector2.zero, new Vector2(312f, 26f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f));
+        captionText.horizontalOverflow = HorizontalWrapMode.Overflow;
+        captionText.resizeTextForBestFit = true;
+        captionText.resizeTextMinSize = 12;
+        captionText.resizeTextMaxSize = 16;
 
         Text valueText = CreateText(root.transform, "Value", "75 / 100", 16, TextAnchor.UpperRight,
             Color.white, new Vector2(-14f, -8f), new Vector2(112f, 26f),
