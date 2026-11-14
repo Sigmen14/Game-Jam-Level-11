@@ -165,3 +165,8 @@ _ReSharper*/
 # Unity TextMesh Pro optional examples
 */[Aa]ssets/TextMesh Pro/Examples & Extras/
 */[Aa]ssets/TextMesh Pro/Examples & Extras.meta
+
+# Plastic SCM
+**/.plastic/
+**/.plastic
+**/.plastic.*
