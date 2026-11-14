@@ -22,11 +22,13 @@
 
 | Префаб | Содержимое | Что настраивается в Inspector |
 |---|---|---|
-| UI_Menu.prefab | Canvas, MainMenuController, AudioSettingsController, UI_StartPanel, UI_SettingsPanel | Reference Resolution, навигация сцены, ссылки на панели и аудио |\n| UI_HUD.prefab | Корневой Canvas, CanvasScaler, GraphicRaycaster, HUDView, AudioSettingsController, только игровые HUD и ResultPanel | Reference Resolution, режим масштабирования, сортировка |
+| UI_Menu.prefab | Canvas, MainMenuController, AudioSettingsController, UI_StartPanel, UI_SettingsPanel | Reference Resolution, навигация сцены, ссылки на панели и аудио |
+| UI_HUD.prefab | Корневой Canvas, CanvasScaler, GraphicRaycaster, HUDView, AudioSettingsController, только игровые HUD и ResultPanel | Reference Resolution, режим масштабирования, сортировка |
 | UI_FlameMeter.prefab | Иконка огня, фон и заполнение полосы, необязательная подпись | Спрайты, цвета, размеры, anchors, анимация заполнения |
 | UI_Timer.prefab | Текст оставшегося времени | Шрифт, размер, формат времени, позиция |
 | UI_WindWarning.prefab | Иконка/текст предупреждения о ветре | Иконка, текст, цвет, анимация, позиция |
-| UI_StartPanel.prefab | Название игры, цель, подсказки управления, кнопки Играть / Настройки / Выход | Все тексты, шрифты, цвета, фон, размеры, три кнопки |\n| UI_SettingsPanel.prefab | Ползунки SFX и Music, проценты громкости, кнопка Назад | Диапазон и начальные значения ползунков, подписи, цвета и размеры |
+| UI_StartPanel.prefab | Название игры, цель, подсказки управления, кнопки Играть / Настройки / Выход | Все тексты, шрифты, цвета, фон, размеры, три кнопки |
+| UI_SettingsPanel.prefab | Ползунки SFX и Music, проценты громкости, кнопка Назад | Диапазон и начальные значения ползунков, подписи, цвета и размеры |
 | UI_ResultPanel.prefab | Результат Won/Lost, итоговое время, кнопка Retry | Тексты, оформление победы/поражения, шрифты, кнопка |
 | UI_PausePanel.prefab | Пауза и кнопка продолжения (необязательно) | Тексты, оформление и кнопки |
 
@@ -36,7 +38,8 @@ UI_StartPanel и UI_SettingsPanel размещаются внутри UI_Menu в
 
 Назначить следующие ссылки через Inspector:
 
-- GameManager (Main) → PlayerController, FlameMeter, WindController, FuelPickup[], HUDView.\n- MainMenuController (Menu) → UI_StartPanel, UI_SettingsPanel, имя игровой сцены Main.
+- GameManager (Main) → PlayerController, FlameMeter, WindController, FuelPickup[], HUDView.
+- MainMenuController (Menu) → UI_StartPanel, UI_SettingsPanel, имя игровой сцены Main.
 - PlayerController → Rigidbody2D, визуал защиты, Light2D или объект, который управляет радиусом света.
 - FlameMeter → заранее существующий визуальный источник света (или событие изменения значения).
 - FuelPickup → FlameMeter или заранее настроенный получатель топлива.
