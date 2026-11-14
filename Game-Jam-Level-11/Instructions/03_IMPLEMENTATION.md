@@ -10,8 +10,8 @@
 - Скрипт Assets/Scripts/Gameplay/CoverZone.cs — отслеживает вход и выход игрока из trigger-укрытия через UnityEvent<bool>.
 - Скрипт Assets/Scripts/Gameplay/WindController.cs — уже содержит цикл ожидание → предупреждение → порыв и настройки интервалов в Inspector.
 - Префабы: Assets/Prefabs/Player/Player.prefab, Assets/Prefabs/Pickups/PickupRoot.prefab, Assets/Prefabs/Environment/EnvironmentRoot.prefab.
-- UI_HUD.prefab уже содержит Canvas, CanvasScaler и GraphicRaycaster, но пока не имеет готовых элементов HUD.
-- UI_StartPanel.prefab пока является простой Image-заготовкой.
+- UI_HUD.prefab предназначен только для игрового HUD и ResultPanel в сцене Main.
+- UI_Menu.prefab объединяет отдельные префабы UI_StartPanel и UI_SettingsPanel в сцене Menu.
 
 Заготовки требуют настройки и развития. Не считать, что у Player, PickupRoot или EnvironmentRoot уже реализовано поведение.
 
@@ -139,7 +139,7 @@ Main содержит только игровой уровень и HUD:
 
 UI_StartPanel содержит заголовок, цель, подсказки управления и три вертикальные кнопки. Он размещается только в Menu через UI_Menu. UI_SettingsPanel также размещается в Menu. UI_ResultPanel находится в Main внутри UI_HUD и содержит результат и Retry.
 
-Кнопки и обработчики заранее связать с методами GameManager через Inspector. При завершении игры переключать уже существующий ResultPanel, не создавать новый.
+Кнопки меню и обработчики заранее связать с методами MainMenuController через Inspector. Retry в ResultPanel связать с GameManager. При завершении игры переключать уже существующий ResultPanel, не создавать новый.
 
 ## Скриптовые роли
 
@@ -201,7 +201,7 @@ UI_StartPanel содержит заголовок, цель, подсказки 
 
 - Move — Vector2, WASD / стрелки.
 - Protect — Button, удержание Space.
-- Start / Retry — кнопки UI.
+- Кнопка Играть в Menu загружает Main; Retry в UI_ResultPanel запускает новый матч.
 
 Если действия Protect ещё нет, добавить его в Input Actions asset через Editor. Не создавать Input Actions Asset в рантайме.
 
