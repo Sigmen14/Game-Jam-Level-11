@@ -706,6 +706,7 @@ public static class LastFlameProjectSetup
         Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
         GameObject systemsRoot = new GameObject("MenuSystems");
+        systemsRoot.AddComponent<AudioListener>();
         AudioSource musicSource = systemsRoot.AddComponent<AudioSource>();
         musicSource.playOnAwake = false;
         musicSource.loop = true;
