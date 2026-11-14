@@ -57,17 +57,6 @@ public sealed class HUDView : MonoBehaviour
             SetWindWarning(_windController.IsWarning);
         }
 
-        if (startButton != null)
-        {
-            startButton.onClick.RemoveListener(HandleStartClicked);
-            startButton.onClick.AddListener(HandleStartClicked);
-        }
-
-        if (retryButton != null)
-        {
-            retryButton.onClick.RemoveListener(HandleRetryClicked);
-            retryButton.onClick.AddListener(HandleRetryClicked);
-        }
     }
 
     public void ShowReady()
@@ -144,6 +133,16 @@ public sealed class HUDView : MonoBehaviour
         {
             windWarningText.text = "ВЕТЕР ПОДНИМАЕТСЯ";
         }
+    }
+
+    public void OnStartButtonClicked()
+    {
+        HandleStartClicked();
+    }
+
+    public void OnRetryButtonClicked()
+    {
+        HandleRetryClicked();
     }
 
     private void HandleStartClicked()
