@@ -16,6 +16,9 @@ public sealed class CoverZone : MonoBehaviour
     private readonly Dictionary<Transform, HashSet<Collider2D>> _playerColliders =
         new Dictionary<Transform, HashSet<Collider2D>>();
 
+    /// <summary>Persistent UnityEvent used by the Editor setup to connect the scene player.</summary>
+    public UnityEvent<bool> CoverStateChanged => coverStateChanged;
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!TryGetPlayerRoot(other, out Transform playerRoot))
