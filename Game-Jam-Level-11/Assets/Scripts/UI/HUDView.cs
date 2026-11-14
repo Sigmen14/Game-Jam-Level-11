@@ -22,8 +22,6 @@ public sealed class HUDView : MonoBehaviour
     [SerializeField] private GameObject resultPanel;
     [SerializeField] private Text resultTitleText;
     [SerializeField] private Text resultTimeText;
-    [SerializeField] private Button startButton;
-    [SerializeField] private Button retryButton;
 
     private GameManager _gameManager;
     private FlameMeter _flameMeter;
