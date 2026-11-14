@@ -16,10 +16,8 @@ public sealed class HUDView : MonoBehaviour
     [SerializeField] private GameObject windWarningRoot;
     [SerializeField] private Text windWarningText;
 
-    [Header("Panels")]
+    [Header("Gameplay panels")]
     [SerializeField] private GameObject hudContentRoot;
-    [SerializeField] private GameObject startPanel;
-    [SerializeField] private GameObject settingsPanel;
     [SerializeField] private GameObject resultPanel;
     [SerializeField] private Text resultTitleText;
     [SerializeField] private Text resultTimeText;
@@ -57,32 +55,8 @@ public sealed class HUDView : MonoBehaviour
         }
     }
 
-    public void ShowReady()
-    {
-        SetActive(hudContentRoot, false);
-        SetActive(startPanel, true);
-        SetActive(settingsPanel, false);
-        SetActive(resultPanel, false);
-        SetWindWarning(false);
-    }
-
-    public void ShowSettings()
-    {
-        SetActive(hudContentRoot, false);
-        SetActive(startPanel, false);
-        SetActive(settingsPanel, true);
-        SetActive(resultPanel, false);
-    }
-
-    public void CloseSettings()
-    {
-        ShowReady();
-    }
-
     public void ShowGameplay()
     {
-        SetActive(startPanel, false);
-        SetActive(settingsPanel, false);
         SetActive(resultPanel, false);
         SetActive(hudContentRoot, true);
         SetWindWarning(false);
@@ -91,8 +65,6 @@ public sealed class HUDView : MonoBehaviour
     public void ShowResult(bool didWin, float elapsedSeconds)
     {
         SetActive(hudContentRoot, true);
-        SetActive(startPanel, false);
-        SetActive(settingsPanel, false);
         SetActive(resultPanel, true);
 
         if (resultTitleText != null)
@@ -147,39 +119,6 @@ public sealed class HUDView : MonoBehaviour
         {
             windWarningText.text = "ВЕТЕР ПОДНИМАЕТСЯ";
         }
-    }
-
-    // These methods are connected to persistent Button UnityEvents by the Editor tool.
-    public void OnPlayButtonClicked()
-    {
-        if (_gameManager != null)
-        {
-            _gameManager.StartGame();
-        }
-    }
-
-    public void OnSettingsButtonClicked()
-    {
-        ShowSettings();
-    }
-
-    public void OnExitButtonClicked()
-    {
-        Application.Quit();
-
-#if UNITY_EDITOR
-        Debug.Log("Exit button pressed. Application.Quit is applied in a built player.");
-#endif
-    }
-
-    public void OnSettingsBackButtonClicked()
-    {
-        CloseSettings();
-    }
-
-    public void OnStartButtonClicked()
-    {
-        OnPlayButtonClicked();
     }
 
     public void OnRetryButtonClicked()
