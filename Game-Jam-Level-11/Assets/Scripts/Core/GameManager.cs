@@ -46,7 +46,7 @@ public sealed class GameManager : MonoBehaviour
             hudView.Bind(this, flameMeter, windController);
         }
 
-        ResetToReady();
+        StartGame();
     }
 
     private void Update()
@@ -102,13 +102,15 @@ public sealed class GameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Retry returns to the ready screen. Start begins a fresh 180-second run.
-    /// All pickups and systems are reset in place; no objects are created.
-    /// </summary>
+    /// <summary>Restarts the active match using the existing scene objects.</summary>
     public void Retry()
     {
-        ResetToReady();
+        if (_state == GameState.Playing)
+        {
+            return;
+        }
+
+        StartGame();
     }
 
     private void ResetToReady()
