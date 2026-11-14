@@ -18,7 +18,9 @@ using UnityEngine.UI;
 /// </summary>
 public static class LastFlameProjectSetup
 {
+    private const string MenuScenePath = "Assets/Scenes/Menu.unity";
     private const string ScenePath = "Assets/Scenes/Main.unity";
+    private const string MenuPrefabPath = "Assets/Prefabs/UI/UI_Menu.prefab";
     private const string InputActionsPath = "Assets/InputSystem_Actions.inputactions";
     private const string PlayerPrefabPath = "Assets/Prefabs/Player/Player.prefab";
     private const string PickupPrefabPath = "Assets/Prefabs/Pickups/PickupRoot.prefab";
@@ -66,6 +68,7 @@ public static class LastFlameProjectSetup
             GameObject windWidget = CreateWindWidget();
             GameObject startPanel = CreateMainMenuPanelPrefab();
             GameObject settingsPanel = CreateSettingsPanelPrefab();
+            GameObject menuPrefab = CreateMenuPrefab(startPanel, settingsPanel);
             GameObject resultPanel = CreatePanelPrefab(
                 ResultPanelPath,
                 "ОГОНЁК ПОГАС",
@@ -74,9 +77,11 @@ public static class LastFlameProjectSetup
                 "ЕЩЁ РАЗ");
 
             GameObject hudPrefab = CreateHudPrefab(
-                flameWidget, timerWidget, windWidget, startPanel, settingsPanel, resultPanel);
+                flameWidget, timerWidget, windWidget, resultPanel);
 
+            BuildMenuScene(menuPrefab);
             BuildMainScene(playerPrefab, pickupPrefab, coverPrefab, hudPrefab);
+            EditorSceneManager.OpenScene(MenuScenePath, OpenSceneMode.Single);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
@@ -579,12 +584,68 @@ public static class LastFlameProjectSetup
         return SavePrefabAndDestroy(root, path);
     }
 
-        private static GameObject CreateHudPrefab(
+        private static GameObject CreateMenuPrefab(GameObject startPanel, GameObject settingsPanel)
+    {
+        GameObject root = CreateRectRoot("UI_Menu", Vector2.zero, Vector2.one,
+            new Vector2(0f, 0f), Vector2.zero, Vector2.zero);
+
+        Canvas canvas = root.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 20;
+
+        CanvasScaler scaler = root.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+        scaler.matchWidthOrHeight = 0.5f;
+        root.AddComponent<GraphicRaycaster>();
+
+        GameObject menuInstance = InstantiatePrefabUnder(startPanel, root.transform);
+        GameObject settingsInstance = InstantiatePrefabUnder(settingsPanel, root.transform);
+        settingsInstance.SetActive(false);
+
+        MainMenuController menuController = root.AddComponent<MainMenuController>();
+        AudioSettingsController audioSettings = root.AddComponent<AudioSettingsController>();
+
+        SetObjectReference(menuController, "mainMenuPanel", menuInstance);
+        SetObjectReference(menuController, "settingsPanel", settingsInstance);
+
+        Slider sfxSlider = settingsInstance.transform.Find("SfxSlider").GetComponent<Slider>();
+        Slider musicSlider = settingsInstance.transform.Find("MusicSlider").GetComponent<Slider>();
+        Text sfxValueText = settingsInstance.transform.Find("SfxSliderValue").GetComponent<Text>();
+        Text musicValueText = settingsInstance.transform.Find("MusicSliderValue").GetComponent<Text>();
+
+        SetObjectReference(audioSettings, "sfxSlider", sfxSlider);
+        SetObjectReference(audioSettings, "musicSlider", musicSlider);
+        SetObjectReference(audioSettings, "sfxValueText", sfxValueText);
+        SetObjectReference(audioSettings, "musicValueText", musicValueText);
+
+        Button playButton = menuInstance.transform.Find("PlayButton").GetComponent<Button>();
+        Button settingsButton = menuInstance.transform.Find("SettingsButton").GetComponent<Button>();
+        Button exitButton = menuInstance.transform.Find("ExitButton").GetComponent<Button>();
+        Button backButton = settingsInstance.transform.Find("BackButton").GetComponent<Button>();
+
+        // Persist all navigation and volume callbacks inside this menu prefab.
+        UnityEventTools.AddPersistentListener(playButton.onClick, menuController.PlayGame);
+        UnityEventTools.AddPersistentListener(settingsButton.onClick, menuController.OpenSettings);
+        UnityEventTools.AddPersistentListener(exitButton.onClick, menuController.ExitGame);
+        UnityEventTools.AddPersistentListener(backButton.onClick, menuController.CloseSettings);
+        UnityEventTools.AddPersistentListener(sfxSlider.onValueChanged, audioSettings.SetSfxVolume);
+        UnityEventTools.AddPersistentListener(musicSlider.onValueChanged, audioSettings.SetMusicVolume);
+
+        PrefabUtility.RecordPrefabInstancePropertyModifications(playButton);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(settingsButton);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(exitButton);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(backButton);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(sfxSlider);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(musicSlider);
+
+        return SavePrefabAndDestroy(root, MenuPrefabPath);
+    }
+
+    private static GameObject CreateHudPrefab(
         GameObject flameWidget,
         GameObject timerWidget,
         GameObject windWidget,
-        GameObject startPanel,
-        GameObject settingsPanel,
         GameObject resultPanel)
     {
         GameObject root = CreateRectRoot("UI_HUD", Vector2.zero, Vector2.one,
@@ -598,7 +659,6 @@ public static class LastFlameProjectSetup
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
-
         root.AddComponent<GraphicRaycaster>();
 
         GameObject hudContent = CreateRectRoot("HUD_Content", Vector2.zero, Vector2.one,
@@ -608,14 +668,12 @@ public static class LastFlameProjectSetup
         GameObject flameInstance = InstantiatePrefabUnder(flameWidget, hudContent.transform);
         GameObject timerInstance = InstantiatePrefabUnder(timerWidget, hudContent.transform);
         GameObject windInstance = InstantiatePrefabUnder(windWidget, hudContent.transform);
-        GameObject startInstance = InstantiatePrefabUnder(startPanel, root.transform);
-        GameObject settingsInstance = InstantiatePrefabUnder(settingsPanel, root.transform);
         GameObject resultInstance = InstantiatePrefabUnder(resultPanel, root.transform);
-        settingsInstance.SetActive(false);
         resultInstance.SetActive(false);
 
         HUDView view = root.AddComponent<HUDView>();
         AudioSettingsController audioSettings = root.AddComponent<AudioSettingsController>();
+
         Slider flameSlider = flameInstance.GetComponentInChildren<Slider>(true);
         Image flameFill = flameInstance.transform.Find("FlameSlider/Fill").GetComponent<Image>();
         Text flameValue = flameInstance.transform.Find("Value").GetComponent<Text>();
@@ -623,17 +681,7 @@ public static class LastFlameProjectSetup
         Text windText = windInstance.GetComponentInChildren<Text>(true);
         Text resultTitle = resultInstance.transform.Find("Title").GetComponent<Text>();
         Text resultTime = resultInstance.transform.Find("Detail").GetComponent<Text>();
-
-        Button playButton = startInstance.transform.Find("PlayButton").GetComponent<Button>();
-        Button settingsButton = startInstance.transform.Find("SettingsButton").GetComponent<Button>();
-        Button exitButton = startInstance.transform.Find("ExitButton").GetComponent<Button>();
         Button retryButton = resultInstance.GetComponentInChildren<Button>(true);
-        Button settingsBackButton = settingsInstance.transform.Find("BackButton").GetComponent<Button>();
-
-        Slider sfxSlider = settingsInstance.transform.Find("SfxSlider").GetComponent<Slider>();
-        Slider musicSlider = settingsInstance.transform.Find("MusicSlider").GetComponent<Slider>();
-        Text sfxValueText = settingsInstance.transform.Find("SfxSliderValue").GetComponent<Text>();
-        Text musicValueText = settingsInstance.transform.Find("MusicSliderValue").GetComponent<Text>();
 
         SetObjectReference(view, "flameSlider", flameSlider);
         SetObjectReference(view, "flameFillImage", flameFill);
@@ -642,39 +690,40 @@ public static class LastFlameProjectSetup
         SetObjectReference(view, "windWarningRoot", windInstance);
         SetObjectReference(view, "windWarningText", windText);
         SetObjectReference(view, "hudContentRoot", hudContent);
-        SetObjectReference(view, "startPanel", startInstance);
-        SetObjectReference(view, "settingsPanel", settingsInstance);
         SetObjectReference(view, "resultPanel", resultInstance);
         SetObjectReference(view, "resultTitleText", resultTitle);
         SetObjectReference(view, "resultTimeText", resultTime);
 
-        SetObjectReference(audioSettings, "sfxSlider", sfxSlider);
-        SetObjectReference(audioSettings, "musicSlider", musicSlider);
-        SetObjectReference(audioSettings, "sfxValueText", sfxValueText);
-        SetObjectReference(audioSettings, "musicValueText", musicValueText);
-
-        // Every button/slider event is serialized in the prefab before Play Mode.
-        UnityEventTools.AddPersistentListener(playButton.onClick, view.OnPlayButtonClicked);
-        UnityEventTools.AddPersistentListener(settingsButton.onClick, view.OnSettingsButtonClicked);
-        UnityEventTools.AddPersistentListener(exitButton.onClick, view.OnExitButtonClicked);
         UnityEventTools.AddPersistentListener(retryButton.onClick, view.OnRetryButtonClicked);
-        UnityEventTools.AddPersistentListener(settingsBackButton.onClick, view.OnSettingsBackButtonClicked);
-        UnityEventTools.AddPersistentListener(sfxSlider.onValueChanged, audioSettings.SetSfxVolume);
-        UnityEventTools.AddPersistentListener(musicSlider.onValueChanged, audioSettings.SetMusicVolume);
-
-        PrefabUtility.RecordPrefabInstancePropertyModifications(playButton);
-        PrefabUtility.RecordPrefabInstancePropertyModifications(settingsButton);
-        PrefabUtility.RecordPrefabInstancePropertyModifications(exitButton);
         PrefabUtility.RecordPrefabInstancePropertyModifications(retryButton);
-        PrefabUtility.RecordPrefabInstancePropertyModifications(settingsBackButton);
-        PrefabUtility.RecordPrefabInstancePropertyModifications(sfxSlider);
-        PrefabUtility.RecordPrefabInstancePropertyModifications(musicSlider);
 
         GameObject prefab = SavePrefabAndDestroy(root, HudPrefabPath);
         return prefab;
     }
 
-    private static void BuildMainScene(
+    private static void BuildMenuScene(GameObject menuPrefab)
+    {
+        Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
+        GameObject systemsRoot = new GameObject("MenuSystems");
+        AudioSource musicSource = systemsRoot.AddComponent<AudioSource>();
+        musicSource.playOnAwake = false;
+        musicSource.loop = true;
+        musicSource.spatialBlend = 0f;
+        musicSource.volume = 0.65f;
+
+        GameObject menuObject = (GameObject)PrefabUtility.InstantiatePrefab(menuPrefab);
+        menuObject.name = "UI_Menu";
+        AudioSettingsController audioSettings = menuObject.GetComponent<AudioSettingsController>();
+        SetObjectArray(audioSettings, "sfxSources", new Object[0]);
+        SetObjectArray(audioSettings, "musicSources", new Object[] { musicSource });
+
+        ConfigureEventSystem();
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene, MenuScenePath);
+    }
+
+        private static void BuildMainScene(
         GameObject playerPrefab,
         GameObject pickupPrefab,
         GameObject coverPrefab,
@@ -780,6 +829,7 @@ public static class LastFlameProjectSetup
         ConfigureEventSystem();
         EditorBuildSettings.scenes = new[]
         {
+            new EditorBuildSettingsScene(MenuScenePath, true),
             new EditorBuildSettingsScene(ScenePath, true)
         };
 
