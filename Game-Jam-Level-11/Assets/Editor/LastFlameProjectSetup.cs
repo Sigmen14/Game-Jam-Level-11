@@ -615,6 +615,7 @@ public static class LastFlameProjectSetup
         camera.orthographicSize = 5f;
         camera.backgroundColor = new Color(0.008f, 0.014f, 0.028f, 1f);
         camera.clearFlags = CameraClearFlags.SolidColor;
+        cameraObject.AddComponent<UniversalAdditionalCameraData>();
         cameraObject.AddComponent<AudioListener>();
 
         GameObject globalLightObject = new GameObject("Global Light 2D");
