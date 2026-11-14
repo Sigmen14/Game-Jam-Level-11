@@ -460,10 +460,11 @@ namespace LastEmber.Editor
 
         private static Font GetBuiltinFont()
         {
-            Font font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            // Unity 6 uses LegacyRuntime.ttf as the built-in font for legacy uGUI Text.
+            Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             if (font == null)
             {
-                font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                Debug.LogWarning("[Last Ember] Built-in LegacyRuntime font was not found. Assign a font to the generated UI Text components.");
             }
 
             return font;
@@ -484,6 +485,12 @@ namespace LastEmber.Editor
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(SampleScenePath) == null)
             {
                 Debug.LogWarning("[Last Ember] SampleScene.unity was not found. Main.unity was not created.");
+                return false;
+            }
+
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            {
+                Debug.LogWarning("[Last Ember] Scene creation was cancelled so unsaved scene changes remain untouched.");
                 return false;
             }
 
