@@ -22,6 +22,7 @@
 - Assets/Prefabs/Player/Player.prefab
 - Assets/Prefabs/Pickups/PickupRoot.prefab
 - Assets/Prefabs/Environment/EnvironmentRoot.prefab
+- Assets/Prefabs/UI/UI_Menu.prefab
 - Assets/Prefabs/UI/UI_HUD.prefab
 - Assets/Prefabs/UI/UI_StartPanel.prefab
 - Assets/Prefabs/UI/UI_ResultPanel.prefab
@@ -36,11 +37,30 @@
 
 Новые папки и файлы создавать только когда они действительно нужны. Unity-объекты и визуальные элементы создаются в Editor, не в коде.
 
+## Сцена Menu
+
+Menu — первая сцена приложения. Она содержит только меню и его аудио:
+
+- Menu
+  - MenuSystems
+    - AudioListener
+    - Music AudioSource
+  - EventSystem
+  - UI_Menu (Canvas)
+    - UI_StartPanel
+      - Играть
+      - Настройки
+      - Выход
+    - UI_SettingsPanel
+      - SFX Slider
+      - Music Slider
+      - Назад
+
+MainMenuController переключает готовые панели и загружает Main через SceneManager. AudioSettingsController применяет значения ползунков к заранее размещённым AudioSource. Все элементы существуют до запуска игры.
+
 ## Сцена Main
 
-Все объекты сцены должны быть заранее добавлены через Editor.
-
-Пример иерархии:
+Main содержит только игровой уровень и HUD:
 
 - Main
   - Main Camera
@@ -58,17 +78,15 @@
   - GameSystems
     - GameManager
     - WindController
-  - UI
-    - UI_HUD (Canvas)
-      - UI_FlameMeter
-      - UI_Timer
-      - UI_WindWarning
-      - UI_StartPanel
-      - UI_ResultPanel
+    - Audio
+  - EventSystem
+  - UI_HUD (Canvas)
+    - UI_FlameMeter
+    - UI_Timer
+    - UI_WindWarning
+    - UI_ResultPanel
 
-Это ориентир. Все перечисленные объекты и вложенные prefab instances должны быть размещены вручную через Editor до запуска игры. Никакого Instantiate для создания этой иерархии.
-
-Все ссылки GameManager, WindController, Player, FlameMeter и UI назначить в Inspector.
+Все игровые объекты и вложенные prefab instances заранее размещаются через Editor. При загрузке Main GameManager автоматически запускает матч. Retry сбрасывает существующие объекты и начинает новый матч. В Main нет главного меню.
 
 ## Префабы и обязанности
 
@@ -119,7 +137,7 @@
 
 Самостоятельные префабы, размещённые внутри Canvas заранее.
 
-StartPanel содержит заголовок, короткую цель, подсказки WASD / Space и три вертикально расположенные кнопки: Играть, Настройки, Выход. Кнопка Настройки открывает отдельный UI_SettingsPanel с ползунками SFX/музыки и кнопкой Назад. ResultPanel содержит заранее созданный текст победы/поражения, итоговое время и кнопку Retry.
+UI_StartPanel содержит заголовок, цель, подсказки управления и три вертикальные кнопки. Он размещается только в Menu через UI_Menu. UI_SettingsPanel также размещается в Menu. UI_ResultPanel находится в Main внутри UI_HUD и содержит результат и Retry.
 
 Кнопки и обработчики заранее связать с методами GameManager через Inspector. При завершении игры переключать уже существующий ResultPanel, не создавать новый.
 
@@ -127,7 +145,7 @@ StartPanel содержит заголовок, короткую цель, по�
 
 Не создавать монолитный скрипт, который одновременно управляет игроком, интерфейсом, ветром и топливом.
 
-- **GameManager** — состояния Start / Playing / Won / Lost, запуск, таймер раунда на 180 секунд, завершение и Retry.
+- **GameManager** — состояния Ready / Playing / Won / Lost, автоматический запуск при загрузке Main, таймер раунда на 180 секунд, завершение и Retry.
 - **PlayerController** — Move и Protect; обычная скорость и скорость при защите; состояние нахождения в укрытии.
 - **FlameMeter** — запас огня от 0 до 100, пассивный расход, дополнительная потеря от ветра, пополнение топливом, событие изменения значения.
 - **WindController** — уже существует; управляет предупреждением и активной фазой ветра.
@@ -168,14 +186,14 @@ StartPanel содержит заголовок, короткую цель, по�
 
 ## Связь систем
 
-1. GameManager переводит игру в Playing после нажатия Start на заранее размещённой кнопке.
+1. Кнопка Играть в Menu загружает Main; GameManager автоматически переводит игру в Playing.
 2. PlayerController читает Move и Protect из существующего Input System.
 3. FlameMeter уменьшает запас огня и принимает пополнение от FuelPickup.
 4. WindController сообщает о предупреждении и активном порыве. PlayerController учитывает Protect и InCover.
 5. FlameMeter передаёт новое значение HUDView. HUDView обновляет полосу и радиус заранее назначенного Light2D.
 6. При нуле огня GameManager завершает игру как Lost. При достижении 180 секунд — Won.
 7. ResultPanel уже существует в сцене и только включается.
-8. Retry сбрасывает значения и позиции существующих объектов, включает заранее созданные pickup instances и возвращает StartPanel. Новые объекты не создаются.
+8. Retry сбрасывает значения и позиции существующих объектов, включает заранее созданные pickup instances и сразу начинает новый матч. Новые объекты не создаются.
 
 ## Input System
 
