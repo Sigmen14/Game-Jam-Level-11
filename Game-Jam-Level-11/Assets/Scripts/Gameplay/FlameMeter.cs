@@ -13,7 +13,6 @@ public sealed class FlameMeter : MonoBehaviour
     [SerializeField, Min(1f)] private float maxFlame = 100f;
     [SerializeField, Min(0f)] private float startingFlame = 75f;
     [SerializeField, Min(0f)] private float passiveDrainPerSecond = 0.35f;
-    [SerializeField, Min(0f)] private float fuelRestoreAmount = 25f;
 
     [Header("Wind damage")]
     [SerializeField, Min(0f)] private float windDamagePerSecond = 8f;
@@ -89,11 +88,6 @@ public sealed class FlameMeter : MonoBehaviour
         }
 
         ChangeFlame(amount);
-    }
-
-    public void AddConfiguredFuel()
-    {
-        AddFuel(fuelRestoreAmount);
     }
 
     private void ChangeFlame(float delta)
