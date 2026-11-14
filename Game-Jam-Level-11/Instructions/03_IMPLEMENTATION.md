@@ -31,7 +31,8 @@
 - Assets/Scripts/Gameplay/
 - Assets/Scripts/UI/
 - Assets/Scripts/Core/
-- Assets/Scenes/Menu.unity\n- Assets/Scenes/Main.unity
+- Assets/Scenes/Menu.unity
+- Assets/Scenes/Main.unity
 
 Новые папки и файлы создавать только когда они действительно нужны. Unity-объекты и визуальные элементы создаются в Editor, не в коде.
 
