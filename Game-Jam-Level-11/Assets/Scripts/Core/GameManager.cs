@@ -113,38 +113,6 @@ public sealed class GameManager : MonoBehaviour
         StartGame();
     }
 
-    private void ResetToReady()
-    {
-        _state = GameState.Ready;
-        _remainingTime = matchDuration;
-
-        if (playerController != null)
-        {
-            playerController.SetGameplayActive(false);
-            playerController.ResetPosition();
-        }
-
-        if (flameMeter != null)
-        {
-            flameMeter.SetRunning(false);
-            flameMeter.ResetMeter();
-        }
-
-        if (windController != null)
-        {
-            windController.SetRunning(false);
-            windController.ResetCycle();
-        }
-
-        ResetPickups();
-
-        if (hudView != null)
-        {
-            hudView.ShowReady();
-            hudView.SetTimer(_remainingTime);
-        }
-    }
-
     private void ResetGameplayObjects()
     {
         if (playerController != null)
