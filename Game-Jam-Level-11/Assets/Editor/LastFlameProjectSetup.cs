@@ -257,8 +257,13 @@ public static class LastFlameProjectSetup
         FlameMeter flameMeter = root.AddComponent<FlameMeter>();
 
         SetObjectReference(playerController, "body", body);
-        SetObjectReference(playerController, "inputActions",
-            AssetDatabase.LoadAssetAtPath<InputActionAsset>(InputActionsPath));
+        InputActionAsset playerInputAsset = AssetDatabase.LoadAssetAtPath<InputActionAsset>(InputActionsPath);
+        if (playerInputAsset == null)
+        {
+            throw new System.InvalidOperationException("InputSystem_Actions.inputactions could not be loaded. Wait for Unity to finish importing assets, then run setup again.");
+        }
+
+        SetObjectReference(playerController, "inputActions", playerInputAsset);
         SetObjectReference(playerController, "protectionVisual", protection);
 
         SetObjectReference(flameMeter, "flameLight", light);
@@ -512,7 +517,8 @@ public static class LastFlameProjectSetup
         }
 
         CreateCameraAndGlobalLight();
-        BuildRoom();
+        GameObject levelObject = BuildRoom();
+        Transform levelRoot = levelObject.transform;
 
         GameObject playerObject = (GameObject)PrefabUtility.InstantiatePrefab(playerPrefab);
         playerObject.name = "Player";
@@ -541,6 +547,7 @@ public static class LastFlameProjectSetup
         for (int i = 0; i < fuelPositions.Length; i++)
         {
             GameObject pickupObject = (GameObject)PrefabUtility.InstantiatePrefab(pickupPrefab);
+            pickupObject.transform.SetParent(levelRoot, false);
             pickupObject.name = "FuelPoint_" + (i + 1).ToString("00");
             pickupObject.transform.position = fuelPositions[i];
             FuelPickup pickup = pickupObject.GetComponent<FuelPickup>();
@@ -559,11 +566,13 @@ public static class LastFlameProjectSetup
         for (int i = 0; i < coverPositions.Length; i++)
         {
             GameObject coverObject = (GameObject)PrefabUtility.InstantiatePrefab(coverPrefab);
+            coverObject.transform.SetParent(levelRoot, false);
             coverObject.name = "Cover_" + (i + 1).ToString("00");
             coverObject.transform.position = coverPositions[i];
 
             CoverZone cover = coverObject.GetComponent<CoverZone>();
             UnityEventTools.AddPersistentListener(cover.CoverStateChanged, player.SetInCover);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(cover);
         }
 
         GameObject hudObject = (GameObject)PrefabUtility.InstantiatePrefab(hudPrefab);
@@ -615,7 +624,7 @@ public static class LastFlameProjectSetup
         globalLight.intensity = 0.14f;
     }
 
-    private static void BuildRoom()
+    private static GameObject BuildRoom()
     {
         GameObject level = new GameObject("Level");
 
@@ -627,6 +636,7 @@ public static class LastFlameProjectSetup
         CreateWall(level.transform, "Wall_Bottom", new Vector3(0f, -4.75f, 0f), new Vector2(17.1f, 0.42f));
         CreateWall(level.transform, "Wall_Left", new Vector3(-8.35f, 0f, 0f), new Vector2(0.42f, 9.9f));
         CreateWall(level.transform, "Wall_Right", new Vector3(8.35f, 0f, 0f), new Vector2(0.42f, 9.9f));
+        return level;
     }
 
     private static void CreateWall(Transform parent, string name, Vector3 position, Vector2 size)
@@ -794,6 +804,10 @@ public static class LastFlameProjectSetup
 
         property.objectReferenceValue = value;
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        if (PrefabUtility.IsPartOfPrefabInstance(target))
+        {
+            PrefabUtility.RecordPrefabInstancePropertyModifications(target);
+        }
     }
 
     private static void SetFloat(Object target, string propertyName, float value)
@@ -808,6 +822,10 @@ public static class LastFlameProjectSetup
 
         property.floatValue = value;
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        if (PrefabUtility.IsPartOfPrefabInstance(target))
+        {
+            PrefabUtility.RecordPrefabInstancePropertyModifications(target);
+        }
     }
 
     private static void SetString(Object target, string propertyName, string value)
@@ -822,6 +840,10 @@ public static class LastFlameProjectSetup
 
         property.stringValue = value;
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        if (PrefabUtility.IsPartOfPrefabInstance(target))
+        {
+            PrefabUtility.RecordPrefabInstancePropertyModifications(target);
+        }
     }
 
     private static void SetObjectArray(Object target, string propertyName, Object[] values)
@@ -841,6 +863,10 @@ public static class LastFlameProjectSetup
         }
 
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        if (PrefabUtility.IsPartOfPrefabInstance(target))
+        {
+            PrefabUtility.RecordPrefabInstancePropertyModifications(target);
+        }
     }
 }
 #endif
