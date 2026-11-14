@@ -450,14 +450,12 @@ public static class LastFlameProjectSetup
             Color.white, new Vector2(-300f, -65f), new Vector2(420f, 44f),
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
 
-        Text sfxValueText;
-        Slider sfxSlider = CreateSettingsSlider(root.transform, "SfxSlider",
-            new Vector2(-10f, 25f), 0.8f, out sfxValueText);
-        Text musicValueText;
-        Slider musicSlider = CreateSettingsSlider(root.transform, "MusicSlider",
-            new Vector2(-10f, -112f), 0.65f, out musicValueText);
+        CreateSettingsSlider(root.transform, "SfxSlider",
+            new Vector2(-10f, 25f), 0.8f, out _);
+        CreateSettingsSlider(root.transform, "MusicSlider",
+            new Vector2(-10f, -112f), 0.65f, out _);
 
-        GameObject backButtonObject = CreateMenuButton(
+        CreateMenuButton(
             root.transform, "BackButton", "НАЗАД", new Vector2(0f, -245f), new Vector2(300f, 64f));
 
         // Settings UI stays in its own prefab and exposes its controls to HUDView/AudioSettingsController.
