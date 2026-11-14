@@ -153,7 +153,7 @@ public static class LastFlameProjectSetup
             }
 
             texture.SetPixels(pixels);
-            texture.Apply(false, true);
+            texture.Apply(false, false);
             AssetDatabase.CreateAsset(texture, path);
         }
 
