@@ -87,7 +87,7 @@ public static class LastFlameProjectSetup
 
             EditorUtility.DisplayDialog(
                 "Last Flame",
-                "Main scene and prefab assets have been authored. Open Assets/Scenes/Main.unity and press Play.",
+                "Menu and Main scenes plus their prefab assets have been authored. Menu.unity is the build entry point; press Play from the Menu scene.",
                 "OK");
         }
         catch (System.Exception exception)
