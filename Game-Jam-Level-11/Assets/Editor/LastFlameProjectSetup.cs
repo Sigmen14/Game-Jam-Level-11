@@ -497,6 +497,11 @@ public static class LastFlameProjectSetup
         SetObjectReference(view, "startButton", startButton);
         SetObjectReference(view, "retryButton", retryButton);
 
+        // Button callbacks are stored in the prefab's persistent UnityEvents,
+        // not registered dynamically during gameplay.
+        UnityEventTools.AddPersistentListener(startButton.onClick, view.OnStartButtonClicked);
+        UnityEventTools.AddPersistentListener(retryButton.onClick, view.OnRetryButtonClicked);
+
         GameObject prefab = SavePrefabAndDestroy(root, HudPrefabPath);
         return prefab;
     }
