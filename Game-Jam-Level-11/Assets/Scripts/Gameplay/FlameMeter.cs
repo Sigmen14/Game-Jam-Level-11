@@ -22,7 +22,7 @@ public sealed class FlameMeter : MonoBehaviour
     [Header("Light response")]
     [SerializeField] private Light2D flameLight;
     [SerializeField, Min(0f)] private float minimumLightRadius = 2.2f;
-    [SerializeField, Min(0f)] private float maximumLightRadius = 7.5f;
+    [SerializeField, Min(0f)] private float maximumLightRadius = 8.5f;
     [SerializeField, Min(0f)] private float minimumLightIntensity = 0.45f;
     [SerializeField, Min(0f)] private float maximumLightIntensity = 1.6f;
 
