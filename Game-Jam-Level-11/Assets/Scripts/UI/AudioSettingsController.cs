@@ -47,7 +47,6 @@ public sealed class AudioSettingsController : MonoBehaviour
         {
             sfxSlider.SetValueWithoutNotify(_sfxVolume);
         }
-        }
 
         if (musicSlider != null)
         {
