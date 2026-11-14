@@ -6,7 +6,7 @@
 
 Перед началом не создавай дубликаты существующих заготовок.
 
-- Сцена: Assets/Scenes/Main.unity.
+- Сцены: Assets/Scenes/Menu.unity (стартовая сцена приложения) и Assets/Scenes/Main.unity (игровая сцена).
 - Скрипт Assets/Scripts/Gameplay/CoverZone.cs — отслеживает вход и выход игрока из trigger-укрытия через UnityEvent<bool>.
 - Скрипт Assets/Scripts/Gameplay/WindController.cs — уже содержит цикл ожидание → предупреждение → порыв и настройки интервалов в Inspector.
 - Префабы: Assets/Prefabs/Player/Player.prefab, Assets/Prefabs/Pickups/PickupRoot.prefab, Assets/Prefabs/Environment/EnvironmentRoot.prefab.
@@ -31,7 +31,7 @@
 - Assets/Scripts/Gameplay/
 - Assets/Scripts/UI/
 - Assets/Scripts/Core/
-- Assets/Scenes/Main.unity
+- Assets/Scenes/Menu.unity\n- Assets/Scenes/Main.unity
 
 Новые папки и файлы создавать только когда они действительно нужны. Unity-объекты и визуальные элементы создаются в Editor, не в коде.
 
