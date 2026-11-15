@@ -1,10 +1,11 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Coordinates the post-victory choice and the selected ending.
-/// It only becomes available after GameManager has entered the Won state.
+/// Coordinates the outcome prelude, post-victory choice and the selected ending.
+/// All presentation stays inside the existing UI_HUD Canvas and authored view.
 /// </summary>
 [DisallowMultipleComponent]
 public sealed class EndingFlowController : MonoBehaviour
@@ -22,6 +23,23 @@ public sealed class EndingFlowController : MonoBehaviour
 
     private GameManager gameManager;
     private bool choiceCommitted;
+    private bool outcomePreludeActive;
+    private bool outcomePreludeCompleted;
+    private bool outcomeWasVictory;
+    private float outcomeSurvivedSeconds;
+    private float skipInputEnabledAt;
+    private Coroutine outcomeRoutine;
+    private Action defeatPreludeCompleted;
+
+    private void Update()
+    {
+        if (!outcomePreludeActive || Time.unscaledTime < skipInputEnabledAt)
+            return;
+
+        // The prelude can be skipped with the same inputs as the opening prologue.
+        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+            SkipOutcomePrelude();
+    }
 
     public void Bind(GameManager manager)
     {
@@ -41,17 +59,143 @@ public sealed class EndingFlowController : MonoBehaviour
             mainMenuButton.onClick.AddListener(ReturnToMainMenu);
     }
 
-    /// <summary>Opens the choice only after the existing 180-second victory condition.</summary>
+    public void ShowVictoryPrelude(float survivedSeconds)
+    {
+        BeginOutcomePrelude(true, survivedSeconds, null);
+    }
+
+    public void ShowDefeatPrelude(float survivedSeconds, Action onCompleted)
+    {
+        BeginOutcomePrelude(false, survivedSeconds, onCompleted);
+    }
+
+    private void BeginOutcomePrelude(bool didWin, float survivedSeconds, Action onCompleted)
+    {
+        GameManager.GameState expectedState = didWin
+            ? GameManager.GameState.Won
+            : GameManager.GameState.Lost;
+
+        if (gameManager == null || gameManager.State != expectedState)
+        {
+            if (!didWin)
+                onCompleted?.Invoke();
+            return;
+        }
+
+        // FinishMatch already guards duplicate transitions; this second guard also
+        // prevents two calls from starting parallel presentation coroutines.
+        if (outcomePreludeActive || outcomePreludeCompleted)
+            return;
+
+        StopAllCoroutines();
+        outcomeRoutine = null;
+        choiceCommitted = false;
+        outcomeWasVictory = didWin;
+        outcomeSurvivedSeconds = survivedSeconds;
+        defeatPreludeCompleted = onCompleted;
+        outcomePreludeActive = true;
+        skipInputEnabledAt = Time.unscaledTime + 0.3f;
+
+        SetActive(choiceRoot, false);
+        SetActive(sequenceRoot, true);
+
+        // The ending's own menu button is not part of the prelude; defeat uses
+        // the established HUD result panel and victory uses the two-choice panel.
+        if (mainMenuButton != null)
+            mainMenuButton.gameObject.SetActive(false);
+
+        if (sequenceView == null)
+        {
+            outcomePreludeActive = false;
+            outcomePreludeCompleted = true;
+            SetActive(sequenceRoot, false);
+
+            if (didWin)
+                ShowChoice(survivedSeconds);
+            else
+            {
+                Action callback = defeatPreludeCompleted;
+                defeatPreludeCompleted = null;
+                callback?.Invoke();
+            }
+
+            return;
+        }
+
+        outcomeRoutine = StartCoroutine(PlayOutcomePreludeRoutine(didWin, survivedSeconds));
+    }
+
+    private IEnumerator PlayOutcomePreludeRoutine(bool didWin, float survivedSeconds)
+    {
+        yield return sequenceView.PlayOutcomePrelude(didWin, survivedSeconds);
+        outcomeRoutine = null;
+        CompleteOutcomePrelude();
+    }
+
+    private void SkipOutcomePrelude()
+    {
+        if (!outcomePreludeActive)
+            return;
+
+        if (outcomeRoutine != null)
+        {
+            StopCoroutine(outcomeRoutine);
+            outcomeRoutine = null;
+        }
+
+        if (sequenceView != null)
+        {
+            sequenceView.StopOutcomeAmbience();
+            sequenceView.ResetVisuals();
+        }
+
+        CompleteOutcomePrelude();
+    }
+
+    private void CompleteOutcomePrelude()
+    {
+        if (!outcomePreludeActive)
+            return;
+
+        outcomePreludeActive = false;
+        outcomePreludeCompleted = true;
+        SetActive(sequenceRoot, false);
+
+        if (mainMenuButton != null)
+            mainMenuButton.gameObject.SetActive(true);
+
+        if (outcomeWasVictory)
+        {
+            // The old choice and both existing ending animations remain unchanged.
+            ShowChoice(outcomeSurvivedSeconds);
+            return;
+        }
+
+        Action callback = defeatPreludeCompleted;
+        defeatPreludeCompleted = null;
+
+        if (gameManager != null && gameManager.State == GameManager.GameState.Lost)
+            callback?.Invoke();
+    }
+
+    /// <summary>Opens the existing two-choice screen after the 180-second victory scene.</summary>
     public void ShowChoice(float survivedSeconds)
     {
         if (gameManager == null || gameManager.State != GameManager.GameState.Won)
             return;
 
         StopAllCoroutines();
+        outcomeRoutine = null;
+        outcomePreludeActive = false;
         choiceCommitted = false;
 
+        // Hide the cinematic before restoring its cached visuals to avoid a flash.
+        SetActive(sequenceRoot, false);
         if (sequenceView != null)
             sequenceView.ResetVisuals();
+
+        if (mainMenuButton != null)
+            mainMenuButton.gameObject.SetActive(true);
 
         if (choiceDescriptionText != null)
         {
@@ -63,19 +207,29 @@ public sealed class EndingFlowController : MonoBehaviour
         }
 
         SetActive(choiceRoot, true);
-        SetActive(sequenceRoot, false);
     }
 
     /// <summary>Hides all ending UI when a new match or the main menu is entered.</summary>
     public void Hide()
     {
         StopAllCoroutines();
+        outcomeRoutine = null;
+        outcomePreludeActive = false;
+        outcomePreludeCompleted = false;
+        defeatPreludeCompleted = null;
         choiceCommitted = false;
-        SetActive(choiceRoot, false);
-        SetActive(sequenceRoot, false);
 
         if (sequenceView != null)
+        {
+            sequenceView.StopOutcomeAmbience();
             sequenceView.ResetVisuals();
+        }
+
+        if (mainMenuButton != null)
+            mainMenuButton.gameObject.SetActive(true);
+
+        SetActive(choiceRoot, false);
+        SetActive(sequenceRoot, false);
     }
 
     private void ChooseRekindleWorld()
@@ -104,6 +258,9 @@ public sealed class EndingFlowController : MonoBehaviour
 
         choiceCommitted = true;
         EndingStatistics.RecordChoice(choice);
+
+        if (mainMenuButton != null)
+            mainMenuButton.gameObject.SetActive(true);
 
         SetActive(choiceRoot, false);
         SetActive(sequenceRoot, true);
@@ -147,6 +304,9 @@ public sealed class EndingFlowController : MonoBehaviour
 
     private void OnDestroy()
     {
+        StopAllCoroutines();
+        if (sequenceView != null)
+            sequenceView.StopOutcomeAmbience();
         UnbindButtons();
     }
 }
