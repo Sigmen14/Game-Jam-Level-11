@@ -29,6 +29,7 @@ public sealed class EndingFlowController : MonoBehaviour
     private float outcomeSurvivedSeconds;
     private float skipInputEnabledAt;
     private Coroutine outcomeRoutine;
+    private Coroutine outcomePlaybackRoutine;
     private Action defeatPreludeCompleted;
 
     private void Update()
@@ -89,6 +90,7 @@ public sealed class EndingFlowController : MonoBehaviour
 
         StopAllCoroutines();
         outcomeRoutine = null;
+        outcomePlaybackRoutine = null;
         choiceCommitted = false;
         outcomeWasVictory = didWin;
         outcomeSurvivedSeconds = survivedSeconds;
@@ -127,9 +129,44 @@ public sealed class EndingFlowController : MonoBehaviour
 
     private IEnumerator PlayOutcomePreludeRoutine(bool didWin, float survivedSeconds)
     {
-        yield return sequenceView.PlayOutcomePrelude(didWin, survivedSeconds);
+        bool sequenceCompleted = false;
+        outcomePlaybackRoutine = StartCoroutine(
+            RunOutcomeView(didWin, survivedSeconds, () => sequenceCompleted = true));
+
+        // A failsafe keeps the player from being trapped if a missing view reference
+        // or an interrupted nested animation prevents its normal completion.
+        float elapsed = 0f;
+        const float safetyTimeout = 20f;
+        while (!sequenceCompleted && elapsed < safetyTimeout)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        if (!sequenceCompleted)
+        {
+            Debug.LogWarning(
+                "EndingFlowController: outcome prelude reached its safety timeout; continuing to the result flow.",
+                this);
+            if (outcomePlaybackRoutine != null)
+                StopCoroutine(outcomePlaybackRoutine);
+
+            if (sequenceView != null)
+            {
+                sequenceView.StopOutcomeAmbience();
+                sequenceView.ResetVisuals();
+            }
+        }
+
+        outcomePlaybackRoutine = null;
         outcomeRoutine = null;
         CompleteOutcomePrelude();
+    }
+
+    private IEnumerator RunOutcomeView(bool didWin, float survivedSeconds, Action onCompleted)
+    {
+        yield return sequenceView.PlayOutcomePrelude(didWin, survivedSeconds);
+        onCompleted?.Invoke();
     }
 
     private void SkipOutcomePrelude()
@@ -141,6 +178,12 @@ public sealed class EndingFlowController : MonoBehaviour
         {
             StopCoroutine(outcomeRoutine);
             outcomeRoutine = null;
+        }
+
+        if (outcomePlaybackRoutine != null)
+        {
+            StopCoroutine(outcomePlaybackRoutine);
+            outcomePlaybackRoutine = null;
         }
 
         if (sequenceView != null)
@@ -186,6 +229,7 @@ public sealed class EndingFlowController : MonoBehaviour
 
         StopAllCoroutines();
         outcomeRoutine = null;
+        outcomePlaybackRoutine = null;
         outcomePreludeActive = false;
         choiceCommitted = false;
 
@@ -214,6 +258,7 @@ public sealed class EndingFlowController : MonoBehaviour
     {
         StopAllCoroutines();
         outcomeRoutine = null;
+        outcomePlaybackRoutine = null;
         outcomePreludeActive = false;
         outcomePreludeCompleted = false;
         defeatPreludeCompleted = null;
@@ -305,6 +350,8 @@ public sealed class EndingFlowController : MonoBehaviour
     private void OnDestroy()
     {
         StopAllCoroutines();
+        outcomeRoutine = null;
+        outcomePlaybackRoutine = null;
         if (sequenceView != null)
             sequenceView.StopOutcomeAmbience();
         UnbindButtons();
