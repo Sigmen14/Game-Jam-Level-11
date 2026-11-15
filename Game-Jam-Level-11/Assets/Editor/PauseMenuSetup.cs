@@ -7,6 +7,7 @@ using UnityEditor.SceneManagement;
 using UnityEditor.Animations;
 using UnityEditor.U2D.Sprites;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -15,6 +16,7 @@ public static class PauseMenuSetup
     private const string ScenePath = "Assets/Scenes/Main.unity";
     private const string SettingsPrefabPath = "Assets/Prefabs/UI/UI_SettingsPanel.prefab";
     private const string MenuPrefabPath = "Assets/Prefabs/UI/UI_Menu.prefab";
+    private const string CancelActionReferencePath = "Assets/Settings/InputActionReferences/UI_Cancel.asset";
     private const string PausePrefabPath = "Assets/Prefabs/UI/UI_PausePanel.prefab";
     private const string EmberSheetPath = "Assets/Art/LastFlame/PauseEmbers.png";
     private const string EmberClipPath = "Assets/Art/LastFlame/PauseEmbers.anim";
@@ -135,6 +137,10 @@ public static class PauseMenuSetup
 
         SerializedObject serialized = new SerializedObject(controller);
         serialized.FindProperty("gameManager").objectReferenceValue = manager;
+        InputActionReference cancelAction = AssetDatabase.LoadAssetAtPath<InputActionReference>(CancelActionReferencePath);
+        SerializedProperty cancelActionProperty = serialized.FindProperty("cancelAction");
+        if (cancelActionProperty != null)
+            cancelActionProperty.objectReferenceValue = cancelAction;
         serialized.FindProperty("pauseRoot").objectReferenceValue = pauseRoot;
         serialized.FindProperty("settingsRoot").objectReferenceValue = settingsRoot;
         serialized.FindProperty("resumeButton").objectReferenceValue = resume;
