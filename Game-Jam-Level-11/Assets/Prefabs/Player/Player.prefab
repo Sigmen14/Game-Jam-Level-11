@@ -5291,9 +5291,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxFlame: 100
   startingFlame: 75
-  passiveDrainPerSecond: 0.58
-  windDamagePerSecond: 8
-  protectedWindDamagePerSecond: 0.9
+  passiveDrainPerSecond: 0.9
+  windDamagePerSecond: 10
+  protectedWindDamagePerSecond: 1
   steadySparkPickupThreshold: 2
   lastFlamePickupThreshold: 4
   steadySparkWindDamageMultiplier: 0.9
