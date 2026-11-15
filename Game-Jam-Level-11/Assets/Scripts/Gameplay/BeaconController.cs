@@ -312,15 +312,15 @@ public sealed class BeaconController : MonoBehaviour
 
         bool activatedMessage = _activationMessageTimer > 0f;
         string heading = activatedMessage
-            ? "THE OLD BEACON IS LIT"
+            ? "МАЯК ЗАЖЖЁН"
             : _notEnoughFuel
-                ? "NOT ENOUGH FUEL"
-                : "PRESS [E] TO IGNITE THE BEACON";
+                ? "НЕДОСТАТОЧНО ОГНЯ"
+                : "НАЖМИТЕ [E], ЧТОБЫ ЗАЖЕЧЬ МАЯК";
         string detail = activatedMessage
-            ? "Golden light weakens the Grey Wind nearby"
+            ? "Золотой свет ослабляет Серый Ветер поблизости"
             : _notEnoughFuel
-                ? "Find fuel — ignition requires " + Mathf.CeilToInt(fuelCost) + " fuel"
-                : "Ignition cost: " + Mathf.CeilToInt(fuelCost) + " fuel";
+                ? "Найдите огонь — для зажигания нужно " + Mathf.CeilToInt(fuelCost) + " ед. огня"
+                : "Для зажигания нужно: " + Mathf.CeilToInt(fuelCost) + " ед. огня";
 
         float panelWidth = Mathf.Min(500f, Screen.width - 28f);
         const float panelHeight = 76f;
