@@ -330,7 +330,7 @@ public static class StoryPrologueSetup
         SetRect(rect, anchor, Vector2.zero, size);
 
         Text text = textObject.AddComponent<Text>();
-        text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         text.text = value;
         text.fontSize = fontSize;
         text.fontStyle = FontStyle.Normal;
