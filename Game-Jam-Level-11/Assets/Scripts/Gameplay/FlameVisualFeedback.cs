@@ -64,6 +64,20 @@ public sealed class FlameVisualFeedback : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float shelterMotionMultiplier = 0.38f;
     [SerializeField, Min(0f)] private float windSparkInfluence = 1.25f;
     [SerializeField, Min(1f)] private float gustSparkSpeedMultiplier = 1.35f;
+    [SerializeField, Min(0f)] private float warningSparkInfluence = 0.55f;
+    [SerializeField, Min(0f)] private float warningFlickerBoost = 0.07f;
+
+    [Header("Visible Grey Wind")]
+    [SerializeField] private bool createVisibleWindFX = true;
+    [SerializeField, Min(0f)] private float warningWindRate = 16f;
+    [SerializeField, Min(0f)] private float gustWindRate = 90f;
+    [SerializeField, Min(0f)] private float strongGustWindRate = 150f;
+    [SerializeField, Min(0f)] private float warningWindSpeed = 2.5f;
+    [SerializeField, Min(0f)] private float gustWindSpeed = 6f;
+    [SerializeField, Min(0f)] private float strongGustWindSpeed = 10f;
+    [SerializeField, Min(0.1f)] private float windStreakLifetime = 1.1f;
+    [SerializeField] private Color windStreakColor = new Color(0.68f, 0.70f, 0.69f, 0.38f);
+    [SerializeField] private Color windStreakHighlight = new Color(1f, 0.73f, 0.42f, 0.46f);
 
     [Header("Ambient sparks")]
     [SerializeField, Min(0.05f)] private float highFuelSparkInterval = 0.48f;
@@ -93,6 +107,9 @@ public sealed class FlameVisualFeedback : MonoBehaviour
     [SerializeField] private Color pickupSparkColor = new Color(1f, 0.82f, 0.28f, 1f);
 
     private readonly HashSet<FuelPickup> subscribedPickups = new HashSet<FuelPickup>();
+
+    private ParticleSystem windStreakParticles;
+    private Camera windCamera;
 
     private Vector3 baseFlameScale;
     private Color baseFlameColor;
@@ -152,26 +169,35 @@ public sealed class FlameVisualFeedback : MonoBehaviour
 
     private void Update()
     {
+        bool windActive = windController != null && windController.IsWindActive;
+        bool windWarning = windController != null && windController.IsWarning;
+        float windStrength = windController != null ? windController.CurrentGustStrength : 0f;
+        UpdateVisibleWindFX(windActive, windWarning, windStrength);
+
         if (flameMeter == null || flameRenderer == null)
         {
             return;
         }
 
         float fuel = Mathf.Clamp01(flameMeter.NormalizedValue);
-        bool windActive = windController != null && windController.IsWindActive;
-        bool sheltered = playerController != null &&
-                         (playerController.IsInCover || playerController.IsProtecting);
+        bool sheltered = playerController != null && playerController.IsWindSheltered;
 
         float lowFuelBlend = 1f - Mathf.Clamp01(
             fuel / Mathf.Max(0.01f, lowFuelThreshold));
 
         float noiseFrequency = flickerNoiseFrequency *
-                               (windActive ? windNoiseFrequencyMultiplier : 1f);
+                               (windActive ? windNoiseFrequencyMultiplier :
+                                (windWarning ? 1.35f : 1f));
         float noise = Mathf.PerlinNoise(Time.time * noiseFrequency, noiseSeed) * 2f - 1f;
         float flickerStrength = Mathf.Lerp(highFuelFlicker, lowFuelFlicker, 1f - fuel);
         if (windActive)
         {
-            flickerStrength = Mathf.Max(flickerStrength, 0.12f);
+            float gustFlicker = 0.12f + Mathf.Clamp01((windStrength - 1f) / 0.85f) * 0.07f;
+            flickerStrength = Mathf.Max(flickerStrength, gustFlicker);
+        }
+        else if (windWarning)
+        {
+            flickerStrength = Mathf.Max(flickerStrength, warningFlickerBoost);
         }
 
         float flicker = Mathf.Clamp(
@@ -185,14 +211,15 @@ public sealed class FlameVisualFeedback : MonoBehaviour
                        calmMultiplier;
 
         float windLean = 0f;
-        if (windActive && windController != null)
+        if ((windActive || windWarning) && windController != null)
         {
             Vector3 localWind = transform.InverseTransformDirection(
                 new Vector3(windController.WindDirection.x,
                     windController.WindDirection.y, 0f));
             float shelterFactor = sheltered ? shelterWindMultiplier : 1f;
+            float visualStrength = windActive ? Mathf.Max(1f, windStrength) : warningSparkInfluence;
             windLean = -Mathf.Clamp(localWind.x, -1f, 1f) *
-                       maximumWindLeanAngle * shelterFactor;
+                       maximumWindLeanAngle * visualStrength * shelterFactor;
         }
 
         FlameMeter.GrowthStage growthStage = flameMeter.CurrentGrowthStage;
@@ -237,6 +264,140 @@ public sealed class FlameVisualFeedback : MonoBehaviour
             0f, pickupFlashRemaining - Time.deltaTime);
 
         UpdateAmbientSparks(fuel, windActive, sheltered, growthStage);
+    }
+
+    private void UpdateVisibleWindFX(bool windActive, bool windWarning, float gustStrength)
+    {
+        if (!createVisibleWindFX)
+        {
+            return;
+        }
+
+        EnsureVisibleWindSystem();
+        if (windStreakParticles == null || windCamera == null)
+        {
+            return;
+        }
+
+        float normalizedStrength = Mathf.Clamp01(Mathf.InverseLerp(1f, 1.85f, gustStrength));
+        float emissionRate = windWarning
+            ? warningWindRate
+            : (windActive ? Mathf.Lerp(gustWindRate, strongGustWindRate, normalizedStrength) : 0f);
+        float windSpeed = windWarning
+            ? warningWindSpeed
+            : (windActive ? Mathf.Lerp(gustWindSpeed, strongGustWindSpeed, normalizedStrength) : 0f);
+
+        Vector3 localWind = windCamera.transform.InverseTransformDirection(
+            new Vector3(windController != null ? windController.WindDirection.x : 1f,
+                        windController != null ? windController.WindDirection.y : 0f, 0f));
+        localWind.z = 0f;
+        if (localWind.sqrMagnitude < 0.0001f)
+        {
+            localWind = Vector3.right;
+        }
+        localWind.Normalize();
+
+        ParticleSystem.EmissionModule emission = windStreakParticles.emission;
+        emission.rateOverTime = new ParticleSystem.MinMaxCurve(emissionRate);
+
+        ParticleSystem.VelocityOverLifetimeModule velocity = windStreakParticles.velocityOverLifetime;
+        velocity.x = new ParticleSystem.MinMaxCurve(localWind.x * windSpeed);
+        velocity.y = new ParticleSystem.MinMaxCurve(localWind.y * windSpeed);
+        velocity.z = new ParticleSystem.MinMaxCurve(0f);
+    }
+
+    private void EnsureVisibleWindSystem()
+    {
+        if (windStreakParticles != null)
+        {
+            return;
+        }
+
+        windCamera = Camera.main;
+        if (windCamera == null)
+        {
+            return;
+        }
+
+        GameObject windObject = new GameObject("Grey Wind - Visible Screen Streaks");
+        windObject.transform.SetParent(windCamera.transform, false);
+        windObject.transform.localPosition = new Vector3(0f, 0f,
+            Mathf.Max(1f, windCamera.nearClipPlane + 0.5f));
+
+        windStreakParticles = windObject.AddComponent<ParticleSystem>();
+        ParticleSystem.MainModule main = windStreakParticles.main;
+        main.loop = true;
+        main.playOnAwake = false;
+        main.simulationSpace = ParticleSystemSimulationSpace.Local;
+        main.scalingMode = ParticleSystemScalingMode.Local;
+        main.maxParticles = 260;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(
+            windStreakLifetime * 0.72f, windStreakLifetime * 1.28f);
+        main.startSpeed = 0f;
+        main.startSize = new ParticleSystem.MinMaxCurve(0.028f, 0.052f);
+        main.startColor = Color.white;
+        main.gravityModifier = 0f;
+
+        ParticleSystem.ShapeModule shape = windStreakParticles.shape;
+        shape.enabled = true;
+        shape.shapeType = ParticleSystemShapeType.Box;
+        float viewHeight = windCamera.orthographic
+            ? windCamera.orthographicSize * 2f
+            : 16f;
+        float viewWidth = viewHeight * windCamera.aspect;
+        shape.scale = new Vector3(viewWidth * 1.15f, viewHeight * 1.15f, 0.05f);
+
+        ParticleSystem.EmissionModule emission = windStreakParticles.emission;
+        emission.enabled = true;
+        emission.rateOverTime = 0f;
+
+        ParticleSystem.VelocityOverLifetimeModule velocity = windStreakParticles.velocityOverLifetime;
+        velocity.enabled = true;
+        velocity.space = ParticleSystemSimulationSpace.Local;
+        velocity.x = 0f;
+        velocity.y = 0f;
+        velocity.z = 0f;
+
+        Gradient fade = new Gradient();
+        fade.SetKeys(
+            new[]
+            {
+                new GradientColorKey(windStreakColor, 0f),
+                new GradientColorKey(windStreakHighlight, 0.55f),
+                new GradientColorKey(windStreakColor, 1f)
+            },
+            new[]
+            {
+                new GradientAlphaKey(0f, 0f),
+                new GradientAlphaKey(0.58f, 0.12f),
+                new GradientAlphaKey(0.34f, 0.78f),
+                new GradientAlphaKey(0f, 1f)
+            });
+
+        ParticleSystem.ColorOverLifetimeModule colorOverLifetime = windStreakParticles.colorOverLifetime;
+        colorOverLifetime.enabled = true;
+        colorOverLifetime.color = new ParticleSystem.MinMaxGradient(fade);
+
+        ParticleSystemRenderer windRenderer = windStreakParticles.GetComponent<ParticleSystemRenderer>();
+        windRenderer.renderMode = ParticleSystemRenderMode.Stretch;
+        windRenderer.velocityScale = 0.18f;
+        windRenderer.lengthScale = 5f;
+        ParticleSystemRenderer sparkRenderer = sparkParticles != null
+            ? sparkParticles.GetComponent<ParticleSystemRenderer>()
+            : null;
+        windRenderer.sortingLayerName = sparkRenderer != null
+            ? sparkRenderer.sortingLayerName
+            : "Default";
+        windRenderer.sortingOrder = sparkRenderer != null
+            ? sparkRenderer.sortingOrder + 10
+            : 80;
+
+        if (sparkRenderer != null && sparkRenderer.sharedMaterial != null)
+        {
+            windRenderer.sharedMaterial = sparkRenderer.sharedMaterial;
+        }
+
+        windStreakParticles.Play();
     }
 
     private float GetFuelScale(float fuel)
@@ -356,7 +517,15 @@ public sealed class FlameVisualFeedback : MonoBehaviour
 
         if (windActive)
         {
-            interval *= 0.78f;
+            float strengthBoost = Mathf.Lerp(
+                1f, 1.2f,
+                Mathf.Clamp01((windController.CurrentGustStrength - 1f) / 0.85f));
+            interval *= 0.78f / strengthBoost;
+        }
+        else if (windController != null && windController.IsWarning)
+        {
+            // A brief increase in warm sparks gives the player a readable pre-gust cue.
+            interval *= 0.72f;
         }
 
         if (sheltered)
@@ -388,13 +557,14 @@ public sealed class FlameVisualFeedback : MonoBehaviour
         }
 
         Vector2 wind = Vector2.zero;
-        if (windActive && windController != null)
+        bool windWarning = windController != null && windController.IsWarning;
+        float windPower = windActive && windController != null
+            ? Mathf.Max(1f, windController.CurrentGustStrength)
+            : (windWarning ? warningSparkInfluence : 0f);
+        if (windPower > 0f && windController != null)
         {
-            wind = windController.WindDirection * windSparkInfluence;
-            if (sheltered)
-            {
-                wind *= shelterWindMultiplier;
-            }
+            wind = windController.WindDirection * windSparkInfluence * windPower;
+            if (sheltered) wind *= shelterWindMultiplier;
         }
 
         Vector2 flameUp = flameRenderer != null
@@ -426,7 +596,11 @@ public sealed class FlameVisualFeedback : MonoBehaviour
 
             if (windActive && !sheltered)
             {
-                speed *= gustSparkSpeedMultiplier;
+                speed *= gustSparkSpeedMultiplier * windPower;
+            }
+            else if (windWarning && !sheltered)
+            {
+                speed *= 1.12f;
             }
 
             float sizeVariation = Random.Range(0.62f, 1.38f);
@@ -525,6 +699,12 @@ public sealed class FlameVisualFeedback : MonoBehaviour
 
         subscribedPickups.Clear();
         pickupFlashRemaining = 0f;
+
+        if (windStreakParticles != null)
+        {
+            ParticleSystem.EmissionModule windEmission = windStreakParticles.emission;
+            windEmission.rateOverTime = 0f;
+        }
 
         // Keep the authored ParticleSystem enabled. Its existing particles are
         // allowed to finish naturally while this component releases its event hooks.

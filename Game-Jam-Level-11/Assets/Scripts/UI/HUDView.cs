@@ -25,18 +25,25 @@ public sealed class HUDView : MonoBehaviour
     private GameManager gameManager;
     private FlameMeter flameMeter;
     private WindController windController;
+    private Image windWarningBackground;
+    private RectTransform windWarningRect;
+    private Vector3 windWarningBaseScale = Vector3.one;
+    private Color windWarningBaseColor = Color.white;
+    private Color windWarningBaseTextColor = Color.white;
 
     public void Bind(GameManager manager, FlameMeter meter, WindController wind)
     {
-        if (flameMeter != null)
-            flameMeter.ValueChanged -= SetFlame;
-
+        if (flameMeter != null) flameMeter.ValueChanged -= SetFlame;
         if (windController != null)
-            windController.WarningStateChanged -= SetWindWarning;
+        {
+            windController.WarningStateChanged -= HandleWindStateChanged;
+            windController.WindActiveStateChanged -= HandleWindStateChanged;
+        }
 
         gameManager = manager;
         flameMeter = meter;
         windController = wind;
+        CacheWindWarningVisuals();
 
         if (flameMeter != null)
         {
@@ -46,9 +53,16 @@ public sealed class HUDView : MonoBehaviour
 
         if (windController != null)
         {
-            windController.WarningStateChanged += SetWindWarning;
-            SetWindWarning(windController.IsWarning);
+            windController.WarningStateChanged += HandleWindStateChanged;
+            windController.WindActiveStateChanged += HandleWindStateChanged;
+            SetWindWarning(windController.IsWarning || windController.IsWindActive);
         }
+        else SetWindWarning(false);
+    }
+
+    private void Update()
+    {
+        UpdateWindWarningVisuals();
     }
 
     public void ShowMainMenu()
@@ -77,26 +91,18 @@ public sealed class HUDView : MonoBehaviour
     {
         SetActive(hudContentRoot, true);
         SetActive(resultPanel, true);
-
-        if (resultTitleText != null)
-            resultTitleText.text = didWin ? "ПОБЕДА" : "ПОРАЖЕНИЕ";
-
+        if (resultTitleText != null) resultTitleText.text = didWin ? "ПОБЕДА" : "ПОРАЖЕНИЕ";
         if (resultTimeText != null)
             resultTimeText.text = "Время выживания: " + FormatTime(elapsedSeconds);
-
         SetWindWarning(false);
     }
 
     public void SetFlame(float current, float maximum)
     {
         float normalized = maximum > 0f ? Mathf.Clamp01(current / maximum) : 0f;
-
-        if (flameSlider != null)
-            flameSlider.value = normalized;
-
+        if (flameSlider != null) flameSlider.value = normalized;
         if (flameValueText != null)
             flameValueText.text = Mathf.CeilToInt(current) + " / " + Mathf.CeilToInt(maximum);
-
         if (flameFillImage != null)
         {
             flameFillImage.color = Color.Lerp(
@@ -108,16 +114,77 @@ public sealed class HUDView : MonoBehaviour
 
     public void SetTimer(float secondsRemaining)
     {
-        if (timerText != null)
-            timerText.text = FormatTime(secondsRemaining);
+        if (timerText != null) timerText.text = FormatTime(secondsRemaining);
     }
 
     public void SetWindWarning(bool isVisible)
     {
-        SetActive(windWarningRoot, isVisible);
+        bool gustActive = windController != null && windController.IsWindActive;
+        bool shouldShow = isVisible || gustActive;
+        SetActive(windWarningRoot, shouldShow);
+        if (!shouldShow) RestoreWindWarningVisuals();
+        else if (windWarningText != null && windController != null)
+            windWarningText.text = windController.StatusMessage;
+    }
 
+    private void HandleWindStateChanged(bool state)
+    {
+        SetWindWarning(state || (windController != null && windController.IsWindActive));
+    }
+
+    private void CacheWindWarningVisuals()
+    {
+        windWarningBackground = windWarningRoot != null ? windWarningRoot.GetComponent<Image>() : null;
+        windWarningRect = windWarningRoot != null ? windWarningRoot.GetComponent<RectTransform>() : null;
+        if (windWarningBackground != null) windWarningBaseColor = windWarningBackground.color;
+        if (windWarningRect != null) windWarningBaseScale = windWarningRect.localScale;
+        if (windWarningText != null) windWarningBaseTextColor = windWarningText.color;
+    }
+
+    private void UpdateWindWarningVisuals()
+    {
+        if (windWarningRoot == null || windController == null) return;
+        bool warning = windController.IsWarning;
+        bool gustActive = windController.IsWindActive;
+        bool visible = warning || gustActive;
+        SetActive(windWarningRoot, visible);
+        if (!visible)
+        {
+            RestoreWindWarningVisuals();
+            return;
+        }
+
+        if (windWarningText != null) windWarningText.text = windController.StatusMessage;
+        float pulseRate = gustActive ? 8.5f : 4.2f;
+        float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * pulseRate);
+        if (windWarningBackground != null)
+        {
+            Color darkWind = gustActive
+                ? new Color(0.025f, 0.032f, 0.04f, 0.96f)
+                : new Color(0.075f, 0.045f, 0.028f, 0.93f);
+            Color warmEdge = gustActive
+                ? new Color(0.12f, 0.075f, 0.045f, 0.98f)
+                : new Color(0.20f, 0.085f, 0.025f, 0.96f);
+            windWarningBackground.color = Color.Lerp(darkWind, warmEdge, pulse * 0.48f);
+        }
         if (windWarningText != null)
-            windWarningText.text = "ВНИМАНИЕ: СКОРО ПОРЫВ ВЕТРА";
+        {
+            Color emberGold = new Color(1f, 0.72f, 0.30f, 1f);
+            Color brightGold = new Color(1f, 0.90f, 0.58f, 1f);
+            windWarningText.color = Color.Lerp(emberGold, brightGold, pulse * 0.65f);
+        }
+        if (windWarningRect != null)
+        {
+            float scalePulse = gustActive ? 0.035f : 0.016f;
+            windWarningRect.localScale = windWarningBaseScale * (1f + pulse * scalePulse);
+        }
+    }
+
+    private void RestoreWindWarningVisuals()
+    {
+        if (windWarningBackground != null) windWarningBackground.color = windWarningBaseColor;
+        if (windWarningText != null) windWarningText.color = windWarningBaseTextColor;
+        if (windWarningRect != null) windWarningRect.localScale = windWarningBaseScale;
     }
 
     public void OnRetryButtonClicked()
@@ -140,16 +207,16 @@ public sealed class HUDView : MonoBehaviour
 
     private static void SetActive(GameObject target, bool active)
     {
-        if (target != null && target.activeSelf != active)
-            target.SetActive(active);
+        if (target != null && target.activeSelf != active) target.SetActive(active);
     }
 
     private void OnDestroy()
     {
-        if (flameMeter != null)
-            flameMeter.ValueChanged -= SetFlame;
-
+        if (flameMeter != null) flameMeter.ValueChanged -= SetFlame;
         if (windController != null)
-            windController.WarningStateChanged -= SetWindWarning;
+        {
+            windController.WarningStateChanged -= HandleWindStateChanged;
+            windController.WindActiveStateChanged -= HandleWindStateChanged;
+        }
     }
 }

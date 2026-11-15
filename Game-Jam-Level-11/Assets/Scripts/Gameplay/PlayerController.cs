@@ -20,6 +20,7 @@ public sealed class PlayerController : MonoBehaviour
 
     public bool IsProtecting { get; private set; }
     public bool IsInCover { get; private set; }
+    public bool IsWindSheltered => IsInCover || IsProtecting;
     public bool IsGameplayActive => gameplayActive;
 
     private InputActionMap playerMap;
