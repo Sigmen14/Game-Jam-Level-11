@@ -25,6 +25,7 @@ public sealed class PrologueController : MonoBehaviour
     [SerializeField] private Text titleText;
     [SerializeField] private Text storyText;
     [SerializeField] private Text finalText;
+    [SerializeField] private Text continueHint;
 
     [Header("Light and particles")]
     [SerializeField] private Image flameGlow;
@@ -70,6 +71,7 @@ public sealed class PrologueController : MonoBehaviour
         SetGroupAlpha(titleGroup, 0f);
         SetGroupAlpha(storyGroup, 0f);
         SetGroupAlpha(finalGroup, 0f);
+        SetTextAlpha(continueHint, 0f);
     }
 
     /// <summary>
@@ -111,16 +113,21 @@ public sealed class PrologueController : MonoBehaviour
         if (!_isPlaying)
             return;
 
+        // Project Settings uses Both input handling, so legacy polling is available.
+        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+        {
+            Skip();
+            return;
+        }
+
+        // Finish the story on its last frame and wait for an explicit player action.
         _elapsed += Time.unscaledDeltaTime;
         UpdateTimeline();
-
-        if (_elapsed >= totalDuration)
-            Complete();
     }
 
     private void UpdateTimeline()
     {
-        float outro = 1f - SmoothRange(_elapsed, totalDuration - 0.85f, 0.85f);
+        const float outro = 1f;
 
         SetGroupAlpha(worldGroup, SmoothRange(_elapsed, 1.6f, 2.7f) * outro);
         SetGroupAlpha(flameGroup, SmoothRange(_elapsed, 7.1f, 1.5f) * outro);
@@ -154,7 +161,8 @@ public sealed class PrologueController : MonoBehaviour
         }
 
         SetGroupAlpha(storyGroup, storyAlpha * outro);
-        SetGroupAlpha(finalGroup, FadeWindow(_elapsed, 16.55f, totalDuration - 0.35f, 0.7f) * outro);
+        SetGroupAlpha(finalGroup, SmoothRange(_elapsed, 16.55f, 0.7f));
+        SetTextAlpha(continueHint, SmoothRange(_elapsed, totalDuration - 2.0f, 0.55f));
 
         UpdateParticles();
         UpdateLights();

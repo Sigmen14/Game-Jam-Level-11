@@ -86,7 +86,7 @@ public sealed class MainMenuController : MonoBehaviour
         if (prologueController == null)
             prologueController = GetComponentInChildren<PrologueController>(true);
 
-        if (prologueController != null && prologueController.TryPlay(ShowMainMenuPanels))
+        if (prologueController != null && prologueController.TryPlay(StartGameImmediately))
             return;
 
         ShowMainMenuPanels();

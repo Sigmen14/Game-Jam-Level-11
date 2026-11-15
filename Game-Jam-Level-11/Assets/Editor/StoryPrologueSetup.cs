@@ -96,6 +96,10 @@ public static class StoryPrologueSetup
                 "Hope", finalGroup.transform, "Пока горит хотя бы одна искра — надежда не умерла",
                 new Vector2(0.5f, 0.55f), new Vector2(1500f, 150f), 44,
                 new Color(1f, 0.78f, 0.43f, 1f));
+            Text continueHint = CreateText(
+                "ContinueHint", finalGroup.transform, "Нажмите ЛКМ или ПРОБЕЛ, чтобы продолжить",
+                new Vector2(0.5f, 0.36f), new Vector2(1300f, 56f), 24,
+                new Color(0.88f, 0.86f, 0.81f, 0.92f));
 
             Button skipButton = CreateSkipButton(overlay.transform, uiSprite);
             AudioSource windSource = ConfigureAudioSource(overlay.AddComponent<AudioSource>(), windClip);
@@ -113,6 +117,7 @@ public static class StoryPrologueSetup
             SetReference(serialized, "titleText", titleText);
             SetReference(serialized, "storyText", storyText);
             SetReference(serialized, "finalText", finalText);
+            SetReference(serialized, "continueHint", continueHint);
             SetReference(serialized, "flameGlow", flameGlow);
             SetReference(serialized, "flameCore", flameCore);
             SetReference(serialized, "beaconGlow", beaconGlow);
