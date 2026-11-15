@@ -29,6 +29,12 @@ public sealed class GameManager : MonoBehaviour
     [SerializeField] private GameplayChallengeController[] rotatingObstacles;
     [SerializeField] private GameplayChallengeController routeDirector;
 
+    [Header("Fuel pickup spawn area")]
+    [SerializeField] private Vector2 fuelSpawnMin = new Vector2(-7.2f, -3.6f);
+    [SerializeField] private Vector2 fuelSpawnMax = new Vector2(7.2f, 3.6f);
+    [SerializeField, Min(0f)] private float minimumPickupSpacing = 2.1f;
+    [SerializeField, Min(0f)] private float playerSpawnClearance = 2.4f;
+
     [Header("UI references")]
     [SerializeField] private HUDView hudView;
     [SerializeField] private MainMenuController mainMenuController;
@@ -162,6 +168,7 @@ public sealed class GameManager : MonoBehaviour
         if (endingFlowController != null)
             endingFlowController.Hide();
 
+        RandomizeFuelPickupPositions();
         ResetGameplayObjects();
 
         _remainingTime = matchDuration;
@@ -243,6 +250,60 @@ public sealed class GameManager : MonoBehaviour
 
         if (mainMenuController != null)
             mainMenuController.ShowMainMenu();
+    }
+
+    private void RandomizeFuelPickupPositions()
+    {
+        if (fuelPickups == null || fuelPickups.Length == 0)
+            return;
+
+        Vector2 playerStart = playerController != null
+            ? (Vector2)playerController.transform.position
+            : Vector2.zero;
+        Vector2[] assignedPositions = new Vector2[fuelPickups.Length];
+        int assignedCount = 0;
+
+        for (int i = 0; i < fuelPickups.Length; i++)
+        {
+            FuelPickup pickup = fuelPickups[i];
+            if (pickup == null)
+                continue;
+
+            Vector2 candidate = pickup.transform.position;
+            bool foundValidPosition = false;
+
+            for (int attempt = 0; attempt < 40; attempt++)
+            {
+                candidate = new Vector2(
+                    UnityEngine.Random.Range(fuelSpawnMin.x, fuelSpawnMax.x),
+                    UnityEngine.Random.Range(fuelSpawnMin.y, fuelSpawnMax.y));
+
+                if (Vector2.Distance(candidate, playerStart) < playerSpawnClearance)
+                    continue;
+
+                bool overlapsAnotherPickup = false;
+                for (int j = 0; j < assignedCount; j++)
+                {
+                    if (Vector2.Distance(candidate, assignedPositions[j]) < minimumPickupSpacing)
+                    {
+                        overlapsAnotherPickup = true;
+                        break;
+                    }
+                }
+
+                if (!overlapsAnotherPickup)
+                {
+                    foundValidPosition = true;
+                    break;
+                }
+            }
+
+            if (!foundValidPosition)
+                Debug.LogWarning("GameManager: could not find a fully separated fuel pickup spawn; using the last candidate.", pickup);
+
+            pickup.transform.position = new Vector3(candidate.x, candidate.y, pickup.transform.position.z);
+            assignedPositions[assignedCount++] = candidate;
+        }
     }
 
     private void ResetGameplayObjects()
