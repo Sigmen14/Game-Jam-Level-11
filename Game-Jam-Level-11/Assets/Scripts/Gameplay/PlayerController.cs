@@ -34,9 +34,11 @@ public sealed class PlayerController : MonoBehaviour
     private float spawnBodyRotation;
     private bool gameplayActive;
     private WindController windController;
+    private GameManager gameManager;
 
     private void Awake()
     {
+        gameManager = FindFirstObjectByType<GameManager>();
         spawnPosition = transform.position;
         spawnRotation = transform.rotation;
 
@@ -69,6 +71,14 @@ public sealed class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        // Keep this component in sync with the authoritative game state. This
+        // also recovers input if another scene object disabled the local flag.
+        if (!gameplayActive && gameManager != null &&
+            gameManager.State == GameManager.GameState.Playing)
+        {
+            SetGameplayActive(true);
+        }
+
         if (!gameplayActive)
         {
             moveInput = Vector2.zero;
@@ -77,18 +87,18 @@ public sealed class PlayerController : MonoBehaviour
             return;
         }
 
-        // Read physical keyboard state directly first. This keeps WASD responsive
-        // even when the Input Actions asset or its control scheme is out of sync.
-        // Gamepad/other devices still work through the Move action when no key is held.
         Vector2 keyboardInput = ReadKeyboardMovement();
+        Vector2 legacyInput = ReadLegacyMovement();
         Vector2 actionInput = moveAction != null && moveAction.enabled
             ? moveAction.ReadValue<Vector2>()
             : Vector2.zero;
 
+        // Prefer direct keyboard/legacy axes over the action asset. This keeps
+        // WASD working if a composite binding is damaged in the editor.
         if (keyboardInput.sqrMagnitude > 0.0001f)
-        {
             actionInput = keyboardInput;
-        }
+        else if (legacyInput.sqrMagnitude > 0.0001f)
+            actionInput = legacyInput;
 
         moveInput = Vector2.ClampMagnitude(actionInput, 1f);
         IsProtecting = protectAction != null && protectAction.enabled &&
@@ -112,10 +122,33 @@ public sealed class PlayerController : MonoBehaviour
         return Vector2.ClampMagnitude(new Vector2(horizontal, vertical), 1f);
     }
 
+    private static Vector2 ReadLegacyMovement()
+    {
+#if ENABLE_LEGACY_INPUT_MANAGER
+        try
+        {
+            return Vector2.ClampMagnitude(
+                new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")),
+                1f);
+        }
+        catch (System.InvalidOperationException)
+        {
+            // The project can still be opened with the new Input System only.
+        }
+#endif
+        return Vector2.zero;
+    }
+
     private void FixedUpdate()
     {
         if (body == null)
             return;
+
+        if (!gameplayActive && gameManager != null &&
+            gameManager.State == GameManager.GameState.Playing)
+        {
+            SetGameplayActive(true);
+        }
 
         if (!gameplayActive)
         {
