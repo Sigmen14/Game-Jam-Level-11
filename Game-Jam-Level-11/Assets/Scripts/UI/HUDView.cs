@@ -66,6 +66,13 @@ public sealed class HUDView : MonoBehaviour
         SetWindWarning(false);
     }
 
+    public void HideForEnding()
+    {
+        SetActive(hudContentRoot, false);
+        SetActive(resultPanel, false);
+        SetWindWarning(false);
+    }
+
     public void ShowResult(bool didWin, float elapsedSeconds)
     {
         SetActive(hudContentRoot, true);

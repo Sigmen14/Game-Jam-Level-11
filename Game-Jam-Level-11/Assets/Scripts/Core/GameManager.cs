@@ -31,6 +31,7 @@ public sealed class GameManager : MonoBehaviour
     [SerializeField] private HUDView hudView;
     [SerializeField] private MainMenuController mainMenuController;
     [SerializeField] private PauseMenuController pauseMenuController;
+    [SerializeField] private EndingFlowController endingFlowController;
 
     public GameState State => _state;
     public float RemainingTime => _remainingTime;
@@ -71,6 +72,9 @@ public sealed class GameManager : MonoBehaviour
         if (hudView != null)
             hudView.Bind(this, flameMeter, windController);
 
+        if (endingFlowController != null)
+            endingFlowController.Bind(this);
+
         ReturnToMainMenu();
     }
 
@@ -95,6 +99,9 @@ public sealed class GameManager : MonoBehaviour
             return;
 
         Time.timeScale = 1f;
+        if (endingFlowController != null)
+            endingFlowController.Hide();
+
         ResetGameplayObjects();
 
         _remainingTime = matchDuration;
@@ -159,6 +166,9 @@ public sealed class GameManager : MonoBehaviour
     public void ReturnToMainMenu()
     {
         Time.timeScale = 1f;
+        if (endingFlowController != null)
+            endingFlowController.Hide();
+
         ResetGameplayObjects();
         _remainingTime = matchDuration;
         ChangeState(GameState.MainMenu);
@@ -238,8 +248,18 @@ public sealed class GameManager : MonoBehaviour
 
         ChangeState(didWin ? GameState.Won : GameState.Lost);
 
-        if (hudView != null)
+        if (didWin && endingFlowController != null)
+        {
+            if (hudView != null)
+                hudView.HideForEnding();
+
+            endingFlowController.ShowChoice(ElapsedTime);
+        }
+        else if (hudView != null)
+        {
+            // A depleted flame keeps the existing loss/result flow unchanged.
             hudView.ShowResult(didWin, ElapsedTime);
+        }
     }
 
     private void ChangeState(GameState nextState)

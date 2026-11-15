@@ -39,18 +39,20 @@ public static class GameFlowUISetup
         ConfigureMainMenuPrefab();
         EnsureResultMainMenuButton();
         WireResultButtons();
+        EndingFlowSetup.ConfigureHudPrefab();
 
         Scene scene = EditorSceneManager.OpenScene(MainScenePath, OpenSceneMode.Single);
         GameManager manager = FindInScene<GameManager>(scene);
         PlayerController player = FindInScene<PlayerController>(scene);
         HUDView hud = FindInScene<HUDView>(scene);
         PauseMenuController pause = FindInScene<PauseMenuController>(scene);
+        EndingFlowController endingFlow = FindInScene<EndingFlowController>(scene);
 
-        if (manager == null || player == null || hud == null)
+        if (manager == null || player == null || hud == null || endingFlow == null)
         {
             EditorUtility.DisplayDialog(
                 "Game Flow UI",
-                "Main.unity must contain GameManager, PlayerController and HUDView. Rebuild the MVP scene first.",
+                "Main.unity must contain GameManager, PlayerController, HUDView and the configured story-ending UI.",
                 "OK");
             return;
         }
@@ -78,6 +80,7 @@ public static class GameFlowUISetup
         SetObjectReference(menuController, "gameManager", manager);
         SetObjectReference(manager, "mainMenuController", menuController);
         SetObjectReference(manager, "pauseMenuController", pause);
+        SetObjectReference(manager, "endingFlowController", endingFlow);
 
         CoverZone[] covers = FindAllInScene<CoverZone>(scene);
         SetObjectArray(manager, "coverZones", covers);
