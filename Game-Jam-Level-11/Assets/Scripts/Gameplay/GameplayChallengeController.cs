@@ -57,6 +57,7 @@ public sealed class GameplayChallengeController : MonoBehaviour
     public float KnockbackImpulse => knockbackImpulse;
 
     private PlayerController player;
+    private Rigidbody2D obstacleBody;
     private FlameMeter flameMeter;
     private HUDView hudView;
     private RouteState routeState;
@@ -68,6 +69,7 @@ public sealed class GameplayChallengeController : MonoBehaviour
 
     private void Awake()
     {
+        obstacleBody = GetComponent<Rigidbody2D>();
         baseAngle = transform.localEulerAngles.z;
         ResetMotion();
         ResetRoute();
@@ -96,14 +98,22 @@ public sealed class GameplayChallengeController : MonoBehaviour
             return;
 
         if (IsRotatingObstacle)
-        {
-            elapsed += Time.deltaTime;
-            float angle = baseAngle + Mathf.Sin(elapsed * rotationSpeed + phaseOffset) * rotationAmplitude;
-            transform.localRotation = Quaternion.Euler(0f, 0f, angle);
             return;
-        }
 
         UpdateRoute();
+    }
+
+    private void FixedUpdate()
+    {
+        if (!isRunning || !IsRotatingObstacle)
+            return;
+
+        elapsed += Time.fixedDeltaTime;
+        float angle = baseAngle + Mathf.Sin(elapsed * rotationSpeed + phaseOffset) * rotationAmplitude;
+        if (obstacleBody != null)
+            obstacleBody.MoveRotation(angle);
+        else
+            transform.localRotation = Quaternion.Euler(0f, 0f, angle);
     }
 
     public bool TryConsumeHit()
@@ -204,6 +214,8 @@ public sealed class GameplayChallengeController : MonoBehaviour
         elapsed = 0f;
         nextHitTime = 0f;
         transform.localRotation = Quaternion.Euler(0f, 0f, baseAngle);
+        if (obstacleBody != null)
+            obstacleBody.rotation = baseAngle;
     }
 
     private void ResetRoute()
