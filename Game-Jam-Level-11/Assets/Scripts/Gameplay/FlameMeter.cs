@@ -4,11 +4,18 @@ using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// Owns the flame resource, its passive drain, wind damage and the player's 2D light.
-/// All references point to objects already placed in the scene.
+/// Successful fuel pickups also advance the session-long flame growth stage.
 /// </summary>
 [DisallowMultipleComponent]
 public sealed class FlameMeter : MonoBehaviour
 {
+    public enum GrowthStage
+    {
+        SmallSpark = 0,
+        SteadySpark = 1,
+        LastFlame = 2
+    }
+
     [Header("Flame")]
     [SerializeField, Min(1f)] private float maxFlame = 100f;
     [SerializeField, Min(0f)] private float startingFlame = 75f;
@@ -17,6 +24,18 @@ public sealed class FlameMeter : MonoBehaviour
     [Header("Wind damage")]
     [SerializeField, Min(0f)] private float windDamagePerSecond = 8f;
     [SerializeField, Min(0f)] private float protectedWindDamagePerSecond = 1.5f;
+
+    [Header("Flame growth")]
+    [SerializeField, Min(1)] private int steadySparkPickupThreshold = 2;
+    [SerializeField, Min(2)] private int lastFlamePickupThreshold = 4;
+    [SerializeField, Range(0.5f, 1f)] private float steadySparkWindDamageMultiplier = 0.9f;
+    [SerializeField, Range(0.5f, 1f)] private float lastFlameWindDamageMultiplier = 0.82f;
+
+    [Header("Growth light response")]
+    [SerializeField, Min(1f)] private float steadySparkLightRadiusMultiplier = 1.06f;
+    [SerializeField, Min(1f)] private float lastFlameLightRadiusMultiplier = 1.12f;
+    [SerializeField, Min(1f)] private float steadySparkLightIntensityMultiplier = 1.08f;
+    [SerializeField, Min(1f)] private float lastFlameLightIntensityMultiplier = 1.16f;
 
     [Header("Light response")]
     [SerializeField] private Light2D flameLight;
@@ -31,11 +50,21 @@ public sealed class FlameMeter : MonoBehaviour
 
     public event Action<float, float> ValueChanged;
     public event Action FlameDepleted;
+    public event Action<GrowthStage> GrowthStageChanged;
 
     public float Current { get; private set; }
     public float Maximum => maxFlame;
     public float NormalizedValue => maxFlame > 0f ? Current / maxFlame : 0f;
     public bool IsRunning => _isRunning;
+    public int SuccessfulFuelPickupCount { get; private set; }
+    public GrowthStage CurrentGrowthStage { get; private set; } = GrowthStage.SmallSpark;
+
+    /// <summary>Only unprotected gust damage is reduced by flame growth; Space and cover keep their existing rules.</summary>
+    public float WindDamageMultiplier => CurrentGrowthStage == GrowthStage.LastFlame
+        ? lastFlameWindDamageMultiplier
+        : CurrentGrowthStage == GrowthStage.SteadySpark
+            ? steadySparkWindDamageMultiplier
+            : 1f;
 
     private bool _isRunning;
     private bool _depletionReported;
@@ -58,9 +87,11 @@ public sealed class FlameMeter : MonoBehaviour
             (playerController == null || !playerController.IsInCover))
         {
             bool protectedByPlayer = playerController != null && playerController.IsProtecting;
+            // Keep the established Space protection value unchanged. Growth only
+            // softens the exposed-wind penalty, so the Grey Wind remains dangerous.
             drain += protectedByPlayer
                 ? protectedWindDamagePerSecond
-                : windDamagePerSecond;
+                : windDamagePerSecond * WindDamageMultiplier;
         }
 
         ChangeFlame(-drain * Time.deltaTime);
@@ -71,13 +102,23 @@ public sealed class FlameMeter : MonoBehaviour
         _isRunning = isRunning;
     }
 
+    /// <summary>
+    /// A new meter/session starts as a small spark. GameManager already calls this
+    /// during StartGame/Retry, so the session counter resets with the flame resource.
+    /// </summary>
     public void ResetMeter()
     {
+        GrowthStage previousStage = CurrentGrowthStage;
+        SuccessfulFuelPickupCount = 0;
+        CurrentGrowthStage = GrowthStage.SmallSpark;
         _isRunning = false;
         _depletionReported = false;
         Current = Mathf.Clamp(startingFlame, 0f, maxFlame);
         UpdateLight();
         ValueChanged?.Invoke(Current, maxFlame);
+
+        if (previousStage != CurrentGrowthStage)
+            GrowthStageChanged?.Invoke(CurrentGrowthStage);
     }
 
     public void AddFuel(float amount)
@@ -88,6 +129,37 @@ public sealed class FlameMeter : MonoBehaviour
         }
 
         ChangeFlame(amount);
+    }
+
+    /// <summary>
+    /// Called by the existing FuelPickup only after AddFuel actually increases Current.
+    /// Counting pickups here, rather than fuel reserve, prevents stage regression while
+    /// fuel is consumed and ignores touches that cannot restore any fuel.
+    /// </summary>
+    public void RegisterSuccessfulFuelPickup()
+    {
+        if (Current <= 0f)
+            return;
+
+        GrowthStage previousStage = CurrentGrowthStage;
+        SuccessfulFuelPickupCount++;
+        CurrentGrowthStage = ResolveGrowthStage(SuccessfulFuelPickupCount);
+
+        UpdateLight();
+
+        if (previousStage != CurrentGrowthStage)
+            GrowthStageChanged?.Invoke(CurrentGrowthStage);
+    }
+
+    private GrowthStage ResolveGrowthStage(int successfulPickups)
+    {
+        if (successfulPickups >= lastFlamePickupThreshold)
+            return GrowthStage.LastFlame;
+
+        if (successfulPickups >= steadySparkPickupThreshold)
+            return GrowthStage.SteadySpark;
+
+        return GrowthStage.SmallSpark;
     }
 
     private void ChangeFlame(float delta)
@@ -118,15 +190,36 @@ public sealed class FlameMeter : MonoBehaviour
 
         float normalized = NormalizedValue;
         float radius = Mathf.Lerp(minimumLightRadius, maximumLightRadius, normalized);
+        float intensity = Mathf.Lerp(minimumLightIntensity, maximumLightIntensity, normalized);
+
+        if (CurrentGrowthStage == GrowthStage.SteadySpark)
+        {
+            radius *= steadySparkLightRadiusMultiplier;
+            intensity *= steadySparkLightIntensityMultiplier;
+        }
+        else if (CurrentGrowthStage == GrowthStage.LastFlame)
+        {
+            radius *= lastFlameLightRadiusMultiplier;
+            intensity *= lastFlameLightIntensityMultiplier;
+        }
+
         flameLight.pointLightOuterRadius = radius;
         flameLight.pointLightInnerRadius = radius * 0.22f;
-        flameLight.intensity = Mathf.Lerp(minimumLightIntensity, maximumLightIntensity, normalized);
+        flameLight.intensity = intensity;
     }
 
     private void OnValidate()
     {
         maxFlame = Mathf.Max(1f, maxFlame);
         startingFlame = Mathf.Clamp(startingFlame, 0f, maxFlame);
+        steadySparkPickupThreshold = Mathf.Max(1, steadySparkPickupThreshold);
+        lastFlamePickupThreshold = Mathf.Max(steadySparkPickupThreshold + 1, lastFlamePickupThreshold);
+        steadySparkWindDamageMultiplier = Mathf.Clamp(steadySparkWindDamageMultiplier, 0.5f, 1f);
+        lastFlameWindDamageMultiplier = Mathf.Clamp(lastFlameWindDamageMultiplier, 0.5f, steadySparkWindDamageMultiplier);
+        steadySparkLightRadiusMultiplier = Mathf.Max(1f, steadySparkLightRadiusMultiplier);
+        lastFlameLightRadiusMultiplier = Mathf.Max(steadySparkLightRadiusMultiplier, lastFlameLightRadiusMultiplier);
+        steadySparkLightIntensityMultiplier = Mathf.Max(1f, steadySparkLightIntensityMultiplier);
+        lastFlameLightIntensityMultiplier = Mathf.Max(steadySparkLightIntensityMultiplier, lastFlameLightIntensityMultiplier);
         maximumLightRadius = Mathf.Max(minimumLightRadius, maximumLightRadius);
         maximumLightIntensity = Mathf.Max(minimumLightIntensity, maximumLightIntensity);
     }
