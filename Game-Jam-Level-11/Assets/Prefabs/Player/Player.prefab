@@ -5273,7 +5273,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movementSpeed: 5.2
   protectionSpeedMultiplier: 0.45
-  gustDriftSpeed: 2.7
   body: {fileID: 2991176113115829085}
   inputActions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   protectionVisual: {fileID: 6320857378673596893}
