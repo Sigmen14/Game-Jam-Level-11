@@ -2967,23 +2967,23 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 554698714}
     m_Modifications:
-    - target: {fileID: 710000000000000000, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
+    - target: {fileID: 710000001, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
       propertyPath: m_Name
       value: Beacon_01
       objectReference: {fileID: 0}
-    - target: {fileID: 710000000000000000, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
+    - target: {fileID: 710000005, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
       propertyPath: flameMeter
       value:
       objectReference: {fileID: 343093392}
-    - target: {fileID: 710000000000000000, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
+    - target: {fileID: 710000002, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 710000000000000000, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
+    - target: {fileID: 710000002, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
       propertyPath: m_LocalPosition.y
       value: 2.2
       objectReference: {fileID: 0}
-    - target: {fileID: 710000000000000000, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
+    - target: {fileID: 710000002, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
@@ -2994,12 +2994,12 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
 --- !u!4 &4100002 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 710000000000000000, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
+  m_CorrespondingSourceObject: {fileID: 710000002, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
   m_PrefabInstance: {fileID: 4100000}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &4100003 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 710000000000000000, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
+  m_CorrespondingSourceObject: {fileID: 710000005, guid: 51f5bb4a7b6e4f01a1a5707edca8a0d9, type: 3}
   m_PrefabInstance: {fileID: 4100000}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
