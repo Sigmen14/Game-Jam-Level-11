@@ -65,8 +65,12 @@ public sealed class FlameVisualFeedback : MonoBehaviour
     [SerializeField, Min(0f)] private float sparkSpread = 0.45f;
     [SerializeField, Min(0.001f)] private float sparkSize = 0.055f;
     [SerializeField, Min(0.01f)] private float sparkLifetime = 0.48f;
-    [SerializeField] private Color sparkColor = new Color(1f, 0.74f, 0.32f, 1f);
-    [SerializeField] private Color weakSparkColor = new Color(1f, 0.38f, 0.15f, 0.55f);
+    [SerializeField] private Color sparkColor = new Color(1f, 0.38f, 0.055f, 1f);
+    [SerializeField] private Color sparkGoldColor = new Color(1f, 0.66f, 0.12f, 1f);
+    [SerializeField] private Color sparkYellowColor = new Color(1f, 0.92f, 0.42f, 1f);
+    [SerializeField] private Color sparkRedColor = new Color(0.95f, 0.13f, 0.018f, 1f);
+    [SerializeField] private Color weakSparkColor = new Color(1f, 0.25f, 0.045f, 0.48f);
+    [SerializeField, Min(0f)] private float pickupSparkSideSpread = 0.9f;
     [SerializeField, Min(1f)] private float shelterSparkIntervalMultiplier = 1.35f;
 
     [Header("Fuel pickup burst")]
@@ -75,7 +79,7 @@ public sealed class FlameVisualFeedback : MonoBehaviour
     [SerializeField, Min(0f)] private float pickupSparkSpeed = 2.3f;
     [SerializeField, Min(0f)] private float pickupLightBoost = 0.45f;
     [SerializeField] private Color pickupFlashColor = new Color(1f, 0.97f, 0.78f, 1f);
-    [SerializeField] private Color pickupSparkColor = new Color(1f, 0.91f, 0.57f, 1f);
+    [SerializeField] private Color pickupSparkColor = new Color(1f, 0.82f, 0.28f, 1f);
 
     private readonly HashSet<FuelPickup> subscribedPickups = new HashSet<FuelPickup>();
 
@@ -121,6 +125,12 @@ public sealed class FlameVisualFeedback : MonoBehaviour
                     pickup.FuelCollected += HandleFuelCollected;
                 }
             }
+        }
+
+        if (sparkParticles != null && sparkParticles.enabled &&
+            sparkParticles.gameObject.activeInHierarchy && !sparkParticles.isPlaying)
+        {
+            sparkParticles.Play(true);
         }
 
         sparkTimer = Random.Range(0.12f, 0.5f);
@@ -310,40 +320,82 @@ public sealed class FlameVisualFeedback : MonoBehaviour
         Vector2 flameUp = flameRenderer != null
             ? (Vector2)flameRenderer.transform.up
             : (Vector2)transform.up;
+        Vector2 flameRight = flameRenderer != null
+            ? (Vector2)flameRenderer.transform.right
+            : (Vector2)transform.right;
 
         for (int i = 0; i < count; i++)
         {
-            Vector2 spread = Random.insideUnitCircle * sparkSpread;
-            Vector2 direction = (flameUp * Random.Range(0.55f, 1f) +
-                                 wind + spread).normalized;
+            // Keep the launch predominantly upward; use a controlled lateral arc
+            // instead of scattering particles in a full circle.
+            float sideSpread = pickupBurst
+                ? pickupSparkSideSpread
+                : sparkSpread * 0.55f;
+            float sideVelocity = Random.Range(-sideSpread, sideSpread);
+            Vector2 direction = (flameUp * Random.Range(0.88f, 1.18f) +
+                                 flameRight * sideVelocity + wind).normalized;
 
             float speed = pickupBurst
-                ? pickupSparkSpeed
-                : sparkSpeed * (fuel < lowFuelThreshold ? 0.62f : 1f);
+                ? pickupSparkSpeed * Random.Range(0.82f, 1.42f)
+                : sparkSpeed * Random.Range(0.78f, 1.28f);
+
+            if (fuel < lowFuelThreshold && !pickupBurst)
+            {
+                speed *= 0.62f;
+            }
 
             if (windActive && !sheltered)
             {
                 speed *= gustSparkSpeedMultiplier;
             }
 
-            Color particleColor = pickupBurst
-                ? pickupSparkColor
-                : (fuel < lowFuelThreshold ? weakSparkColor : sparkColor);
+            float sizeVariation = Random.Range(0.62f, 1.38f);
+            float lifetimeVariation = Random.Range(0.78f, 1.28f);
+            Color particleColor = GetRandomSparkColor(pickupBurst, fuel);
 
             ParticleSystem.EmitParams emit = new ParticleSystem.EmitParams
             {
                 position = flameRenderer != null
-                    ? flameRenderer.transform.position + (Vector3)(flameUp * 0.06f)
+                    ? flameRenderer.transform.position + (Vector3)(flameUp * 0.075f)
                     : transform.position,
                 velocity = direction * speed,
                 startColor = particleColor,
-                startSize = sparkSize * (pickupBurst ? 1.25f :
-                    (fuel < lowFuelThreshold ? 0.65f : 1f)),
-                startLifetime = sparkLifetime * (pickupBurst ? 1.15f : 1f)
+                startSize = sparkSize * sizeVariation *
+                    (pickupBurst ? 1.12f : (fuel < lowFuelThreshold ? 0.72f : 1f)),
+                startLifetime = sparkLifetime * lifetimeVariation *
+                    (pickupBurst ? 1.18f : 1f)
             };
 
             sparkParticles.Emit(emit, 1);
         }
+    }
+
+    private Color GetRandomSparkColor(bool pickupBurst, float fuel)
+    {
+        float roll = Random.value;
+        Color selected;
+
+        if (pickupBurst)
+        {
+            selected = roll < 0.12f ? sparkRedColor
+                : roll < 0.34f ? sparkColor
+                : roll < 0.72f ? sparkGoldColor
+                : sparkYellowColor;
+
+            return Color.Lerp(selected, pickupSparkColor, 0.28f);
+        }
+
+        selected = roll < 0.09f ? sparkRedColor
+            : roll < 0.43f ? sparkColor
+            : roll < 0.78f ? sparkGoldColor
+            : sparkYellowColor;
+
+        if (fuel < lowFuelThreshold)
+        {
+            return Color.Lerp(weakSparkColor, selected, 0.22f);
+        }
+
+        return selected;
     }
 
     private void HandleFuelCollected()
@@ -383,11 +435,8 @@ public sealed class FlameVisualFeedback : MonoBehaviour
         subscribedPickups.Clear();
         pickupFlashRemaining = 0f;
 
-        if (sparkParticles != null)
-        {
-            sparkParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-        }
-
+        // Keep the authored ParticleSystem enabled. Its existing particles are
+        // allowed to finish naturally while this component releases its event hooks.
         RestoreBaseVisuals();
     }
 
