@@ -232,9 +232,9 @@ public static class PlayerFlameVisualSetup
                 new Keyframe(1f, 0.03f, -1.2f, 0f)));
 
         ParticleSystemRenderer particleRenderer = sparks.GetComponent<ParticleSystemRenderer>();
-        particleRenderer.renderMode = ParticleSystemRenderMode.StretchedBillboard;
+        particleRenderer.renderMode = ParticleSystemRenderMode.Stretch;
         particleRenderer.lengthScale = 2.25f;
-        particleRenderer.speedScale = 0.24f;
+        particleRenderer.velocityScale = 0.24f;
         particleRenderer.cameraVelocityScale = 0f;
         particleRenderer.alignment = ParticleSystemRenderSpace.View;
         particleRenderer.sortingLayerID = playerRenderer.sortingLayerID;
@@ -499,7 +499,7 @@ public static class PlayerFlameVisualSetup
         if (renderer == null || !renderer.enabled || renderer.sharedMaterial == null ||
             renderer.sharedMaterial.shader != expectedShader ||
             renderer.sharedMaterial.GetTexture("_BaseMap") == null ||
-            renderer.renderMode != ParticleSystemRenderMode.StretchedBillboard)
+            renderer.renderMode != ParticleSystemRenderMode.Stretch)
         {
             throw new System.InvalidOperationException(
                 "FlameSparks is not using the generated fire texture and URP additive material.");
