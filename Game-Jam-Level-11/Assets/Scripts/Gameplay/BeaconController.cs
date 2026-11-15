@@ -130,7 +130,17 @@ public sealed class BeaconController : MonoBehaviour
                 ? new Color(1f, 0.96f, 0.86f, 1f)
                 : Color.white;
         if (glowRenderer != null)
-            glowRenderer.enabled = isLit;
+        {
+            // Keep a restrained locator glow visible before ignition so the
+            // unlit lighthouse is still easy to spot in the level.
+            glowRenderer.enabled = true;
+            Color glowColor = Color.white;
+            glowColor.a = isLit ? 0.88f : 0.2f;
+            glowRenderer.color = glowColor;
+            glowRenderer.transform.localScale = isLit
+                ? _baseGlowScale
+                : _baseGlowScale * 0.65f;
+        }
         if (flameRenderer != null)
             flameRenderer.enabled = isLit;
         if (beaconLight != null)
