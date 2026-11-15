@@ -2057,6 +2057,37 @@ MonoBehaviour:
   menuButton: {fileID: 1690458716}
   settingsBackButton: {fileID: 1161134398}
   cancelAction: {fileID: 11400000, guid: ee37601bb21f8d64eb17328a405026fd, type: 2}
+--- !u!114 &1650502802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1650502797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7d42f893a8e4fe0a18b2c3d7e9f4510, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 0
+  rotationAmplitude: 66
+  rotationSpeed: 1.5
+  phaseOffset: 0
+  collisionDamage: 11
+  knockbackImpulse: 4
+  hitCooldown: 0.85
+  decisionStartX: 1
+  decisionLockX: 2.5
+  shortLaneThreshold: 1.9
+  safeLaneThreshold: -1.9
+  shortFinishX: 6.55
+  shortFinishY: 3.05
+  safeFinishX: 7.75
+  safeFinishY: -3.05
+  finishLaneTolerance: 1.05
+  shortRouteFuelReward: 14
+  safeRouteFuelReward: 8
+  resultMessageDuration: 4
 --- !u!1001 &1690458714
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2936,37 +2967,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c282a3f4d5e6478890a1b2c3d4e5f602, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1650502802
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1650502797}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7d42f893a8e4fe0a18b2c3d7e9f4510, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mode: 0
-  rotationAmplitude: 66
-  rotationSpeed: 1.5
-  phaseOffset: 0
-  collisionDamage: 11
-  knockbackImpulse: 4
-  hitCooldown: 0.85
-  decisionStartX: 1
-  decisionLockX: 2.5
-  shortLaneThreshold: 1.9
-  safeLaneThreshold: -1.9
-  shortFinishX: 6.55
-  shortFinishY: 3.05
-  safeFinishX: 7.75
-  safeFinishY: -3.05
-  finishLaneTolerance: 1.05
-  shortRouteFuelReward: 14
-  safeRouteFuelReward: 8
-  resultMessageDuration: 4
 --- !u!1001 &2200100000
 PrefabInstance:
   m_ObjectHideFlags: 0
