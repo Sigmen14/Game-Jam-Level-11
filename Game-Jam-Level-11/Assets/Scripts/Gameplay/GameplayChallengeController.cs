@@ -1,44 +1,16 @@
 using UnityEngine;
 
-/// <summary>
-/// Supports both the route director placed on GameSystems and pre-placed rotating
-/// obstacle instances. No gameplay objects are created at runtime.
-/// </summary>
+/// <summary>Directs the upper-risk / lower-safe route choice and grants its fuel reward.</summary>
 [DisallowMultipleComponent]
 public sealed class GameplayChallengeController : MonoBehaviour
 {
-    public enum ControllerMode
-    {
-        RouteDirector,
-        RotatingObstacle
-    }
-
-    private enum RouteState
-    {
-        Waiting,
-        Choosing,
-        ShortDangerous,
-        LongSafe,
-        Completed,
-        Finished
-    }
-
-    [Header("Mode")]
-    [SerializeField] private ControllerMode mode = ControllerMode.RouteDirector;
-
-    [Header("Rotating obstacle")]
-    [SerializeField, Range(0f, 85f)] private float rotationAmplitude = 66f;
-    [SerializeField, Min(0f)] private float rotationSpeed = 1.5f;
-    [SerializeField] private float phaseOffset;
-    [SerializeField, Min(0f)] private float collisionDamage = 11f;
-    [SerializeField, Min(0f)] private float knockbackImpulse = 4f;
-    [SerializeField, Min(0.1f)] private float hitCooldown = 0.85f;
+    private enum RouteState { Waiting, Choosing, ShortDangerous, LongSafe, Completed, Finished }
 
     [Header("Route junction")]
     [SerializeField, Min(0f)] private float decisionStartX = 1f;
-    [SerializeField, Min(0f)] private float decisionLockX = 2.5f;
-    [SerializeField] private float shortLaneThreshold = 1.9f;
-    [SerializeField] private float safeLaneThreshold = -1.9f;
+    [SerializeField, Min(0f)] private float decisionLockX = 3.5f;
+    [SerializeField] private float shortLaneThreshold = 1.35f;
+    [SerializeField] private float safeLaneThreshold = -1.35f;
 
     [Header("Route exits")]
     [SerializeField] private float shortFinishX = 6.55f;
@@ -52,26 +24,12 @@ public sealed class GameplayChallengeController : MonoBehaviour
     [SerializeField, Min(0f)] private float safeRouteFuelReward = 8f;
     [SerializeField, Min(0f)] private float resultMessageDuration = 4f;
 
-    public bool IsRotatingObstacle => mode == ControllerMode.RotatingObstacle;
-    public float CollisionDamage => collisionDamage;
-    public float KnockbackImpulse => knockbackImpulse;
-
     private PlayerController player;
     private FlameMeter flameMeter;
     private HUDView hudView;
     private RouteState routeState;
     private bool isRunning;
-    private float baseAngle;
-    private float elapsed;
-    private float nextHitTime;
     private float resultMessageTime;
-
-    private void Awake()
-    {
-        baseAngle = transform.localEulerAngles.z;
-        ResetMotion();
-        ResetRoute();
-    }
 
     public void Bind(PlayerController playerController, FlameMeter meter, HUDView hud)
     {
@@ -83,36 +41,13 @@ public sealed class GameplayChallengeController : MonoBehaviour
     public void SetRunning(bool running)
     {
         isRunning = running;
-
-        if (IsRotatingObstacle)
-            ResetMotion();
-        else
-            ResetRoute();
+        ResetRoute();
     }
 
     private void Update()
     {
-        if (!isRunning)
-            return;
-
-        if (IsRotatingObstacle)
-        {
-            elapsed += Time.deltaTime;
-            float angle = baseAngle + Mathf.Sin(elapsed * rotationSpeed + phaseOffset) * rotationAmplitude;
-            transform.localRotation = Quaternion.Euler(0f, 0f, angle);
-            return;
-        }
-
-        UpdateRoute();
-    }
-
-    public bool TryConsumeHit()
-    {
-        if (!IsRotatingObstacle || !isRunning || Time.time < nextHitTime)
-            return false;
-
-        nextHitTime = Time.time + hitCooldown;
-        return true;
+        if (isRunning)
+            UpdateRoute();
     }
 
     private void UpdateRoute()
@@ -136,57 +71,46 @@ public sealed class GameplayChallengeController : MonoBehaviour
             return;
 
         Vector2 position = player.transform.position;
-
         if (routeState == RouteState.Waiting && position.x >= decisionStartX)
         {
             routeState = RouteState.Choosing;
-            ShowMessage("РАЗВИЛКА: ВВЕРХ — КОРОТКИЙ ОПАСНЫЙ ПУТЬ · ВНИЗ — ДЛИННЫЙ БЕЗОПАСНЫЙ");
+            ShowMessage("РАЗВИЛКА: ВВЕРХ — КОРОТКО И РИСКОВАННО (+14); ВНИЗ — ДОЛЬШЕ И БЕЗОПАСНЕЕ (+8)");
         }
 
         if (routeState == RouteState.Choosing)
         {
             if (position.y >= shortLaneThreshold)
-            {
-                routeState = RouteState.ShortDangerous;
-                ShowMessage("КОРОТКИЙ ПУТЬ: ПРОЙДИ МЕЖДУ ВРАЩАЮЩИМИСЯ ПРЕПЯТСТВИЯМИ");
-            }
+                SelectRoute(true);
             else if (position.y <= safeLaneThreshold)
-            {
-                routeState = RouteState.LongSafe;
-                ShowMessage("БЕЗОПАСНЫЙ ПУТЬ: ОБОЙДИ ОПАСНЫЙ УЧАСТОК СНИЗУ");
-            }
+                SelectRoute(false);
             else if (position.x >= decisionLockX)
-            {
-                // A player who ignores the prompt is committed to the nearest lane.
-                routeState = position.y >= 0f ? RouteState.ShortDangerous : RouteState.LongSafe;
-                ShowMessage(routeState == RouteState.ShortDangerous
-                    ? "КОРОТКИЙ ПУТЬ: ПРОЙДИ МЕЖДУ ВРАЩАЮЩИМИСЯ ПРЕПЯТСТВИЯМИ"
-                    : "БЕЗОПАСНЫЙ ПУТЬ: ОБОЙДИ ОПАСНЫЙ УЧАСТОК СНИЗУ");
-            }
+                SelectRoute(position.y > 0f);
         }
 
         if (routeState == RouteState.ShortDangerous &&
             position.x >= shortFinishX &&
             Mathf.Abs(position.y - shortFinishY) <= finishLaneTolerance)
-        {
             CompleteRoute(true);
-        }
         else if (routeState == RouteState.LongSafe &&
                  position.x >= safeFinishX &&
                  Mathf.Abs(position.y - safeFinishY) <= finishLaneTolerance)
-        {
             CompleteRoute(false);
-        }
+    }
+
+    private void SelectRoute(bool tookShortRoute)
+    {
+        routeState = tookShortRoute ? RouteState.ShortDangerous : RouteState.LongSafe;
+        ShowMessage(tookShortRoute
+            ? "КОРОТКИЙ ПУТЬ ↑: БЫСТРЕЕ, НО ОПАСНЕЕ · +14 ОГНЯ"
+            : "БЕЗОПАСНЫЙ ПУТЬ ↓: ДОЛЬШЕ, ЗАТО СПОКОЙНЕЕ · +8 ОГНЯ");
     }
 
     private void CompleteRoute(bool tookShortRoute)
     {
         routeState = RouteState.Completed;
         float reward = tookShortRoute ? shortRouteFuelReward : safeRouteFuelReward;
-
         if (flameMeter != null)
             flameMeter.AddFuel(reward);
-
         resultMessageTime = resultMessageDuration;
         ShowMessage(tookShortRoute
             ? string.Format("МАРШРУТ ПРОЙДЕН! БЫСТРО И РИСКОВАННО — +{0:0} ОГНЯ", reward)
@@ -199,18 +123,16 @@ public sealed class GameplayChallengeController : MonoBehaviour
             hudView.ShowChallengeMessage(message);
     }
 
-    private void ResetMotion()
-    {
-        elapsed = 0f;
-        nextHitTime = 0f;
-        transform.localRotation = Quaternion.Euler(0f, 0f, baseAngle);
-    }
-
     private void ResetRoute()
     {
         routeState = RouteState.Waiting;
         resultMessageTime = 0f;
-        if (hudView != null)
+        if (hudView == null)
+            return;
+
+        if (isRunning)
+            ShowMessage("ВЫБЕРИ МАРШРУТ: ИДИ ВПРАВО К РАЗВИЛКЕ · W/↑ — КОРОТКИЙ РИСКОВАННЫЙ · S/↓ — ДЛИННЫЙ БЕЗОПАСНЫЙ");
+        else
             hudView.HideChallengeMessage();
     }
 

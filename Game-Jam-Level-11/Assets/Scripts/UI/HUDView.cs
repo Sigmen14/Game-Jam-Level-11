@@ -32,6 +32,8 @@ public sealed class HUDView : MonoBehaviour
     private Color windWarningBaseTextColor = Color.white;
     private bool challengeMessageVisible;
     private string challengeMessage;
+    private string pickupNotification;
+    private float pickupNotificationRemaining;
 
     public void Bind(GameManager manager, FlameMeter meter, WindController wind)
     {
@@ -64,6 +66,17 @@ public sealed class HUDView : MonoBehaviour
 
     private void Update()
     {
+        if (pickupNotificationRemaining > 0f)
+        {
+            pickupNotificationRemaining -= Time.deltaTime;
+            if (pickupNotificationRemaining <= 0f)
+            {
+                pickupNotificationRemaining = 0f;
+                pickupNotification = string.Empty;
+                RefreshWindWarning();
+            }
+        }
+
         UpdateWindWarningVisuals();
     }
 
@@ -122,7 +135,21 @@ public sealed class HUDView : MonoBehaviour
     public void SetWindWarning(bool isVisible)
     {
         if (!isVisible)
+        {
             challengeMessageVisible = false;
+            pickupNotificationRemaining = 0f;
+            pickupNotification = string.Empty;
+        }
+        RefreshWindWarning();
+    }
+
+    public void ShowPickupNotification(string message, float duration = 2.5f)
+    {
+        if (string.IsNullOrEmpty(message))
+            return;
+
+        pickupNotification = message;
+        pickupNotificationRemaining = Mathf.Max(0.1f, duration);
         RefreshWindWarning();
     }
 
@@ -143,13 +170,30 @@ public sealed class HUDView : MonoBehaviour
     {
         bool windIsVisible = windController != null &&
             (windController.IsWarning || windController.IsWindActive);
-        bool shouldShow = windIsVisible || challengeMessageVisible;
+        bool pickupIsVisible = pickupNotificationRemaining > 0f &&
+            !string.IsNullOrEmpty(pickupNotification);
+        bool shouldShow = windIsVisible || challengeMessageVisible || pickupIsVisible;
         SetActive(windWarningRoot, shouldShow);
 
         if (!shouldShow)
             RestoreWindWarningVisuals();
         else if (windWarningText != null)
-            windWarningText.text = windIsVisible ? windController.StatusMessage : challengeMessage;
+            windWarningText.text = BuildWarningMessage(windIsVisible);
+    }
+
+    private string BuildWarningMessage(bool showWindStatus)
+    {
+        string message = showWindStatus && windController != null
+            ? windController.StatusMessage
+            : string.Empty;
+
+        if (challengeMessageVisible && !string.IsNullOrEmpty(challengeMessage))
+            message = string.IsNullOrEmpty(message) ? challengeMessage : message + "\n" + challengeMessage;
+
+        if (pickupNotificationRemaining > 0f && !string.IsNullOrEmpty(pickupNotification))
+            message = string.IsNullOrEmpty(message) ? pickupNotification : message + "\n" + pickupNotification;
+
+        return message;
     }
 
     private void HandleWindStateChanged(bool state)
@@ -172,7 +216,8 @@ public sealed class HUDView : MonoBehaviour
         bool warning = windController != null && windController.IsWarning;
         bool gustActive = windController != null && windController.IsWindActive;
         bool showWindStatus = warning || gustActive;
-        bool visible = showWindStatus || challengeMessageVisible;
+        bool pickupIsVisible = pickupNotificationRemaining > 0f && !string.IsNullOrEmpty(pickupNotification);
+        bool visible = showWindStatus || challengeMessageVisible || pickupIsVisible;
         SetActive(windWarningRoot, visible);
         if (!visible)
         {
@@ -181,7 +226,7 @@ public sealed class HUDView : MonoBehaviour
         }
 
         if (windWarningText != null)
-            windWarningText.text = showWindStatus ? windController.StatusMessage : challengeMessage;
+            windWarningText.text = BuildWarningMessage(showWindStatus);
         float pulseRate = gustActive ? 8.5f : (warning ? 4.2f : 2.8f);
         float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * pulseRate);
         if (windWarningBackground != null)

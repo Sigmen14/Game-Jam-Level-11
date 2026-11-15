@@ -20,11 +20,11 @@ public sealed class FlameMeter : MonoBehaviour
     [Header("Flame")]
     [SerializeField, Min(1f)] private float maxFlame = 100f;
     [SerializeField, Min(0f)] private float startingFlame = 75f;
-    [SerializeField, Min(0f)] private float passiveDrainPerSecond = 0.35f;
+    [SerializeField, Min(0f)] private float passiveDrainPerSecond = 0.58f;
 
     [Header("Wind damage")]
     [SerializeField, Min(0f)] private float windDamagePerSecond = 8f;
-    [SerializeField, Min(0f)] private float protectedWindDamagePerSecond = 1.5f;
+    [SerializeField, Min(0f)] private float protectedWindDamagePerSecond = 0.9f;
 
     [Header("Flame growth")]
     [SerializeField, Min(1)] private int steadySparkPickupThreshold = 2;
