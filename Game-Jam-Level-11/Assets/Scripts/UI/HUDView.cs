@@ -31,6 +31,7 @@ public sealed class HUDView : MonoBehaviour
     private Color windWarningBaseColor = Color.white;
     private Color windWarningBaseTextColor = Color.white;
     private bool challengeMessageVisible;
+    private bool routeChoiceHintVisible;
     private string challengeMessage;
     private string pickupNotification;
     private float pickupNotificationRemaining;
@@ -166,13 +167,19 @@ public sealed class HUDView : MonoBehaviour
         RefreshWindWarning();
     }
 
+    public void SetRouteChoiceHint(bool isVisible)
+    {
+        routeChoiceHintVisible = isVisible;
+        RefreshWindWarning();
+    }
+
     private void RefreshWindWarning()
     {
         bool windIsVisible = windController != null &&
             (windController.IsWarning || windController.IsWindActive);
         bool pickupIsVisible = pickupNotificationRemaining > 0f &&
             !string.IsNullOrEmpty(pickupNotification);
-        bool shouldShow = windIsVisible || challengeMessageVisible || pickupIsVisible;
+        bool shouldShow = windIsVisible || challengeMessageVisible || routeChoiceHintVisible || pickupIsVisible;
         SetActive(windWarningRoot, shouldShow);
 
         if (!shouldShow)
@@ -189,6 +196,12 @@ public sealed class HUDView : MonoBehaviour
 
         if (challengeMessageVisible && !string.IsNullOrEmpty(challengeMessage))
             message = string.IsNullOrEmpty(message) ? challengeMessage : message + "\n" + challengeMessage;
+
+        if (routeChoiceHintVisible)
+        {
+            const string routeHint = "Выберите маршрут: верхний — рискованный, нижний — безопасный";
+            message = string.IsNullOrEmpty(message) ? routeHint : message + "\n" + routeHint;
+        }
 
         if (pickupNotificationRemaining > 0f && !string.IsNullOrEmpty(pickupNotification))
             message = string.IsNullOrEmpty(message) ? pickupNotification : message + "\n" + pickupNotification;
@@ -217,7 +230,7 @@ public sealed class HUDView : MonoBehaviour
         bool gustActive = windController != null && windController.IsWindActive;
         bool showWindStatus = warning || gustActive;
         bool pickupIsVisible = pickupNotificationRemaining > 0f && !string.IsNullOrEmpty(pickupNotification);
-        bool visible = showWindStatus || challengeMessageVisible || pickupIsVisible;
+        bool visible = showWindStatus || challengeMessageVisible || routeChoiceHintVisible || pickupIsVisible;
         SetActive(windWarningRoot, visible);
         if (!visible)
         {
