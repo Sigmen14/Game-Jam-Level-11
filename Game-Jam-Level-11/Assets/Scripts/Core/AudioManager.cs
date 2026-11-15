@@ -13,7 +13,7 @@ public sealed class AudioManager : MonoBehaviour
     private static AudioManager instance;
 
     [Header("Mix")]
-    [SerializeField, Range(0f, 1f)] private float musicVolume = 0.22f;
+    [SerializeField, Range(0f, 1f)] private float musicVolume = 0.32f;
     [SerializeField, Range(0f, 1f)] private float effectsVolume = 0.72f;
     [SerializeField] private AudioSource musicSource;
 
@@ -135,9 +135,9 @@ public sealed class AudioManager : MonoBehaviour
 
             float edgeFade = Mathf.SmoothStep(0f, 0.22f, t) *
                              (1f - Mathf.SmoothStep(duration - 0.22f, duration, t));
-            data[i] = (pad * 0.018f * padEnvelope +
-                       bass * 0.012f +
-                       pluck * 0.035f) * edgeFade;
+            data[i] = (pad * 0.026f * padEnvelope +
+                       bass * 0.016f +
+                       pluck * 0.048f) * edgeFade;
         }
 
         return MakeClip("LastEmber_Original_Ambient_Loop", data);
