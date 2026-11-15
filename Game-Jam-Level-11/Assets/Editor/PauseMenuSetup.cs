@@ -526,16 +526,20 @@ public static class PauseMenuSetup
     {
         GameObject root = new GameObject("UI_PausePanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         Stretch(root.GetComponent<RectTransform>());
-        root.GetComponent<Image>().color = new Color(0.015f, 0.025f, 0.035f, 0.88f);
+        // Match the main menu's deep navy backdrop and warm ember palette.
+        root.GetComponent<Image>().color = new Color(0.015f, 0.025f, 0.045f, 0.95f);
 
         GameObject card = CreateUIObject("PauseCard", root.transform, typeof(Image));
         RectTransform cardRect = card.GetComponent<RectTransform>();
         cardRect.anchorMin = cardRect.anchorMax = new Vector2(0.5f, 0.5f);
         cardRect.sizeDelta = new Vector2(1040f, 1360f);
-        card.GetComponent<Image>().color = new Color(0.07f, 0.11f, 0.13f, 1f);
+        card.GetComponent<Image>().color = new Color(0.035f, 0.055f, 0.085f, 1f);
 
         CreateEmberArtwork(card.transform, emberFrames, emberController);
         CreateText("ПАУЗА", card.transform, 84, new Vector2(0f, 180f), new Vector2(880f, 144f));
+        Text pauseTitle = card.GetComponentInChildren<Text>(true);
+        if (pauseTitle != null)
+            pauseTitle.color = new Color(1f, 0.77f, 0.38f, 1f);
         CreateButton("ПРОДОЛЖИТЬ", card.transform, new Vector2(0f, 0f));
         CreateButton("НАСТРОЙКИ", card.transform, new Vector2(0f, -180f));
         CreateButton("РЕСТАРТ", card.transform, new Vector2(0f, -360f));
@@ -576,18 +580,21 @@ public static class PauseMenuSetup
         rect.sizeDelta = new Vector2(720f, 152f);
 
         Image image = go.GetComponent<Image>();
-        image.color = new Color(0.16f, 0.27f, 0.29f, 1f);
+        image.color = new Color(0.95f, 0.55f, 0.16f, 1f);
 
         Button button = go.GetComponent<Button>();
         button.targetGraphic = image;
         ColorBlock colors = button.colors;
-        colors.normalColor = new Color(0.82f, 0.86f, 0.82f, 1f);
-        colors.highlightedColor = new Color(1f, 0.72f, 0.35f, 1f);
-        colors.pressedColor = new Color(0.78f, 0.42f, 0.18f, 1f);
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(1f, 0.72f, 0.28f, 1f);
+        colors.pressedColor = new Color(1f, 0.35f, 0.08f, 1f);
         button.colors = colors;
 
         CreateText(label, go.transform, label == "ВЫЙТИ В МЕНЮ" ? 44 : 52,
             Vector2.zero, new Vector2(680f, 132f));
+        Text buttonLabel = go.GetComponentInChildren<Text>(true);
+        if (buttonLabel != null)
+            buttonLabel.color = new Color(0.08f, 0.06f, 0.04f, 1f);
         return go;
     }
 
