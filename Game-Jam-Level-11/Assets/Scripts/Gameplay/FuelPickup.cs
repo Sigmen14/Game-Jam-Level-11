@@ -50,7 +50,8 @@ public sealed class FuelPickup : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (_isOnCooldown || other.GetComponentInParent<PlayerController>() == null)
+        PlayerController player = other.GetComponentInParent<PlayerController>();
+        if (_isOnCooldown || player == null || !player.IsGameplayActive)
         {
             return;
         }
