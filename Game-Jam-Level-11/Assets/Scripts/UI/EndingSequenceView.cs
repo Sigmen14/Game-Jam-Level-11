@@ -273,7 +273,7 @@ public sealed class EndingSequenceView : MonoBehaviour
                 if (emberImage != null)
                 {
                     Color fadingEmber = emberHomeColor;
-                    fadingEmber.a = Mathf.Lerp(emberHomeColor.a, 0.48f, eased);
+                    fadingEmber.a = Mathf.Lerp(emberHomeColor.a, 0.10f, eased);
                     emberImage.color = fadingEmber;
                 }
             }
@@ -297,11 +297,11 @@ public sealed class EndingSequenceView : MonoBehaviour
             ember.anchoredPosition = emberHomePosition;
         if (emberGlow != null)
         {
-            emberGlow.color = new Color(1f, 0.29f, 0.075f, 0.24f);
-            emberGlow.rectTransform.localScale = Vector3.one * 0.34f;
+            emberGlow.color = new Color(1f, 0.29f, 0.075f, 0.12f);
+            emberGlow.rectTransform.localScale = Vector3.one * 0.22f;
         }
         if (ember != null)
-            ember.localScale = emberHomeScale * 0.82f;
+            ember.localScale = emberHomeScale * 0.72f;
 
         yield return WaitRealtime(1.25f);
     }
