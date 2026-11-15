@@ -9,8 +9,8 @@ using UnityEngine;
 public sealed class FuelPickup : MonoBehaviour
 {
     [Header("Pickup")]
-    [SerializeField, Min(0f)] private float fuelAmount = 25f;
-    [SerializeField, Min(0f)] private float respawnDelay = 8f;
+    [SerializeField, Min(0f)] private float fuelAmount = 14f;
+    [SerializeField, Min(0f)] private float respawnDelay = 32f;
 
     [Header("References")]
     [SerializeField] private FlameMeter flameMeter;
