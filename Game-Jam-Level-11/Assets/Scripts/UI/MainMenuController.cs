@@ -18,6 +18,18 @@ public sealed class MainMenuController : MonoBehaviour
     private PrologueController prologueController;
     private bool _playTransitionPending;
 
+    // The standalone Menu scene has no GameManager. Remember that the player
+    // explicitly pressed Play so Main starts the round instead of showing a
+    // second copy of the menu after the scene transition.
+    private static bool _startGameplayAfterMainLoads;
+
+    public static bool ConsumeStartGameplayAfterMainLoads()
+    {
+        bool shouldStart = _startGameplayAfterMainLoads;
+        _startGameplayAfterMainLoads = false;
+        return shouldStart;
+    }
+
     private void Awake()
     {
         if (fireAtmosphere == null)
@@ -76,6 +88,7 @@ public sealed class MainMenuController : MonoBehaviour
             return;
         }
 
+        _startGameplayAfterMainLoads = true;
         SceneManager.LoadScene(gameplaySceneName);
     }
 
