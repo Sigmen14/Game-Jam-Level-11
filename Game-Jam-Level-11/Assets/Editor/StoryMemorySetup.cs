@@ -405,19 +405,19 @@ public static class StoryMemorySetup
 
         GameObject journal = CreatePanel(
             "MemoryJournal", root.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            Vector2.zero, new Vector2(760f, 560f), new Color(0.045f, 0.04f, 0.038f, 0.98f));
+            Vector2.zero, new Vector2(1160f, 1000f), new Color(0.045f, 0.04f, 0.038f, 0.98f));
         CanvasGroup journalGroup = journal.AddComponent<CanvasGroup>();
         journalGroup.alpha = 1f;
         journalGroup.interactable = true;
         journalGroup.blocksRaycasts = true;
 
         CreateText("JournalTitle", journal.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(-10f, 238f), new Vector2(620f, 48f), "ОСКОЛКИ ПАМЯТИ", 27,
+            new Vector2(-10f, 450f), new Vector2(900f, 48f), "ОСКОЛКИ ПАМЯТИ", 27,
             new Color(1f, 0.78f, 0.43f, 1f), TextAnchor.MiddleCenter, FontStyle.Bold);
 
         Text journalContent = CreateText(
             "Content", journal.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(0f, -8f), new Vector2(670f, 430f), string.Empty, 17,
+            new Vector2(0f, -55f), new Vector2(1040f, 840f), string.Empty, 34,
             new Color(0.92f, 0.89f, 0.83f, 1f), TextAnchor.UpperLeft, FontStyle.Normal);
         journalContent.alignment = TextAnchor.UpperLeft;
 
@@ -426,8 +426,8 @@ public static class StoryMemorySetup
             new Color(0.22f, 0.13f, 0.08f, 0.98f));
 
         GameObject badge = CreateButton("MemoryJournalButton", root.transform,
-            new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-28f, 28f),
-            new Vector2(184f, 44f), "✦ ПАМЯТЬ  0/5", 16, new Color(0.09f, 0.07f, 0.055f, 0.94f));
+            new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-28f, 42f),
+            new Vector2(390f, 82f), "✦ ПАМЯТЬ  0/5", 40, new Color(0.09f, 0.07f, 0.055f, 0.94f));
         badge.GetComponentInChildren<Text>(true).name = "ProgressLabel";
 
         journal.SetActive(false);
