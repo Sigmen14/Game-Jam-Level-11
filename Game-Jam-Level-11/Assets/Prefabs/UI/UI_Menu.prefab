@@ -120,6 +120,7 @@ MonoBehaviour:
   gameManager: {fileID: 0}
   mainMenuPanel: {fileID: 607592902570376614}
   settingsPanel: {fileID: 6471200837525043162}
+  gameplaySceneName: Main
 --- !u!114 &5218236606636810589
 MonoBehaviour:
   m_ObjectHideFlags: 0
