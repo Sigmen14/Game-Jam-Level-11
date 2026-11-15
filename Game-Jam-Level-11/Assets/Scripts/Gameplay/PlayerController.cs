@@ -101,8 +101,11 @@ public sealed class PlayerController : MonoBehaviour
             actionInput = legacyInput;
 
         moveInput = Vector2.ClampMagnitude(actionInput, 1f);
+        bool wasProtecting = IsProtecting;
         IsProtecting = protectAction != null && protectAction.enabled &&
                        protectAction.IsPressed();
+        if (wasProtecting != IsProtecting)
+            AudioManager.PlayProtection(IsProtecting);
         SetProtectionVisual(IsProtecting);
     }
 
