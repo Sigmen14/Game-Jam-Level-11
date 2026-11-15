@@ -5293,6 +5293,14 @@ MonoBehaviour:
   passiveDrainPerSecond: 0.35
   windDamagePerSecond: 8
   protectedWindDamagePerSecond: 1.5
+  steadySparkPickupThreshold: 2
+  lastFlamePickupThreshold: 4
+  steadySparkWindDamageMultiplier: 0.9
+  lastFlameWindDamageMultiplier: 0.82
+  steadySparkLightRadiusMultiplier: 1.06
+  lastFlameLightRadiusMultiplier: 1.12
+  steadySparkLightIntensityMultiplier: 1.08
+  lastFlameLightIntensityMultiplier: 1.16
   flameLight: {fileID: 5370038716801195692}
   minimumLightRadius: 2.2
   maximumLightRadius: 8.5
@@ -5326,6 +5334,15 @@ MonoBehaviour:
   lowFuelScale: 0.62
   pickupScaleBoost: 1.32
   visualSmoothSpeed: 9
+  steadySparkScaleMultiplier: 1.1
+  lastFlameScaleMultiplier: 1.22
+  lastFlameHeightMultiplier: 1.08
+  steadySparkColorBlend: 0.42
+  lastFlameColorBlend: 0.64
+  steadySparkFlameColor: {r: 1, g: 0.72, b: 0.24, a: 1}
+  lastFlameFlameColor: {r: 1, g: 0.52, b: 0.12, a: 1}
+  steadySparkLightColor: {r: 1, g: 0.76, b: 0.38, a: 1}
+  lastFlameLightColor: {r: 1, g: 0.58, b: 0.2, a: 1}
   highFuelColor: {r: 1, g: 0.86, b: 0.52, a: 1}
   mediumFuelColor: {r: 1, g: 0.57, b: 0.2, a: 1}
   lowFuelColor: {r: 0.92, g: 0.27, b: 0.1, a: 1}
