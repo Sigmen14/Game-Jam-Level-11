@@ -97,6 +97,12 @@ public sealed class FlameMeter : MonoBehaviour
         ChangeFlame(-drain * Time.deltaTime);
     }
 
+    public void BindGameplaySystems(PlayerController player, WindController wind)
+    {
+        playerController = player;
+        windController = wind;
+    }
+
     public void SetRunning(bool isRunning)
     {
         _isRunning = isRunning;
