@@ -13,8 +13,8 @@ public sealed class AudioManager : MonoBehaviour
     private static AudioManager instance;
 
     [Header("Mix")]
-    [SerializeField, Range(0f, 1f)] private float musicVolume = 0.32f;
-    [SerializeField, Range(0f, 1f)] private float effectsVolume = 0.72f;
+    [SerializeField, Range(0f, 1f)] private float musicVolume = 0.8f;
+    [SerializeField, Range(0f, 1f)] private float effectsVolume = 0.95f;
     [SerializeField] private AudioSource musicSource;
 
     private AudioSource effectsSource;
@@ -66,6 +66,48 @@ public sealed class AudioManager : MonoBehaviour
         musicSource.volume = musicVolume;
         musicSource.pitch = 1f;
         musicSource.Play();
+    }
+
+    private void Start()
+    {
+        // Recover from a globally paused or muted listener before gameplay begins.
+        AudioListener.pause = false;
+        AudioListener.volume = 1f;
+
+        AudioListener listener = FindFirstObjectByType<AudioListener>();
+        if (listener != null)
+            listener.enabled = true;
+        else if (Camera.main != null)
+            Camera.main.gameObject.AddComponent<AudioListener>();
+
+        if (musicSource != null)
+        {
+            musicSource.enabled = true;
+            musicSource.mute = false;
+            musicSource.volume = musicVolume;
+            musicSource.loop = true;
+            if (!musicSource.isPlaying)
+                musicSource.Play();
+        }
+
+        if (effectsSource != null)
+        {
+            effectsSource.enabled = true;
+            effectsSource.mute = false;
+            effectsSource.volume = effectsVolume;
+        }
+
+        Debug.Log("AudioManager started: listener unpaused, master volume 1, music playing.", this);
+    }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+            return;
+
+        AudioListener.pause = false;
+        if (musicSource != null && musicSource.enabled && !musicSource.isPlaying)
+            musicSource.Play();
     }
 
     private void OnDestroy()
