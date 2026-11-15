@@ -26,6 +26,7 @@ public sealed class GameManager : MonoBehaviour
     [SerializeField] private WindController windController;
     [SerializeField] private FuelPickup[] fuelPickups;
     [SerializeField] private CoverZone[] coverZones;
+    [SerializeField] private BeaconController[] beacons;
 
     [Header("UI references")]
     [SerializeField] private HUDView hudView;
@@ -74,6 +75,15 @@ public sealed class GameManager : MonoBehaviour
 
         if (endingFlowController != null)
             endingFlowController.Bind(this);
+
+        if (beacons != null)
+        {
+            for (int i = 0; i < beacons.Length; i++)
+            {
+                if (beacons[i] != null)
+                    beacons[i].Bind(playerController, flameMeter, this);
+            }
+        }
 
         ReturnToMainMenu();
     }
@@ -218,6 +228,15 @@ public sealed class GameManager : MonoBehaviour
             {
                 if (coverZones[i] != null)
                     coverZones[i].ResetZone();
+            }
+        }
+
+        if (beacons != null)
+        {
+            for (int i = 0; i < beacons.Length; i++)
+            {
+                if (beacons[i] != null)
+                    beacons[i].ResetBeacon();
             }
         }
     }

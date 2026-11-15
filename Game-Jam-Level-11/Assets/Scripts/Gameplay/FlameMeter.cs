@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -24,6 +25,7 @@ public sealed class FlameMeter : MonoBehaviour
     [Header("Wind damage")]
     [SerializeField, Min(0f)] private float windDamagePerSecond = 8f;
     [SerializeField, Min(0f)] private float protectedWindDamagePerSecond = 1.5f;
+    [SerializeField, Range(0f, 1f)] private float beaconShelterWindDamageMultiplier = 0.35f;
 
     [Header("Flame growth")]
     [SerializeField, Min(1)] private int steadySparkPickupThreshold = 2;
@@ -56,6 +58,7 @@ public sealed class FlameMeter : MonoBehaviour
     public float Maximum => maxFlame;
     public float NormalizedValue => maxFlame > 0f ? Current / maxFlame : 0f;
     public bool IsRunning => _isRunning;
+    public bool IsInsideBeaconShelter => _beaconShelters.Count > 0;
     public int SuccessfulFuelPickupCount { get; private set; }
     public GrowthStage CurrentGrowthStage { get; private set; } = GrowthStage.SmallSpark;
 
@@ -68,6 +71,7 @@ public sealed class FlameMeter : MonoBehaviour
 
     private bool _isRunning;
     private bool _depletionReported;
+    private readonly HashSet<BeaconController> _beaconShelters = new HashSet<BeaconController>();
 
     private void Awake()
     {
@@ -89,9 +93,10 @@ public sealed class FlameMeter : MonoBehaviour
             bool protectedByPlayer = playerController != null && playerController.IsProtecting;
             // Keep the established Space protection value unchanged. Growth only
             // softens the exposed-wind penalty, so the Grey Wind remains dangerous.
+            float shelterMultiplier = IsInsideBeaconShelter ? beaconShelterWindDamageMultiplier : 1f;
             drain += protectedByPlayer
                 ? protectedWindDamagePerSecond
-                : windDamagePerSecond * WindDamageMultiplier;
+                : windDamagePerSecond * WindDamageMultiplier * shelterMultiplier;
         }
 
         ChangeFlame(-drain * Time.deltaTime);
@@ -113,12 +118,35 @@ public sealed class FlameMeter : MonoBehaviour
         CurrentGrowthStage = GrowthStage.SmallSpark;
         _isRunning = false;
         _depletionReported = false;
+        _beaconShelters.Clear();
         Current = Mathf.Clamp(startingFlame, 0f, maxFlame);
         UpdateLight();
         ValueChanged?.Invoke(Current, maxFlame);
 
         if (previousStage != CurrentGrowthStage)
             GrowthStageChanged?.Invoke(CurrentGrowthStage);
+    }
+
+    /// <summary>Spends fuel only when the full beacon cost is available.</summary>
+    public bool TryConsumeFuel(float amount)
+    {
+        if (amount <= 0f || Current < amount || Current <= 0f)
+            return false;
+
+        ChangeFlame(-amount);
+        return true;
+    }
+
+    /// <summary>Tracks overlapping active beacon shelters; multiple beacons compose safely.</summary>
+    public void SetBeaconShelter(BeaconController beacon, bool isInside)
+    {
+        if (beacon == null)
+            return;
+
+        if (isInside)
+            _beaconShelters.Add(beacon);
+        else
+            _beaconShelters.Remove(beacon);
     }
 
     public void AddFuel(float amount)
@@ -216,6 +244,7 @@ public sealed class FlameMeter : MonoBehaviour
         lastFlamePickupThreshold = Mathf.Max(steadySparkPickupThreshold + 1, lastFlamePickupThreshold);
         steadySparkWindDamageMultiplier = Mathf.Clamp(steadySparkWindDamageMultiplier, 0.5f, 1f);
         lastFlameWindDamageMultiplier = Mathf.Clamp(lastFlameWindDamageMultiplier, 0.5f, steadySparkWindDamageMultiplier);
+        beaconShelterWindDamageMultiplier = Mathf.Clamp01(beaconShelterWindDamageMultiplier);
         steadySparkLightRadiusMultiplier = Mathf.Max(1f, steadySparkLightRadiusMultiplier);
         lastFlameLightRadiusMultiplier = Mathf.Max(steadySparkLightRadiusMultiplier, lastFlameLightRadiusMultiplier);
         steadySparkLightIntensityMultiplier = Mathf.Max(1f, steadySparkLightIntensityMultiplier);
