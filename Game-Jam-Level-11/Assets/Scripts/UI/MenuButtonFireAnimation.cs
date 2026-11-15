@@ -77,6 +77,8 @@ public sealed class MenuButtonFireAnimation : MonoBehaviour,
         CacheSparkData();
         SetImageAlpha(glowImage, 0f);
         SetImageAlpha(flashImage, 0f);
+        if (flashImage != null)
+            flashImage.rectTransform.localScale = Vector3.one;
         ClearSparks();
     }
 
@@ -195,7 +197,11 @@ public sealed class MenuButtonFireAnimation : MonoBehaviour,
         {
             Image spark = sparkImages[i];
             if (spark != null)
-                _sparkBaseColors[i] = spark.color;
+            {
+                Color baseColor = spark.color;
+                baseColor.a = 1f;
+                _sparkBaseColors[i] = baseColor;
+            }
         }
     }
 
@@ -221,6 +227,7 @@ public sealed class MenuButtonFireAnimation : MonoBehaviour,
         if (_flashRemaining <= 0f)
         {
             SetImageAlpha(flashImage, 0f);
+            flashImage.rectTransform.localScale = Vector3.one;
             return;
         }
 
