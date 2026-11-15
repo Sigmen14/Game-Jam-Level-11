@@ -70,6 +70,9 @@ public sealed class FuelPickup : MonoBehaviour
         flameMeter.AddFuel(fuelAmount);
         if (flameMeter.Current > previousFuel)
         {
+            // FlameMeter tracks successful pickups for the whole match. The separate
+            // FuelCollected event remains intact for StoryMemoryPickup and other listeners.
+            flameMeter.RegisterSuccessfulFuelPickup();
             FuelCollected?.Invoke();
         }
 
