@@ -503,17 +503,32 @@ public sealed class GameManager : MonoBehaviour
 
         ChangeState(didWin ? GameState.Won : GameState.Lost);
 
-        if (didWin && endingFlowController != null)
+        float survivedSeconds = ElapsedTime;
+
+        if (endingFlowController != null)
         {
             if (hudView != null)
                 hudView.HideForEnding();
 
-            endingFlowController.ShowChoice(ElapsedTime);
+            if (didWin)
+            {
+                // Play the victory cinematic first, then let the player choose one
+                // of the two existing endings.
+                endingFlowController.ShowVictoryPrelude(survivedSeconds);
+            }
+            else
+            {
+                // The defeat cinematic must finish before the established result UI appears.
+                endingFlowController.ShowDefeatPrelude(survivedSeconds, () =>
+                {
+                    if (hudView != null)
+                        hudView.ShowResult(false, survivedSeconds);
+                });
+            }
         }
         else if (hudView != null)
         {
-            // A depleted flame keeps the existing loss/result flow unchanged.
-            hudView.ShowResult(didWin, ElapsedTime);
+            hudView.ShowResult(didWin, survivedSeconds);
         }
     }
 
