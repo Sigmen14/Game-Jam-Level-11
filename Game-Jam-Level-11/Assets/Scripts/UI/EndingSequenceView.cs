@@ -76,7 +76,7 @@ public sealed class EndingSequenceView : MonoBehaviour
     /// Shows a short story beat before the existing result flow. Victory leads back
     /// to the two-choice screen; defeat is followed by HUDView's existing result panel.
     /// </summary>
-    public IEnumerator PlayOutcomePrelude(bool didWin, float survivedSeconds)
+    public IEnumerator PlayOutcomePrelude(bool didWin)
     {
         CacheHomeValues();
         ResetVisuals();
