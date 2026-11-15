@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Plays the one-time story sequence over the existing main-menu Canvas.
@@ -112,8 +113,7 @@ public sealed class PrologueController : MonoBehaviour
             return;
 
         // Ignore the mouse/key press that may have launched Play Mode or loaded the scene.
-        if (Time.unscaledTime >= _inputEnabledAt &&
-            (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)))
+        if (Time.unscaledTime >= _inputEnabledAt && WasAdvancePressedThisFrame())
         {
             AdvanceScene();
             return;
@@ -122,6 +122,24 @@ public sealed class PrologueController : MonoBehaviour
         // Keep the story moving until the final frame; it never completes by itself.
         _elapsed += Time.unscaledDeltaTime;
         UpdateTimeline();
+    }
+
+    private static bool WasAdvancePressedThisFrame()
+    {
+        Keyboard keyboard = Keyboard.current;
+        Mouse mouse = Mouse.current;
+
+        bool pressedByNewInputSystem =
+            (keyboard != null && keyboard.spaceKey.wasPressedThisFrame) ||
+            (mouse != null && mouse.leftButton.wasPressedThisFrame);
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+        // Preserve compatibility with projects using the legacy Input Manager.
+        bool pressedByLegacyInput = Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space);
+        return pressedByNewInputSystem || pressedByLegacyInput;
+#else
+        return pressedByNewInputSystem;
+#endif
     }
 
     /// <summary>
