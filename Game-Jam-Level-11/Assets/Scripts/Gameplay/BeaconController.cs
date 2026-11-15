@@ -323,7 +323,7 @@ public sealed class BeaconController : MonoBehaviour
                 : "Чтобы зажечь маяк, нужно: " + Mathf.CeilToInt(fuelCost) + " ед. огня";
 
         float panelWidth = Mathf.Min(500f, Screen.width - 28f);
-        const float panelHeight = 76f;
+        const float panelHeight = 132f;
         Rect panel = new Rect((Screen.width - panelWidth) * 0.5f,
                               Screen.height - panelHeight - 28f,
                               panelWidth, panelHeight);
@@ -337,7 +337,7 @@ public sealed class BeaconController : MonoBehaviour
         GUIStyle headingStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 18,
+            fontSize = 36,
             fontStyle = FontStyle.Bold
         };
         headingStyle.normal.textColor = activatedMessage || !_notEnoughFuel
@@ -347,13 +347,13 @@ public sealed class BeaconController : MonoBehaviour
         GUIStyle detailStyle = new GUIStyle(GUI.skin.label)
         {
             alignment = TextAnchor.MiddleCenter,
-            fontSize = 13
+            fontSize = 26
         };
         detailStyle.normal.textColor = new Color(0.88f, 0.88f, 0.84f, 1f);
 
         GUI.color = Color.white;
-        GUI.Label(new Rect(panel.x + 12f, panel.y + 8f, panel.width - 24f, 30f), heading, headingStyle);
-        GUI.Label(new Rect(panel.x + 12f, panel.y + 39f, panel.width - 24f, 25f), detail, detailStyle);
+        GUI.Label(new Rect(panel.x + 12f, panel.y + 10f, panel.width - 24f, 54f), heading, headingStyle);
+        GUI.Label(new Rect(panel.x + 12f, panel.y + 69f, panel.width - 24f, 48f), detail, detailStyle);
         GUI.color = previousColor;
     }
 
