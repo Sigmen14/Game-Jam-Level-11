@@ -134,6 +134,30 @@ public static class GameFlowUISetup
             SetText(root.transform, "Title", "LAST EMBER");
             SetText(root.transform, "Detail",
                 "Продержись 180 секунд, собирай топливо и укрывайся от порывов ветра.");
+
+            // Enlarge the title, subtitle, control hint below Exit, and all menu labels.
+            foreach (Text label in root.GetComponentsInChildren<Text>(true))
+            {
+                bool enlargeTextRect = label.fontSize == 54 || label.fontSize == 24 || label.fontSize == 18;
+                if (label.fontSize == 54)
+                    label.fontSize = 108;
+                else if (label.fontSize == 24)
+                    label.fontSize = 48;
+                else if (label.fontSize == 18)
+                    label.fontSize = 36;
+
+                RectTransform textRect = label.GetComponent<RectTransform>();
+                if (enlargeTextRect && textRect != null && textRect.sizeDelta.sqrMagnitude > 0f)
+                    textRect.sizeDelta *= 2f;
+            }
+
+            foreach (Button button in root.GetComponentsInChildren<Button>(true))
+            {
+                RectTransform buttonRect = button.GetComponent<RectTransform>();
+                if (buttonRect != null && buttonRect.sizeDelta.x > 0f && buttonRect.sizeDelta.x < 500f)
+                    buttonRect.sizeDelta *= 2f;
+            }
+
             PrefabUtility.SaveAsPrefabAsset(root, path);
         }
         finally
