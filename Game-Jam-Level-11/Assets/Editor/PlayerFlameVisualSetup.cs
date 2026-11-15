@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 
@@ -16,6 +17,7 @@ public static class PlayerFlameVisualSetup
 {
     private const string PlayerPrefabPath = "Assets/Prefabs/Player/Player.prefab";
     private const string MainScenePath = "Assets/Scenes/Main.unity";
+    private const string SparkMaterialPath = "Assets/Art/LastFlame/FlameSparkUnlit.mat";
 
     [MenuItem("Game Jam/Setup Player Flame Visual Feedback")]
     public static void SetupPlayerFlameVisualFeedback()
@@ -186,10 +188,34 @@ public static class PlayerFlameVisualSetup
         ParticleSystem.ShapeModule shape = sparks.shape;
         shape.enabled = false;
 
+        ParticleSystem.ColorOverLifetimeModule colorOverLifetime = sparks.colorOverLifetime;
+        colorOverLifetime.enabled = true;
+        Gradient fadeGradient = new Gradient();
+        fadeGradient.SetKeys(
+            new[]
+            {
+                new GradientColorKey(Color.white, 0f),
+                new GradientColorKey(Color.white, 1f)
+            },
+            new[]
+            {
+                new GradientAlphaKey(1f, 0f),
+                new GradientAlphaKey(0f, 1f)
+            });
+        colorOverLifetime.color = new ParticleSystem.MinMaxGradient(fadeGradient);
+
+        ParticleSystem.SizeOverLifetimeModule sizeOverLifetime = sparks.sizeOverLifetime;
+        sizeOverLifetime.enabled = true;
+        sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(
+            1f, AnimationCurve.EaseInOut(0f, 1f, 1f, 0f));
+
         ParticleSystemRenderer particleRenderer = sparks.GetComponent<ParticleSystemRenderer>();
         particleRenderer.renderMode = ParticleSystemRenderMode.Billboard;
         particleRenderer.sortingLayerID = playerRenderer.sortingLayerID;
         particleRenderer.sortingOrder = playerRenderer.sortingOrder + 2;
+        particleRenderer.shadowCastingMode = ShadowCastingMode.Off;
+        particleRenderer.receiveShadows = false;
+        particleRenderer.sharedMaterial = CreateParticleMaterial();
 
         FlameVisualFeedback feedback = playerRoot.GetComponent<FlameVisualFeedback>();
         if (feedback == null)
@@ -207,6 +233,49 @@ public static class PlayerFlameVisualSetup
 
         sparks.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         EditorUtility.SetDirty(playerRoot);
+    }
+
+    private static Material CreateParticleMaterial()
+    {
+        Shader particleShader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+        if (particleShader == null)
+        {
+            throw new System.InvalidOperationException(
+                "URP particle shader 'Universal Render Pipeline/Particles/Unlit' was not found. " +
+                "Check that the Universal Render Pipeline package is installed and compiled.");
+        }
+
+        Material material = AssetDatabase.LoadAssetAtPath<Material>(SparkMaterialPath);
+        if (material == null)
+        {
+            material = new Material(particleShader)
+            {
+                name = "FlameSparkUnlit"
+            };
+            AssetDatabase.CreateAsset(material, SparkMaterialPath);
+        }
+        else if (material.shader != particleShader)
+        {
+            material.shader = particleShader;
+        }
+
+        // Explicit transparent alpha blending avoids the pink error material and
+        // keeps per-particle warm colors/fade alpha visible in URP.
+        material.SetOverrideTag("RenderType", "Transparent");
+        if (material.HasProperty("_Surface"))
+            material.SetFloat("_Surface", 1f);
+        if (material.HasProperty("_Blend"))
+            material.SetFloat("_Blend", 0f);
+        if (material.HasProperty("_ZWrite"))
+            material.SetFloat("_ZWrite", 0f);
+        if (material.HasProperty("_BaseColor"))
+            material.SetColor("_BaseColor", Color.white);
+
+        material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        material.DisableKeyword("_ALPHATEST_ON");
+        material.renderQueue = (int)RenderQueue.Transparent;
+        EditorUtility.SetDirty(material);
+        return material;
     }
 
     private static T FindInScene<T>(Scene scene) where T : Component
