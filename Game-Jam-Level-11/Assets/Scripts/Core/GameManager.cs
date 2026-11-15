@@ -26,6 +26,8 @@ public sealed class GameManager : MonoBehaviour
     [SerializeField] private WindController windController;
     [SerializeField] private FuelPickup[] fuelPickups;
     [SerializeField] private CoverZone[] coverZones;
+    [SerializeField] private GameplayChallengeController[] rotatingObstacles;
+    [SerializeField] private GameplayChallengeController routeDirector;
 
     [Header("UI references")]
     [SerializeField] private HUDView hudView;
@@ -74,6 +76,12 @@ public sealed class GameManager : MonoBehaviour
 
         if (endingFlowController != null)
             endingFlowController.Bind(this);
+
+        if (playerController != null)
+            playerController.BindGameplaySystems(flameMeter, windController);
+
+        if (routeDirector != null)
+            routeDirector.Bind(playerController, flameMeter, hudView);
 
         ReturnToMainMenu();
     }
@@ -127,6 +135,8 @@ public sealed class GameManager : MonoBehaviour
 
         if (windController != null)
             windController.SetRunning(true);
+
+        SetChallengeSystemsRunning(true);
     }
 
     /// <summary>Restarts the round with all resources and world pickups restored.</summary>
@@ -185,6 +195,7 @@ public sealed class GameManager : MonoBehaviour
 
     private void ResetGameplayObjects()
     {
+        SetChallengeSystemsRunning(false);
         if (playerController != null)
         {
             playerController.SetGameplayActive(false);
@@ -222,6 +233,21 @@ public sealed class GameManager : MonoBehaviour
         }
     }
 
+    private void SetChallengeSystemsRunning(bool isRunning)
+    {
+        if (routeDirector != null)
+            routeDirector.SetRunning(isRunning);
+
+        if (rotatingObstacles == null)
+            return;
+
+        for (int i = 0; i < rotatingObstacles.Length; i++)
+        {
+            if (rotatingObstacles[i] != null)
+                rotatingObstacles[i].SetRunning(isRunning);
+        }
+    }
+
     private void HandleFlameDepleted()
     {
         FinishMatch(false);
@@ -242,6 +268,8 @@ public sealed class GameManager : MonoBehaviour
 
         if (windController != null)
             windController.SetRunning(false);
+
+        SetChallengeSystemsRunning(false);
 
         if (pauseMenuController != null)
             pauseMenuController.HidePanels();

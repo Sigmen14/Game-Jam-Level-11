@@ -17,6 +17,8 @@ public sealed class PlayerController : MonoBehaviour
     [SerializeField] private Rigidbody2D body;
     [SerializeField] private InputActionAsset inputActions;
     [SerializeField] private GameObject protectionVisual;
+    [SerializeField, Min(0f)] private float windPushSpeed = 3.2f;
+    [SerializeField, Min(0f)] private float obstacleKnockbackRecovery = 12f;
 
     public bool IsProtecting { get; private set; }
     public bool IsInCover { get; private set; }
@@ -31,6 +33,9 @@ public sealed class PlayerController : MonoBehaviour
     private Quaternion spawnRotation;
     private float spawnBodyRotation;
     private bool gameplayActive;
+    private FlameMeter flameMeter;
+    private WindController windController;
+    private Vector2 obstacleKnockbackVelocity;
 
     private void Awake()
     {
@@ -120,7 +125,41 @@ public sealed class PlayerController : MonoBehaviour
         }
 
         float speed = movementSpeed * (IsProtecting ? protectionSpeedMultiplier : 1f);
-        body.linearVelocity = moveInput * speed;
+        Vector2 velocity = moveInput * speed;
+
+        // Strong gusts push exposed movement; Space or a CoverZone fully shelters the player.
+        if (windController != null && windController.IsWindActive && !IsWindSheltered)
+        {
+            float gustScale = Mathf.Max(0.5f, windController.CurrentGustStrength);
+            velocity += windController.WindDirection * windPushSpeed * gustScale;
+        }
+
+        velocity += obstacleKnockbackVelocity;
+        obstacleKnockbackVelocity = Vector2.MoveTowards(
+            obstacleKnockbackVelocity, Vector2.zero, obstacleKnockbackRecovery * Time.fixedDeltaTime);
+        body.linearVelocity = velocity;
+    }
+
+    public void BindGameplaySystems(FlameMeter meter, WindController wind)
+    {
+        flameMeter = meter;
+        windController = wind;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (!gameplayActive || flameMeter == null || collision == null)
+            return;
+
+        GameplayChallengeController obstacle = collision.gameObject.GetComponentInParent<GameplayChallengeController>();
+        if (obstacle == null || !obstacle.IsRotatingObstacle || !obstacle.TryConsumeHit())
+            return;
+
+        flameMeter.ApplyDamage(obstacle.CollisionDamage);
+        Vector2 knockback = body.position - (Vector2)obstacle.transform.position;
+        if (knockback.sqrMagnitude < 0.0001f && collision.contactCount > 0)
+            knockback = collision.GetContact(0).normal;
+        obstacleKnockbackVelocity += knockback.normalized * obstacle.KnockbackImpulse;
     }
 
     public void SetGameplayActive(bool isActive)
@@ -137,6 +176,7 @@ public sealed class PlayerController : MonoBehaviour
         {
             moveInput = Vector2.zero;
             IsProtecting = false;
+            obstacleKnockbackVelocity = Vector2.zero;
             if (body != null)
             {
                 body.linearVelocity = Vector2.zero;
@@ -157,6 +197,7 @@ public sealed class PlayerController : MonoBehaviour
         moveInput = Vector2.zero;
         IsProtecting = false;
         IsInCover = false;
+        obstacleKnockbackVelocity = Vector2.zero;
 
         if (body != null)
         {
@@ -184,6 +225,7 @@ public sealed class PlayerController : MonoBehaviour
         gameplayActive = false;
         IsProtecting = false;
         moveInput = Vector2.zero;
+        obstacleKnockbackVelocity = Vector2.zero;
         SetProtectionVisual(false);
     }
 

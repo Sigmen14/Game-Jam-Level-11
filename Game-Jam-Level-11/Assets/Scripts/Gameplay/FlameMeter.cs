@@ -121,6 +121,12 @@ public sealed class FlameMeter : MonoBehaviour
             GrowthStageChanged?.Invoke(CurrentGrowthStage);
     }
 
+    public void ApplyDamage(float amount)
+    {
+        if (amount > 0f && Current > 0f)
+            ChangeFlame(-amount);
+    }
+
     public void AddFuel(float amount)
     {
         if (amount <= 0f || Current <= 0f)

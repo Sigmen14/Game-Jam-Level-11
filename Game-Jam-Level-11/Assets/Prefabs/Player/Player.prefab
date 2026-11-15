@@ -5276,6 +5276,8 @@ MonoBehaviour:
   body: {fileID: 2991176113115829085}
   inputActions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   protectionVisual: {fileID: 6320857378673596893}
+  windPushSpeed: 3.2
+  obstacleKnockbackRecovery: 12
 --- !u!114 &3769385507394412096
 MonoBehaviour:
   m_ObjectHideFlags: 0

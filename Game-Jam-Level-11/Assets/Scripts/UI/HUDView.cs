@@ -30,6 +30,8 @@ public sealed class HUDView : MonoBehaviour
     private Vector3 windWarningBaseScale = Vector3.one;
     private Color windWarningBaseColor = Color.white;
     private Color windWarningBaseTextColor = Color.white;
+    private bool challengeMessageVisible;
+    private string challengeMessage;
 
     public void Bind(GameManager manager, FlameMeter meter, WindController wind)
     {
@@ -55,7 +57,7 @@ public sealed class HUDView : MonoBehaviour
         {
             windController.WarningStateChanged += HandleWindStateChanged;
             windController.WindActiveStateChanged += HandleWindStateChanged;
-            SetWindWarning(windController.IsWarning || windController.IsWindActive);
+            RefreshWindWarning();
         }
         else SetWindWarning(false);
     }
@@ -119,17 +121,40 @@ public sealed class HUDView : MonoBehaviour
 
     public void SetWindWarning(bool isVisible)
     {
-        bool gustActive = windController != null && windController.IsWindActive;
-        bool shouldShow = isVisible || gustActive;
+        if (!isVisible)
+            challengeMessageVisible = false;
+        RefreshWindWarning();
+    }
+
+    public void ShowChallengeMessage(string message)
+    {
+        challengeMessage = message;
+        challengeMessageVisible = !string.IsNullOrEmpty(message);
+        RefreshWindWarning();
+    }
+
+    public void HideChallengeMessage()
+    {
+        challengeMessageVisible = false;
+        RefreshWindWarning();
+    }
+
+    private void RefreshWindWarning()
+    {
+        bool windIsVisible = windController != null &&
+            (windController.IsWarning || windController.IsWindActive);
+        bool shouldShow = windIsVisible || challengeMessageVisible;
         SetActive(windWarningRoot, shouldShow);
-        if (!shouldShow) RestoreWindWarningVisuals();
-        else if (windWarningText != null && windController != null)
-            windWarningText.text = windController.StatusMessage;
+
+        if (!shouldShow)
+            RestoreWindWarningVisuals();
+        else if (windWarningText != null)
+            windWarningText.text = windIsVisible ? windController.StatusMessage : challengeMessage;
     }
 
     private void HandleWindStateChanged(bool state)
     {
-        SetWindWarning(state || (windController != null && windController.IsWindActive));
+        RefreshWindWarning();
     }
 
     private void CacheWindWarningVisuals()
@@ -143,10 +168,11 @@ public sealed class HUDView : MonoBehaviour
 
     private void UpdateWindWarningVisuals()
     {
-        if (windWarningRoot == null || windController == null) return;
-        bool warning = windController.IsWarning;
-        bool gustActive = windController.IsWindActive;
-        bool visible = warning || gustActive;
+        if (windWarningRoot == null) return;
+        bool warning = windController != null && windController.IsWarning;
+        bool gustActive = windController != null && windController.IsWindActive;
+        bool showWindStatus = warning || gustActive;
+        bool visible = showWindStatus || challengeMessageVisible;
         SetActive(windWarningRoot, visible);
         if (!visible)
         {
@@ -154,17 +180,20 @@ public sealed class HUDView : MonoBehaviour
             return;
         }
 
-        if (windWarningText != null) windWarningText.text = windController.StatusMessage;
-        float pulseRate = gustActive ? 8.5f : 4.2f;
+        if (windWarningText != null)
+            windWarningText.text = showWindStatus ? windController.StatusMessage : challengeMessage;
+        float pulseRate = gustActive ? 8.5f : (warning ? 4.2f : 2.8f);
         float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * pulseRate);
         if (windWarningBackground != null)
         {
             Color darkWind = gustActive
                 ? new Color(0.025f, 0.032f, 0.04f, 0.96f)
-                : new Color(0.075f, 0.045f, 0.028f, 0.93f);
+                : (warning ? new Color(0.075f, 0.045f, 0.028f, 0.93f)
+                           : new Color(0.035f, 0.055f, 0.065f, 0.94f));
             Color warmEdge = gustActive
                 ? new Color(0.12f, 0.075f, 0.045f, 0.98f)
-                : new Color(0.20f, 0.085f, 0.025f, 0.96f);
+                : (warning ? new Color(0.20f, 0.085f, 0.025f, 0.96f)
+                           : new Color(0.08f, 0.18f, 0.20f, 0.96f));
             windWarningBackground.color = Color.Lerp(darkWind, warmEdge, pulse * 0.48f);
         }
         if (windWarningText != null)
