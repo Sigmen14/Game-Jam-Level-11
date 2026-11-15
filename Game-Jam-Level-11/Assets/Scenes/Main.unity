@@ -2519,7 +2519,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c6a3f7e21b84d50a1e6c7f8392bd405, type: 3}
   m_Name:
   m_EditorClassIdentifier:
-  musicVolume: 0.22
+  musicVolume: 0.32
   effectsVolume: 0.72
   musicSource: {fileID: 1439309877}
 --- !u!4 &1439309878
