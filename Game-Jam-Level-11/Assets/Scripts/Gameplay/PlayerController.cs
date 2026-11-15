@@ -77,16 +77,17 @@ public sealed class PlayerController : MonoBehaviour
             return;
         }
 
-        // Movement must not depend on the optional Protect action being present.
+        // Read physical keyboard state directly first. This keeps WASD responsive
+        // even when the Input Actions asset or its control scheme is out of sync.
+        // Gamepad/other devices still work through the Move action when no key is held.
+        Vector2 keyboardInput = ReadKeyboardMovement();
         Vector2 actionInput = moveAction != null && moveAction.enabled
             ? moveAction.ReadValue<Vector2>()
             : Vector2.zero;
 
-        // Keep keyboard movement reliable even if an action map/binding was not enabled
-        // by the active scene or its Input Actions asset is out of sync.
-        if (actionInput.sqrMagnitude < 0.0001f)
+        if (keyboardInput.sqrMagnitude > 0.0001f)
         {
-            actionInput = ReadKeyboardMovement();
+            actionInput = keyboardInput;
         }
 
         moveInput = Vector2.ClampMagnitude(actionInput, 1f);
