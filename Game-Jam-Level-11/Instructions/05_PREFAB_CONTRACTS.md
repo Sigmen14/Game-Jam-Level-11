@@ -22,21 +22,24 @@
 
 | Префаб | Содержимое | Что настраивается в Inspector |
 |---|---|---|
-| UI_HUD.prefab | Корневой Canvas, CanvasScaler, GraphicRaycaster | Reference Resolution, режим масштабирования, сортировка |
+| UI_Menu.prefab | Canvas, MainMenuController, AudioSettingsController, UI_StartPanel, UI_SettingsPanel | Reference Resolution, навигация сцены, ссылки на панели и аудио |
+| UI_HUD.prefab | Корневой Canvas, CanvasScaler, GraphicRaycaster, HUDView, AudioSettingsController, только игровые HUD и ResultPanel | Reference Resolution, режим масштабирования, сортировка |
 | UI_FlameMeter.prefab | Иконка огня, фон и заполнение полосы, необязательная подпись | Спрайты, цвета, размеры, anchors, анимация заполнения |
 | UI_Timer.prefab | Текст оставшегося времени | Шрифт, размер, формат времени, позиция |
 | UI_WindWarning.prefab | Иконка/текст предупреждения о ветре | Иконка, текст, цвет, анимация, позиция |
-| UI_StartPanel.prefab | Название игры, цель, подсказки управления, кнопка Start | Все тексты, шрифты, цвета, фон, размеры, кнопка |
+| UI_StartPanel.prefab | Название игры, цель, подсказки управления, кнопки Играть / Настройки / Выход | Все тексты, шрифты, цвета, фон, размеры, три кнопки |
+| UI_SettingsPanel.prefab | Ползунки SFX и Music, проценты громкости, кнопка Назад | Диапазон и начальные значения ползунков, подписи, цвета и размеры |
 | UI_ResultPanel.prefab | Результат Won/Lost, итоговое время, кнопка Retry | Тексты, оформление победы/поражения, шрифты, кнопка |
 | UI_PausePanel.prefab | Пауза и кнопка продолжения (необязательно) | Тексты, оформление и кнопки |
 
-Вложенные UI-префабы вручную разместить внутри UI_HUD (Canvas) или внутри заранее подготовленных панелей. Не вызывать Instantiate при открытии панели и не добавлять элементы в Canvas скриптом.
+UI_StartPanel и UI_SettingsPanel размещаются внутри UI_Menu в сцене Menu. UI_FlameMeter, UI_Timer, UI_WindWarning и UI_ResultPanel размещаются внутри UI_HUD в сцене Main. AudioSettingsController получает ссылки на слайдеры и AudioSource через Inspector; SFX-источники принадлежат заранее размещённым PickupRoot, музыка — заранее размещённому источнику в GameSystems/Audio. Не вызывать Instantiate при открытии панели и не добавлять элементы в Canvas скриптом.
 
 ## Контракты ссылок
 
 Назначить следующие ссылки через Inspector:
 
-- GameManager → PlayerController, FlameMeter, WindController, UI_StartPanel, UI_ResultPanel, HUDView.
+- GameManager (Main) → PlayerController, FlameMeter, WindController, FuelPickup[], HUDView.
+- MainMenuController (Menu) → UI_StartPanel, UI_SettingsPanel, имя игровой сцены Main.
 - PlayerController → Rigidbody2D, визуал защиты, Light2D или объект, который управляет радиусом света.
 - FlameMeter → заранее существующий визуальный источник света (или событие изменения значения).
 - FuelPickup → FlameMeter или заранее настроенный получатель топлива.
@@ -49,10 +52,10 @@
 
 Все экраны существуют до нажатия Play:
 
-- Старт: UI_StartPanel включён, игровой HUD может быть видим, управление и ветер ещё не активны.
-- Игра: UI_StartPanel выключен, HUD включён, UI_ResultPanel выключен.
+- Меню: активна сцена Menu, UI_StartPanel включён, UI_SettingsPanel выключен. Кнопка Играть загружает Main.
+- Игра: после загрузки Main HUD включён, UI_ResultPanel выключен, таймер/ветер/управление стартуют автоматически.
 - Победа или поражение: UI_ResultPanel включён, управление и ветер остановлены.
-- Retry: сбросить значения, вернуть заранее размещённые объекты в начальное состояние и снова включить UI_StartPanel.
+- Retry: сбросить значения существующих игровых объектов и сразу начать новый матч.
 
 Переключение уже существующих объектов через SetActive допустимо. Создавать новый Canvas, панель или дочерние элементы запрещено.
 

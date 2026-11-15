@@ -1,0 +1,773 @@
+fileFormatVersion: 2
+guid: 690fb3b60c7d5074d8d632ff8409521b
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7326259706524674341
+    second: PauseEmbers_0
+  - first:
+      213: 1087690261114344084
+    second: PauseEmbers_1
+  - first:
+      213: 1867292107418435752
+    second: PauseEmbers_2
+  - first:
+      213: -4821592832512619859
+    second: PauseEmbers_3
+  - first:
+      213: 5747889724164162096
+    second: PauseEmbers_4
+  - first:
+      213: -8692813379757300854
+    second: PauseEmbers_5
+  - first:
+      213: -9168798633345827451
+    second: PauseEmbers_6
+  - first:
+      213: 6543666467408966887
+    second: PauseEmbers_7
+  - first:
+      213: -2894110626173782636
+    second: PauseEmbers_8
+  - first:
+      213: -7471350677566919700
+    second: PauseEmbers_9
+  - first:
+      213: -6625744701538972555
+    second: PauseEmbers_10
+  - first:
+      213: 8969605323090957360
+    second: PauseEmbers_11
+  - first:
+      213: 8786222250128109673
+    second: PauseEmbers_12
+  - first:
+      213: 2390754304493385935
+    second: PauseEmbers_13
+  - first:
+      213: 902305364910236272
+    second: PauseEmbers_14
+  - first:
+      213: -4566989250951498514
+    second: PauseEmbers_15
+  - first:
+      213: -8037282855407055687
+    second: PauseEmbers_16
+  - first:
+      213: 4849183816423953928
+    second: PauseEmbers_17
+  - first:
+      213: -4223225886567841382
+    second: PauseEmbers_18
+  - first:
+      213: 8288165700764543487
+    second: PauseEmbers_19
+  - first:
+      213: 2003659995945631925
+    second: PauseEmbers_20
+  - first:
+      213: 9207765953558436321
+    second: PauseEmbers_21
+  - first:
+      213: 7732423172045951354
+    second: PauseEmbers_22
+  - first:
+      213: -7317390174008817846
+    second: PauseEmbers_23
+  - first:
+      213: -465778288738550977
+    second: PauseEmbers_24
+  - first:
+      213: -6434263138356693934
+    second: PauseEmbers_25
+  - first:
+      213: -4243636414302592137
+    second: PauseEmbers_26
+  - first:
+      213: -8203078624027042204
+    second: PauseEmbers_27
+  - first:
+      213: -2484298640891192065
+    second: PauseEmbers_28
+  - first:
+      213: -4609148659711710553
+    second: PauseEmbers_29
+  - first:
+      213: 1083401026057901133
+    second: PauseEmbers_30
+  - first:
+      213: 4358260106085714352
+    second: PauseEmbers_31
+  - first:
+      213: -5273831734321951080
+    second: PauseEmbers_32
+  - first:
+      213: -2311161460180308785
+    second: PauseEmbers_33
+  - first:
+      213: -2432454132059805557
+    second: PauseEmbers_34
+  - first:
+      213: -2302220751498160928
+    second: PauseEmbers_35
+  - first:
+      213: 7325323686720905106
+    second: PauseEmbers_36
+  - first:
+      213: -7221288747002879006
+    second: PauseEmbers_37
+  - first:
+      213: 179957819529541217
+    second: PauseEmbers_38
+  - first:
+      213: 3784735060616065248
+    second: PauseEmbers_39
+  - first:
+      213: 6072289946337076410
+    second: PauseEmbers_40
+  - first:
+      213: 8000361806897937162
+    second: PauseEmbers_41
+  - first:
+      213: -7642048145738933135
+    second: PauseEmbers_42
+  - first:
+      213: -2948950929213481367
+    second: PauseEmbers_43
+  - first:
+      213: 6084724457674916707
+    second: PauseEmbers_44
+  - first:
+      213: -3307652015249035334
+    second: PauseEmbers_45
+  - first:
+      213: 9212904012675422977
+    second: PauseEmbers_46
+  - first:
+      213: 1325209503791955306
+    second: PauseEmbers_47
+  - first:
+      213: 1066344969424493243
+    second: PauseEmbers_48
+  - first:
+      213: -3831492282473755638
+    second: PauseEmbers_49
+  - first:
+      213: -8122079329757124233
+    second: PauseEmbers_50
+  - first:
+      213: 4180485048575980834
+    second: PauseEmbers_51
+  - first:
+      213: -967751674978126540
+    second: PauseEmbers_52
+  - first:
+      213: 4924506372755563842
+    second: PauseEmbers_53
+  - first:
+      213: 7628141053012130757
+    second: PauseEmbers_54
+  - first:
+      213: -8308728152991408504
+    second: PauseEmbers_55
+  - first:
+      213: 6600619388866893704
+    second: PauseEmbers_56
+  - first:
+      213: -2212516431384741634
+    second: PauseEmbers_57
+  - first:
+      213: 1753613010103607976
+    second: PauseEmbers_58
+  - first:
+      213: -8456035374561800260
+    second: PauseEmbers_59
+  - first:
+      213: 6092847075794777375
+    second: PauseEmbers_60
+  - first:
+      213: -6521728895509691480
+    second: PauseEmbers_61
+  - first:
+      213: -3363616459273242123
+    second: PauseEmbers_62
+  - first:
+      213: -594529657892872115
+    second: PauseEmbers_63
+  - first:
+      213: -8470697168397884592
+    second: PauseEmbers_64
+  - first:
+      213: -1570093527055068733
+    second: PauseEmbers_65
+  - first:
+      213: 5325026837356001024
+    second: PauseEmbers_66
+  - first:
+      213: -8680064677492468404
+    second: PauseEmbers_67
+  - first:
+      213: -3325989377571795894
+    second: PauseEmbers_68
+  - first:
+      213: -409918585546660100
+    second: PauseEmbers_69
+  - first:
+      213: 682403497070087701
+    second: PauseEmbers_70
+  - first:
+      213: 6729577518078911755
+    second: PauseEmbers_71
+  - first:
+      213: 3646511724476292063
+    second: PauseEmbers_72
+  - first:
+      213: 8876764717222396399
+    second: PauseEmbers_73
+  - first:
+      213: 1771099792239584639
+    second: PauseEmbers_74
+  - first:
+      213: 1487881222329998951
+    second: PauseEmbers_75
+  - first:
+      213: -1987756970916849859
+    second: PauseEmbers_76
+  - first:
+      213: 8431819749093370705
+    second: PauseEmbers_77
+  - first:
+      213: 5169854769913214163
+    second: PauseEmbers_78
+  - first:
+      213: -3300857673138007627
+    second: PauseEmbers_79
+  - first:
+      213: 7588542117344759327
+    second: PauseEmbers_80
+  - first:
+      213: 6350198128135251396
+    second: PauseEmbers_81
+  - first:
+      213: 8883720396928054168
+    second: PauseEmbers_82
+  - first:
+      213: 3525982378027738620
+    second: PauseEmbers_83
+  - first:
+      213: -7674602419197034442
+    second: PauseEmbers_84
+  - first:
+      213: 1498758125630835470
+    second: PauseEmbers_85
+  - first:
+      213: 5313301196375271541
+    second: PauseEmbers_86
+  - first:
+      213: -1833245238772246827
+    second: PauseEmbers_87
+  - first:
+      213: 632693660812886443
+    second: PauseEmbers_88
+  - first:
+      213: 597912875202169704
+    second: PauseEmbers_89
+  - first:
+      213: -503045434885361881
+    second: PauseEmbers_90
+  - first:
+      213: -5734610214453971237
+    second: PauseEmbers_91
+  - first:
+      213: -4639967603340953603
+    second: PauseEmbers_92
+  - first:
+      213: -8121768799698125269
+    second: PauseEmbers_93
+  - first:
+      213: -7106267181903124312
+    second: PauseEmbers_94
+  - first:
+      213: 7052161711509910420
+    second: PauseEmbers_95
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: PauseEmbers_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 96
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 706ba9551b848084681a589aa7c0b3c7
+      internalID: 106770158
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_01
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 96
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 260871147e134f240bf4cc813ab2671a
+      internalID: -2072811114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_02
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 96
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 477aedb029250df47aa5f1fe36f7df62
+      internalID: 813432166
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_03
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 96
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d3a9b48bbdd8b4f408a3a3b3450cbce5
+      internalID: -1528589498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_04
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 64
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c90c5b8d0065e9f4781558595e8f7829
+      internalID: -24372390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_05
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 64
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7f198b3de7a70574a9b3eef40292378a
+      internalID: -1472787121
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_06
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 64
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be8dd2a06d124754c8394e3c608c6007
+      internalID: 1605400275
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_07
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 64
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ffa03670a0394b744a2f95ac19a36a74
+      internalID: 2016485916
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_08
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dd98fcb7f90476e438c71d8db017cd43
+      internalID: -614192382
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_09
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 32
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2d34aa828ac34be499163313b2b16f50
+      internalID: -1948594676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_10
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 32
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c9512a9ccb7de754fa9e8ed07568d066
+      internalID: -6625744701538972555
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_11
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 32
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0ac23d6f3a0c4a941bb870d4d9c7327e
+      internalID: 8969605323090957360
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8744a377c8e0aa0489bd7e7d461c2376
+      internalID: 8786222250128109673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_13
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 0
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bfcd8edb78d708145a2f889f9d9b8779
+      internalID: 2390754304493385935
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_14
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c89c0af3bf45a7e4c85ebda4370f16a6
+      internalID: 902305364910236272
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PauseEmbers_15
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 0
+        width: 48
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0c13f8438c15f234895a7d2198c54b42
+      internalID: -4566989250951498514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: f3e135df049be2b4a842e782c37ab936
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      PauseEmbers_00: 106770158
+      PauseEmbers_01: -2072811114
+      PauseEmbers_02: 813432166
+      PauseEmbers_03: -1528589498
+      PauseEmbers_04: -24372390
+      PauseEmbers_05: -1472787121
+      PauseEmbers_06: 1605400275
+      PauseEmbers_07: 2016485916
+      PauseEmbers_08: -614192382
+      PauseEmbers_09: -1948594676
+      PauseEmbers_10: -6625744701538972555
+      PauseEmbers_11: 8969605323090957360
+      PauseEmbers_12: 8786222250128109673
+      PauseEmbers_13: 2390754304493385935
+      PauseEmbers_14: 902305364910236272
+      PauseEmbers_15: -4566989250951498514
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
