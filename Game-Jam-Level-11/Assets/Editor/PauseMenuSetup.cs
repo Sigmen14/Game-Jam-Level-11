@@ -577,7 +577,7 @@ public static class PauseMenuSetup
         RectTransform rect = go.GetComponent<RectTransform>();
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.anchoredPosition = position;
-        rect.sizeDelta = new Vector2(560f, 104f);
+        rect.sizeDelta = new Vector2(480f, 78f);
 
         Image image = go.GetComponent<Image>();
         image.color = new Color(0.95f, 0.55f, 0.16f, 1f);
@@ -591,7 +591,7 @@ public static class PauseMenuSetup
         button.colors = colors;
 
         CreateText(label, go.transform, label == "ВЫЙТИ В МЕНЮ" ? 32 : 36,
-            Vector2.zero, new Vector2(520f, 90f));
+            Vector2.zero, new Vector2(440f, 68f));
         Text buttonLabel = go.GetComponentInChildren<Text>(true);
         if (buttonLabel != null)
             buttonLabel.color = new Color(0.08f, 0.06f, 0.04f, 1f);
