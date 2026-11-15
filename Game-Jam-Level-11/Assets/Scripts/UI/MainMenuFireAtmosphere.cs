@@ -59,6 +59,7 @@ public sealed class MainMenuFireAtmosphere : MonoBehaviour
     private bool _atmosphereVisible = true;
     private Coroutine _transitionRoutine;
     private Color _flashColor;
+    private Vector3 _flashBaseScale = Vector3.one;
 
     private void Start()
     {
@@ -80,9 +81,32 @@ public sealed class MainMenuFireAtmosphere : MonoBehaviour
         _sparkStates = BuildStates(risingSparks, true);
         _emberStates = BuildStates(brightEmbers, false);
 
-        _flashColor = transitionFlash != null
-            ? transitionFlash.color
-            : new Color(1f, 0.32f, 0.08f, 0f);
+        _flashColor = new Color(1f, 0.62f, 0.16f, 0f);
+        if (transitionFlash != null)
+        {
+            // UI/Default is Unity's built-in Canvas shader. A custom lit sprite
+            // material is not needed for a screen-space Image.
+            transitionFlash.material = null;
+            transitionFlash.raycastTarget = false;
+            transitionFlash.maskable = false;
+            _flashBaseScale = transitionFlash.rectTransform.localScale;
+            transitionFlash.color = _flashColor;
+            transitionFlash.enabled = false;
+        }
+
+        if (hearthGlow != null)
+        {
+            hearthGlow.material = null;
+            hearthGlow.raycastTarget = false;
+            hearthGlow.maskable = false;
+        }
+
+        if (hearthCore != null)
+        {
+            hearthCore.material = null;
+            hearthCore.raycastTarget = false;
+            hearthCore.maskable = false;
+        }
 
         ApplyParticleCounts();
         _initialized = true;
@@ -145,6 +169,8 @@ public sealed class MainMenuFireAtmosphere : MonoBehaviour
             Color flash = _flashColor;
             flash.a = flashPeakAlpha * envelope;
             transitionFlash.color = flash;
+            transitionFlash.rectTransform.localScale =
+                _flashBaseScale * (0.82f + 0.42f * envelope);
 
             elapsed += Time.unscaledDeltaTime;
             yield return null;
@@ -153,6 +179,8 @@ public sealed class MainMenuFireAtmosphere : MonoBehaviour
         Color finishedFlash = _flashColor;
         finishedFlash.a = 0f;
         transitionFlash.color = finishedFlash;
+        transitionFlash.rectTransform.localScale = _flashBaseScale;
+        transitionFlash.enabled = false;
         _transitionBoost = 0f;
         _transitionRoutine = null;
 
@@ -172,7 +200,9 @@ public sealed class MainMenuFireAtmosphere : MonoBehaviour
             if (image == null)
                 continue;
 
+            image.material = null;
             image.raycastTarget = false;
+            image.maskable = false;
 
             ParticleState state = new ParticleState
             {
@@ -292,8 +322,8 @@ public sealed class MainMenuFireAtmosphere : MonoBehaviour
         float pulse = 0.91f + 0.09f * Mathf.Sin(_elapsed * 0.9f);
         float transition = 1f + _transitionBoost * 0.9f;
 
-        ApplyGlow(hearthGlow, pulse * transition, 1f + _transitionBoost * 0.12f, 0.20f);
-        ApplyGlow(hearthCore, pulse * transition, 1f + _transitionBoost * 0.16f, 0.15f);
+        ApplyGlow(hearthGlow, pulse * transition, 1f + _transitionBoost * 0.12f, 0.10f);
+        ApplyGlow(hearthCore, pulse * transition, 1f + _transitionBoost * 0.16f, 0.13f);
     }
 
     private void ApplyGlow(Image image, float alphaMultiplier, float scaleMultiplier, float baseAlpha)
@@ -393,7 +423,7 @@ public sealed class MainMenuFireAtmosphere : MonoBehaviour
         brightnessMultiplier = Mathf.Clamp(brightnessMultiplier, 0.1f, 2f);
         glowStrength = Mathf.Clamp(glowStrength, 0.1f, 2f);
         transitionDuration = Mathf.Max(0.1f, transitionDuration);
-        flashPeakAlpha = Mathf.Clamp(flashPeakAlpha, 0f, 0.65f);
+        flashPeakAlpha = Mathf.Clamp(flashPeakAlpha, 0f, 0.4f);
 
         ApplyParticleCounts();
     }
