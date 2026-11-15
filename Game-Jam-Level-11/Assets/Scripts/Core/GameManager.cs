@@ -258,17 +258,31 @@ public sealed class GameManager : MonoBehaviour
 
         ChangeState(didWin ? GameState.Won : GameState.Lost);
 
+        float survivedSeconds = ElapsedTime;
+
         if (didWin && endingFlowController != null)
         {
             if (hudView != null)
                 hudView.HideForEnding();
 
-            endingFlowController.ShowChoice(ElapsedTime);
+            endingFlowController.ShowVictoryPrelude(survivedSeconds);
+        }
+        else if (!didWin && endingFlowController != null)
+        {
+            if (hudView != null)
+                hudView.HideForEnding();
+
+            endingFlowController.ShowDefeatPrelude(survivedSeconds, () =>
+            {
+                // Return to the established result panel only after the defeat scene.
+                if (hudView != null && _state == GameState.Lost)
+                    hudView.ShowResult(false, survivedSeconds);
+            });
         }
         else if (hudView != null)
         {
-            // A depleted flame keeps the existing loss/result flow unchanged.
-            hudView.ShowResult(didWin, ElapsedTime);
+            // Keep the original result-panel fallback when the ending view is absent.
+            hudView.ShowResult(didWin, survivedSeconds);
         }
     }
 
