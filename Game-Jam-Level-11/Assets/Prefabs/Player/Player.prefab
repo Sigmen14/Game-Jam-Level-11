@@ -5345,6 +5345,16 @@ MonoBehaviour:
   gustSparkSpeedMultiplier: 1.35
   warningSparkInfluence: 0.55
   warningFlickerBoost: 0.07
+  createVisibleWindFX: 1
+  warningWindRate: 16
+  gustWindRate: 90
+  strongGustWindRate: 150
+  warningWindSpeed: 2.5
+  gustWindSpeed: 6
+  strongGustWindSpeed: 10
+  windStreakLifetime: 1.1
+  windStreakColor: {r: 0.68, g: 0.7, b: 0.69, a: 0.38}
+  windStreakHighlight: {r: 1, g: 0.73, b: 0.42, a: 0.46}
   highFuelSparkInterval: 0.48
   mediumFuelSparkInterval: 1.15
   lowFuelSparkInterval: 2.7
