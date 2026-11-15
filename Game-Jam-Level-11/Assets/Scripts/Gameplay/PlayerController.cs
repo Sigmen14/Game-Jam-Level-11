@@ -148,7 +148,7 @@ public sealed class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (!gameplayActive || flameMeter == null || collision == null)
+        if (!gameplayActive || flameMeter == null || body == null || collision == null)
             return;
 
         GameplayChallengeController obstacle = collision.gameObject.GetComponentInParent<GameplayChallengeController>();

@@ -86,7 +86,56 @@ public sealed class GameManager : MonoBehaviour
         if (routeDirector != null)
             routeDirector.Bind(playerController, flameMeter, hudView);
 
+        ValidateChallengeSetup();
         ReturnToMainMenu();
+    }
+
+    private void ValidateChallengeSetup()
+    {
+        if (windController == null)
+            Debug.LogError("GameManager: WindController is not assigned; Grey Wind events cannot run.", this);
+
+        if (routeDirector == null)
+            Debug.LogError("GameManager: RouteDirector is not assigned; route choice cannot run.", this);
+        else if (!routeDirector.IsRouteDirector)
+            Debug.LogError("GameManager: routeDirector must use RouteDirector mode.", routeDirector);
+
+        if (rotatingObstacles == null || rotatingObstacles.Length == 0)
+        {
+            Debug.LogError("GameManager: no rotating obstacles are assigned.", this);
+            return;
+        }
+
+        for (int i = 0; i < rotatingObstacles.Length; i++)
+        {
+            GameplayChallengeController obstacle = rotatingObstacles[i];
+            if (obstacle == null)
+            {
+                Debug.LogError("GameManager: rotatingObstacles has a missing scene reference at index " + i + ".", this);
+                continue;
+            }
+
+            if (!obstacle.IsRotatingObstacle)
+                Debug.LogError("GameManager: a rotating obstacle reference is not in RotatingObstacle mode.", obstacle);
+
+            Rigidbody2D obstacleBody = obstacle.GetComponent<Rigidbody2D>();
+            if (obstacleBody == null || obstacleBody.bodyType != RigidbodyType2D.Kinematic)
+                Debug.LogError("GameManager: each rotating obstacle needs a root Kinematic Rigidbody2D.", obstacle);
+
+            Collider2D[] colliders = obstacle.GetComponentsInChildren<Collider2D>(true);
+            bool hasSolidCollider = false;
+            for (int c = 0; c < colliders.Length; c++)
+            {
+                if (colliders[c] != null && colliders[c].enabled && !colliders[c].isTrigger)
+                {
+                    hasSolidCollider = true;
+                    break;
+                }
+            }
+
+            if (!hasSolidCollider)
+                Debug.LogError("GameManager: each rotating obstacle needs an enabled solid Collider2D.", obstacle);
+        }
     }
 
     private void Update()

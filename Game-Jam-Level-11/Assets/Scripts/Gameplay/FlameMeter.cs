@@ -89,9 +89,10 @@ public sealed class FlameMeter : MonoBehaviour
             bool protectedByPlayer = playerController != null && playerController.IsProtecting;
             // Keep the established Space protection value unchanged. Growth only
             // softens the exposed-wind penalty, so the Grey Wind remains dangerous.
+            float gustIntensity = Mathf.Max(1f, windController.CurrentGustStrength);
             drain += protectedByPlayer
                 ? protectedWindDamagePerSecond
-                : windDamagePerSecond * WindDamageMultiplier;
+                : windDamagePerSecond * gustIntensity * WindDamageMultiplier;
         }
 
         ChangeFlame(-drain * Time.deltaTime);

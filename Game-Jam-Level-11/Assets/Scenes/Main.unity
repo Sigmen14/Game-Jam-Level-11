@@ -2019,7 +2019,7 @@ MonoBehaviour:
   warningDuration: 4
   gustDuration: 4
   gustDurationVariation: 0.5
-  minimumGustStrength: 1.55
+  minimumGustStrength: 1.25
   maximumGustStrength: 1.85
   strongGustThreshold: 1.55
   windDirection: {x: 1, y: 0}
@@ -2992,9 +2992,9 @@ MonoBehaviour:
   knockbackImpulse: 4
   hitCooldown: 0.85
   decisionStartX: 1
-  decisionLockX: 2.5
-  shortLaneThreshold: 1.9
-  safeLaneThreshold: -1.9
+  decisionLockX: 3.5
+  shortLaneThreshold: 1.35
+  safeLaneThreshold: -1.35
   shortFinishX: 6.55
   shortFinishY: 3.05
   safeFinishX: 7.75

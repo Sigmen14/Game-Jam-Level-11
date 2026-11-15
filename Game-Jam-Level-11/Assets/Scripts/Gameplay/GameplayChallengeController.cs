@@ -36,9 +36,9 @@ public sealed class GameplayChallengeController : MonoBehaviour
 
     [Header("Route junction")]
     [SerializeField, Min(0f)] private float decisionStartX = 1f;
-    [SerializeField, Min(0f)] private float decisionLockX = 2.5f;
-    [SerializeField] private float shortLaneThreshold = 1.9f;
-    [SerializeField] private float safeLaneThreshold = -1.9f;
+    [SerializeField, Min(0f)] private float decisionLockX = 3.5f;
+    [SerializeField] private float shortLaneThreshold = 1.35f;
+    [SerializeField] private float safeLaneThreshold = -1.35f;
 
     [Header("Route exits")]
     [SerializeField] private float shortFinishX = 6.55f;
@@ -53,6 +53,7 @@ public sealed class GameplayChallengeController : MonoBehaviour
     [SerializeField, Min(0f)] private float resultMessageDuration = 4f;
 
     public bool IsRotatingObstacle => mode == ControllerMode.RotatingObstacle;
+    public bool IsRouteDirector => mode == ControllerMode.RouteDirector;
     public float CollisionDamage => collisionDamage;
     public float KnockbackImpulse => knockbackImpulse;
 
@@ -71,8 +72,38 @@ public sealed class GameplayChallengeController : MonoBehaviour
     {
         obstacleBody = GetComponent<Rigidbody2D>();
         baseAngle = transform.localEulerAngles.z;
+
+        if (IsRotatingObstacle)
+            ValidateRotatingObstaclePhysics();
+
         ResetMotion();
         ResetRoute();
+    }
+
+    private void ValidateRotatingObstaclePhysics()
+    {
+        if (obstacleBody == null)
+        {
+            Debug.LogError("GameplayChallengeController: rotating obstacle needs a root Rigidbody2D.", this);
+        }
+        else if (obstacleBody.bodyType != RigidbodyType2D.Kinematic)
+        {
+            Debug.LogError("GameplayChallengeController: rotating obstacle Rigidbody2D must be Kinematic.", this);
+        }
+
+        Collider2D[] colliders = GetComponentsInChildren<Collider2D>(true);
+        bool hasSolidCollider = false;
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            if (colliders[i] != null && colliders[i].enabled && !colliders[i].isTrigger)
+            {
+                hasSolidCollider = true;
+                break;
+            }
+        }
+
+        if (!hasSolidCollider)
+            Debug.LogError("GameplayChallengeController: rotating obstacle needs an enabled non-trigger Collider2D.", this);
     }
 
     public void Bind(PlayerController playerController, FlameMeter meter, HUDView hud)
@@ -105,15 +136,12 @@ public sealed class GameplayChallengeController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!isRunning || !IsRotatingObstacle)
+        if (!isRunning || !IsRotatingObstacle || obstacleBody == null)
             return;
 
         elapsed += Time.fixedDeltaTime;
         float angle = baseAngle + Mathf.Sin(elapsed * rotationSpeed + phaseOffset) * rotationAmplitude;
-        if (obstacleBody != null)
-            obstacleBody.MoveRotation(angle);
-        else
-            transform.localRotation = Quaternion.Euler(0f, 0f, angle);
+        obstacleBody.MoveRotation(angle);
     }
 
     public bool TryConsumeHit()
@@ -150,28 +178,24 @@ public sealed class GameplayChallengeController : MonoBehaviour
         if (routeState == RouteState.Waiting && position.x >= decisionStartX)
         {
             routeState = RouteState.Choosing;
-            ShowMessage("РАЗВИЛКА: ВВЕРХ — КОРОТКИЙ ОПАСНЫЙ ПУТЬ · ВНИЗ — ДЛИННЫЙ БЕЗОПАСНЫЙ");
+            ShowMessage("РАЗВИЛКА: ВВЕРХ — КОРОТКО И ОПАСНО (+14); ВНИЗ — ДОЛЬШЕ И БЕЗОПАСНЕЕ (+8)");
         }
 
         if (routeState == RouteState.Choosing)
         {
             if (position.y >= shortLaneThreshold)
             {
-                routeState = RouteState.ShortDangerous;
-                ShowMessage("КОРОТКИЙ ПУТЬ: ПРОЙДИ МЕЖДУ ВРАЩАЮЩИМИСЯ ПРЕПЯТСТВИЯМИ");
+                SelectRoute(true);
             }
             else if (position.y <= safeLaneThreshold)
             {
-                routeState = RouteState.LongSafe;
-                ShowMessage("БЕЗОПАСНЫЙ ПУТЬ: ОБОЙДИ ОПАСНЫЙ УЧАСТОК СНИЗУ");
+                SelectRoute(false);
             }
             else if (position.x >= decisionLockX)
             {
-                // A player who ignores the prompt is committed to the nearest lane.
-                routeState = position.y >= 0f ? RouteState.ShortDangerous : RouteState.LongSafe;
-                ShowMessage(routeState == RouteState.ShortDangerous
-                    ? "КОРОТКИЙ ПУТЬ: ПРОЙДИ МЕЖДУ ВРАЩАЮЩИМИСЯ ПРЕПЯТСТВИЯМИ"
-                    : "БЕЗОПАСНЫЙ ПУТЬ: ОБОЙДИ ОПАСНЫЙ УЧАСТОК СНИЗУ");
+                // Commit to the nearest lane. Neutral input defaults to the safer
+                // lower lane rather than silently forcing the player into hazards.
+                SelectRoute(position.y > 0f);
             }
         }
 
@@ -187,6 +211,14 @@ public sealed class GameplayChallengeController : MonoBehaviour
         {
             CompleteRoute(false);
         }
+    }
+
+    private void SelectRoute(bool tookShortRoute)
+    {
+        routeState = tookShortRoute ? RouteState.ShortDangerous : RouteState.LongSafe;
+        ShowMessage(tookShortRoute
+            ? "КОРОТКИЙ ПУТЬ ↑: ДЕРЖИСЬ ВЕРХНЕЙ ЛИНИИ · 3 ВРАЩАЮЩИХСЯ ЗАСОВА · +14 ОГНЯ"
+            : "БЕЗОПАСНЫЙ ПУТЬ ↓: ДЕРЖИСЬ НИЖНЕЙ ЛИНИИ · ДОЛЬШЕ, ЗАТО БЕЗ ЗАСОВОВ · +8 ОГНЯ");
     }
 
     private void CompleteRoute(bool tookShortRoute)
