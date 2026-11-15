@@ -81,13 +81,30 @@ public static class LastFlameProjectSetup
 
             BuildMenuScene(menuPrefab);
             BuildMainScene(playerPrefab, pickupPrefab, coverPrefab, hudPrefab);
-            EditorSceneManager.OpenScene(MenuScenePath, OpenSceneMode.Single);
+
+            // The current game flow keeps the menu and GameManager together in Main.unity.
+            // This wires MainMenuController.gameManager and the reverse GameManager reference.
+            GameFlowUISetup.Setup();
+
+            Scene mainScene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+            GameManager configuredManager = FindInScene<GameManager>(mainScene);
+            MainMenuController configuredMenu = FindInScene<MainMenuController>(mainScene);
+            if (configuredManager == null || configuredMenu == null)
+                throw new System.InvalidOperationException(
+                    "Game Flow UI setup did not create a MainMenuController and GameManager in Main.unity.");
+
+            SerializedObject menuControllerSerialized = new SerializedObject(configuredMenu);
+            SerializedProperty managerProperty = menuControllerSerialized.FindProperty("gameManager");
+            if (managerProperty == null || managerProperty.objectReferenceValue != configuredManager)
+                throw new System.InvalidOperationException(
+                    "MainMenuController.gameManager was not assigned in Main.unity.");
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
             EditorUtility.DisplayDialog(
                 "Last Flame",
-                "Menu and Main scenes plus their prefab assets have been authored. Menu.unity is the build entry point; press Play from the Menu scene.",
+                "Menu and Main scenes plus their prefab assets have been authored. Main.unity is configured as the game entry point; press Play from Main.",
                 "OK");
         }
         catch (System.Exception exception)
@@ -455,18 +472,24 @@ public static class LastFlameProjectSetup
             new Color(1f, 0.77f, 0.38f, 1f), new Vector2(0f, 190f), new Vector2(1100f, 90f),
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
 
+        CreateText(root.transform, "MasterLabel", "ОБЩАЯ ГРОМКОСТЬ", 22, TextAnchor.MiddleLeft,
+            Color.white, new Vector2(-300f, 120f), new Vector2(420f, 44f),
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+
         CreateText(root.transform, "SfxLabel", "ЗВУКОВЫЕ ЭФФЕКТЫ (SFX)", 22, TextAnchor.MiddleLeft,
-            Color.white, new Vector2(-300f, 72f), new Vector2(420f, 44f),
+            Color.white, new Vector2(-300f, -5f), new Vector2(420f, 44f),
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
 
         CreateText(root.transform, "MusicLabel", "ГРОМКОСТЬ МУЗЫКИ", 22, TextAnchor.MiddleLeft,
-            Color.white, new Vector2(-300f, -65f), new Vector2(420f, 44f),
+            Color.white, new Vector2(-300f, -90f), new Vector2(420f, 44f),
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
 
+        CreateSettingsSlider(root.transform, "MasterSlider",
+            new Vector2(-10f, 75f), 1f, out _);
         CreateSettingsSlider(root.transform, "SfxSlider",
-            new Vector2(-10f, 25f), 0.8f, out _);
+            new Vector2(-10f, -45f), 0.8f, out _);
         CreateSettingsSlider(root.transform, "MusicSlider",
-            new Vector2(-10f, -112f), 0.65f, out _);
+            new Vector2(-10f, -130f), 0.65f, out _);
 
         CreateMenuButton(
             root.transform, "BackButton", "НАЗАД", new Vector2(0f, -245f), new Vector2(300f, 64f));
@@ -609,13 +632,17 @@ public static class LastFlameProjectSetup
         SetObjectReference(menuController, "mainMenuPanel", menuInstance);
         SetObjectReference(menuController, "settingsPanel", settingsInstance);
 
+        Slider masterSlider = settingsInstance.transform.Find("MasterSlider").GetComponent<Slider>();
         Slider sfxSlider = settingsInstance.transform.Find("SfxSlider").GetComponent<Slider>();
         Slider musicSlider = settingsInstance.transform.Find("MusicSlider").GetComponent<Slider>();
+        Text masterValueText = settingsInstance.transform.Find("MasterSliderValue").GetComponent<Text>();
         Text sfxValueText = settingsInstance.transform.Find("SfxSliderValue").GetComponent<Text>();
         Text musicValueText = settingsInstance.transform.Find("MusicSliderValue").GetComponent<Text>();
 
+        SetObjectReference(audioSettings, "masterSlider", masterSlider);
         SetObjectReference(audioSettings, "sfxSlider", sfxSlider);
         SetObjectReference(audioSettings, "musicSlider", musicSlider);
+        SetObjectReference(audioSettings, "masterValueText", masterValueText);
         SetObjectReference(audioSettings, "sfxValueText", sfxValueText);
         SetObjectReference(audioSettings, "musicValueText", musicValueText);
 
@@ -629,6 +656,7 @@ public static class LastFlameProjectSetup
         UnityEventTools.AddPersistentListener(settingsButton.onClick, menuController.OpenSettings);
         UnityEventTools.AddPersistentListener(exitButton.onClick, menuController.ExitGame);
         UnityEventTools.AddPersistentListener(backButton.onClick, menuController.CloseSettings);
+        UnityEventTools.AddPersistentListener(masterSlider.onValueChanged, audioSettings.SetMasterVolume);
         UnityEventTools.AddPersistentListener(sfxSlider.onValueChanged, audioSettings.SetSfxVolume);
         UnityEventTools.AddPersistentListener(musicSlider.onValueChanged, audioSettings.SetMusicVolume);
 
@@ -636,6 +664,7 @@ public static class LastFlameProjectSetup
         PrefabUtility.RecordPrefabInstancePropertyModifications(settingsButton);
         PrefabUtility.RecordPrefabInstancePropertyModifications(exitButton);
         PrefabUtility.RecordPrefabInstancePropertyModifications(backButton);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(masterSlider);
         PrefabUtility.RecordPrefabInstancePropertyModifications(sfxSlider);
         PrefabUtility.RecordPrefabInstancePropertyModifications(musicSlider);
 
@@ -1027,6 +1056,19 @@ public static class LastFlameProjectSetup
         GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
         Object.DestroyImmediate(root);
         return prefab;
+    }
+
+    private static T FindInScene<T>(Scene scene) where T : Component
+    {
+        GameObject[] roots = scene.GetRootGameObjects();
+        for (int i = 0; i < roots.Length; i++)
+        {
+            T found = roots[i].GetComponentInChildren<T>(true);
+            if (found != null)
+                return found;
+        }
+
+        return null;
     }
 
     private static void SetObjectReference(Object target, string propertyName, Object value)

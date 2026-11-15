@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Controls the pre-authored main-menu prefab in the gameplay scene.
@@ -11,16 +12,39 @@ public sealed class MainMenuController : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private string gameplaySceneName = "Main";
 
     public void PlayGame()
     {
+        // The standalone Menu scene intentionally has no GameManager. Find one when
+        // the menu is embedded in Main, otherwise transfer to the gameplay scene.
         if (gameManager == null)
+            gameManager = FindFirstObjectByType<GameManager>();
+
+        if (gameManager != null)
         {
-            Debug.LogError("MainMenuController: assign GameManager in the Inspector.", this);
+            gameManager.StartGame();
             return;
         }
 
-        gameManager.StartGame();
+        if (SceneManager.GetActiveScene().name == gameplaySceneName)
+        {
+            Debug.LogError(
+                "MainMenuController: no GameManager was found in Main.unity. Run Game Jam > Setup Game Flow UI.",
+                this);
+            return;
+        }
+
+        if (!Application.CanStreamedLevelBeLoaded(gameplaySceneName))
+        {
+            Debug.LogError(
+                "MainMenuController: gameplay scene '" + gameplaySceneName +
+                "' is not in Build Settings. Add Assets/Scenes/" + gameplaySceneName + ".unity.",
+                this);
+            return;
+        }
+
+        SceneManager.LoadScene(gameplaySceneName);
     }
 
     public void ShowMainMenu()

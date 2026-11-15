@@ -15,6 +15,9 @@ public sealed class PauseMenuController : MonoBehaviour
     [SerializeField] private Button restartButton;
     [SerializeField] private Button menuButton;
     [SerializeField] private Button settingsBackButton;
+    [SerializeField] private InputActionReference cancelAction;
+
+    private bool ownsCancelAction;
 
     private void Awake()
     {
@@ -45,9 +48,24 @@ public sealed class PauseMenuController : MonoBehaviour
         HidePanels();
     }
 
+    private void OnEnable()
+    {
+        InputAction action = cancelAction != null ? cancelAction.action : null;
+        if (action != null && !action.enabled)
+        {
+            action.Enable();
+            ownsCancelAction = true;
+        }
+    }
+
     private void Update()
     {
-        if (Keyboard.current == null || !Keyboard.current.escapeKey.wasPressedThisFrame || gameManager == null)
+        InputAction action = cancelAction != null ? cancelAction.action : null;
+        bool cancelPressed = action != null && action.enabled
+            ? action.WasPressedThisFrame()
+            : Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame;
+
+        if (!cancelPressed || gameManager == null)
             return;
 
         if (gameManager.State == GameManager.GameState.Playing)
@@ -117,6 +135,14 @@ public sealed class PauseMenuController : MonoBehaviour
     {
         if (panel != null && panel.activeSelf != active)
             panel.SetActive(active);
+    }
+
+    private void OnDisable()
+    {
+        if (ownsCancelAction && cancelAction != null && cancelAction.action != null)
+            cancelAction.action.Disable();
+
+        ownsCancelAction = false;
     }
 
     private void OnDestroy()
