@@ -24,6 +24,17 @@ public sealed class FlameVisualFeedback : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float highFuelThreshold = 0.65f;
     [SerializeField, Range(0f, 1f)] private float lowFuelThreshold = 0.30f;
 
+    [Header("Growth stage visuals")]
+    [SerializeField, Min(1f)] private float steadySparkScaleMultiplier = 1.10f;
+    [SerializeField, Min(1f)] private float lastFlameScaleMultiplier = 1.22f;
+    [SerializeField, Min(1f)] private float lastFlameHeightMultiplier = 1.08f;
+    [SerializeField, Range(0f, 1f)] private float steadySparkColorBlend = 0.42f;
+    [SerializeField, Range(0f, 1f)] private float lastFlameColorBlend = 0.64f;
+    [SerializeField] private Color steadySparkFlameColor = new Color(1f, 0.72f, 0.24f, 1f);
+    [SerializeField] private Color lastFlameFlameColor = new Color(1f, 0.52f, 0.12f, 1f);
+    [SerializeField] private Color steadySparkLightColor = new Color(1f, 0.76f, 0.38f, 1f);
+    [SerializeField] private Color lastFlameLightColor = new Color(1f, 0.58f, 0.20f, 1f);
+
     [Header("Flame size")]
     [SerializeField, Min(0.1f)] private float highFuelScale = 1.18f;
     [SerializeField, Min(0.1f)] private float mediumFuelScale = 0.92f;
@@ -85,6 +96,7 @@ public sealed class FlameVisualFeedback : MonoBehaviour
 
     private Vector3 baseFlameScale;
     private Color baseFlameColor;
+    private Color baseLightColor = Color.white;
     private float baseLightIntensity = 1f;
     private float pickupFlashRemaining;
     private float sparkTimer;
@@ -101,6 +113,7 @@ public sealed class FlameVisualFeedback : MonoBehaviour
         if (flameLight != null)
         {
             baseLightIntensity = flameLight.intensity;
+            baseLightColor = flameLight.color;
         }
 
         noiseSeed = Mathf.Abs(GetInstanceID() % 10000) * 0.0137f;
@@ -181,13 +194,16 @@ public sealed class FlameVisualFeedback : MonoBehaviour
                        maximumWindLeanAngle * shelterFactor;
         }
 
+        FlameMeter.GrowthStage growthStage = flameMeter.CurrentGrowthStage;
         float fuelScale = GetFuelScale(fuel);
+        float growthScale = GetGrowthScale(growthStage);
         float flash = pickupFlashDuration > 0f
             ? Mathf.Clamp01(pickupFlashRemaining / pickupFlashDuration)
             : 0f;
 
-        Vector3 targetScale = baseFlameScale * fuelScale;
+        Vector3 targetScale = baseFlameScale * (fuelScale * growthScale);
         targetScale.x *= flicker;
+        targetScale.y *= GetGrowthHeightMultiplier(growthStage);
         targetScale.y *= Mathf.Lerp(0.96f, 1.04f, (noise + 1f) * 0.5f);
         targetScale *= Mathf.Lerp(1f, pickupScaleBoost, flash);
 
@@ -199,23 +215,27 @@ public sealed class FlameVisualFeedback : MonoBehaviour
         flameTransform.localRotation = Quaternion.Slerp(
             flameTransform.localRotation, targetRotation, smoothing);
 
-        Color targetColor = GetFuelColor(fuel);
+        float growthColorBlend = GetGrowthColorBlend(growthStage);
+        Color targetColor = Color.Lerp(GetFuelColor(fuel), GetGrowthFlameColor(growthStage), growthColorBlend);
         targetColor.a *= Mathf.Lerp(lowFuelMinimumAlpha, 1f, fuel);
         targetColor.r *= flicker;
         targetColor.g *= flicker;
         targetColor = Color.Lerp(targetColor, pickupFlashColor, flash);
-        flameRenderer.color = targetColor;
+        flameRenderer.color = Color.Lerp(flameRenderer.color, targetColor, smoothing);
 
         if (flameLight != null)
         {
             flameLight.intensity = baseLightIntensity * flicker *
                                    (1f + flash * pickupLightBoost);
+            Color targetLightColor = Color.Lerp(
+                baseLightColor, GetGrowthLightColor(growthStage), growthColorBlend);
+            flameLight.color = Color.Lerp(flameLight.color, targetLightColor, smoothing);
         }
 
         pickupFlashRemaining = Mathf.Max(
             0f, pickupFlashRemaining - Time.deltaTime);
 
-        UpdateAmbientSparks(fuel, windActive, sheltered);
+        UpdateAmbientSparks(fuel, windActive, sheltered, growthStage);
     }
 
     private float GetFuelScale(float fuel)
@@ -248,7 +268,55 @@ public sealed class FlameVisualFeedback : MonoBehaviour
         return lowFuelColor;
     }
 
-    private void UpdateAmbientSparks(float fuel, bool windActive, bool sheltered)
+    private float GetGrowthScale(FlameMeter.GrowthStage stage)
+    {
+        if (stage == FlameMeter.GrowthStage.LastFlame)
+            return lastFlameScaleMultiplier;
+
+        if (stage == FlameMeter.GrowthStage.SteadySpark)
+            return steadySparkScaleMultiplier;
+
+        return 1f;
+    }
+
+    private float GetGrowthHeightMultiplier(FlameMeter.GrowthStage stage)
+    {
+        return stage == FlameMeter.GrowthStage.LastFlame
+            ? lastFlameHeightMultiplier
+            : 1f;
+    }
+
+    private float GetGrowthColorBlend(FlameMeter.GrowthStage stage)
+    {
+        if (stage == FlameMeter.GrowthStage.LastFlame)
+            return lastFlameColorBlend;
+
+        if (stage == FlameMeter.GrowthStage.SteadySpark)
+            return steadySparkColorBlend;
+
+        return 0f;
+    }
+
+    private Color GetGrowthFlameColor(FlameMeter.GrowthStage stage)
+    {
+        return stage == FlameMeter.GrowthStage.LastFlame
+            ? lastFlameFlameColor
+            : stage == FlameMeter.GrowthStage.SteadySpark
+                ? steadySparkFlameColor
+                : baseFlameColor;
+    }
+
+    private Color GetGrowthLightColor(FlameMeter.GrowthStage stage)
+    {
+        return stage == FlameMeter.GrowthStage.LastFlame
+            ? lastFlameLightColor
+            : stage == FlameMeter.GrowthStage.SteadySpark
+                ? steadySparkLightColor
+                : baseLightColor;
+    }
+
+    private void UpdateAmbientSparks(
+        float fuel, bool windActive, bool sheltered, FlameMeter.GrowthStage growthStage)
     {
         if (sparkParticles == null)
         {
@@ -272,6 +340,17 @@ public sealed class FlameVisualFeedback : MonoBehaviour
         {
             interval = lowFuelSparkInterval;
             count = lowFuelSparkCount;
+        }
+
+        if (growthStage == FlameMeter.GrowthStage.SteadySpark)
+        {
+            interval *= 0.86f;
+            count += 1;
+        }
+        else if (growthStage == FlameMeter.GrowthStage.LastFlame)
+        {
+            interval *= 0.72f;
+            count += 2;
         }
 
         if (windActive)
@@ -452,6 +531,7 @@ public sealed class FlameVisualFeedback : MonoBehaviour
         if (flameLight != null)
         {
             flameLight.intensity = baseLightIntensity;
+            flameLight.color = baseLightColor;
         }
     }
 
@@ -461,5 +541,8 @@ public sealed class FlameVisualFeedback : MonoBehaviour
         highFuelThreshold = Mathf.Clamp(highFuelThreshold, lowFuelThreshold, 1f);
         pickupFlashDuration = Mathf.Max(0.05f, pickupFlashDuration);
         shelterSparkIntervalMultiplier = Mathf.Max(1f, shelterSparkIntervalMultiplier);
+        steadySparkScaleMultiplier = Mathf.Max(1f, steadySparkScaleMultiplier);
+        lastFlameScaleMultiplier = Mathf.Max(steadySparkScaleMultiplier, lastFlameScaleMultiplier);
+        lastFlameHeightMultiplier = Mathf.Max(1f, lastFlameHeightMultiplier);
     }
 }
