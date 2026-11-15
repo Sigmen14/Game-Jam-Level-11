@@ -31,7 +31,7 @@ public sealed class MainMenuFireAtmosphere : MonoBehaviour
 
     [Header("Вспышка при запуске")]
     [SerializeField, Min(0.1f)] private float transitionDuration = 0.72f;
-    [SerializeField, Range(0f, 0.65f)] private float flashPeakAlpha = 0.32f;
+    [SerializeField, Range(0f, 0.4f)] private float flashPeakAlpha = 0.24f;
 
     private struct ParticleState
     {
