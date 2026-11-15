@@ -2798,10 +2798,10 @@ RectTransform:
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &6051520507081418591
 Canvas:
   m_ObjectHideFlags: 0
@@ -6603,26 +6603,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3111717800138602732, guid: 87e13fb90ecf7b640a28d7b42a704e03, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3111717800138602732, guid: 87e13fb90ecf7b640a28d7b42a704e03, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 613224339567386706}
-    - target: {fileID: 3111717800138602732, guid: 87e13fb90ecf7b640a28d7b42a704e03, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3111717800138602732, guid: 87e13fb90ecf7b640a28d7b42a704e03, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnMainMenuButtonClicked
-      objectReference: {fileID: 0}
-    - target: {fileID: 3111717800138602732, guid: 87e13fb90ecf7b640a28d7b42a704e03, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: HUDView, Assembly-CSharp
-      objectReference: {fileID: 0}
     - target: {fileID: 3731985202026632423, guid: 87e13fb90ecf7b640a28d7b42a704e03, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
       value: 1
@@ -6640,6 +6620,26 @@ PrefabInstance:
       value: OnRetryButtonClicked
       objectReference: {fileID: 0}
     - target: {fileID: 3731985202026632423, guid: 87e13fb90ecf7b640a28d7b42a704e03, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: HUDView, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 4007989982666055487, guid: 87e13fb90ecf7b640a28d7b42a704e03, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4007989982666055487, guid: 87e13fb90ecf7b640a28d7b42a704e03, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 613224339567386706}
+    - target: {fileID: 4007989982666055487, guid: 87e13fb90ecf7b640a28d7b42a704e03, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4007989982666055487, guid: 87e13fb90ecf7b640a28d7b42a704e03, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnMainMenuButtonClicked
+      objectReference: {fileID: 0}
+    - target: {fileID: 4007989982666055487, guid: 87e13fb90ecf7b640a28d7b42a704e03, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: HUDView, Assembly-CSharp
       objectReference: {fileID: 0}

@@ -27,9 +27,25 @@ public static class PauseMenuSetup
     private const int FrameWidth = 48;
     private const int FrameHeight = 32;
 
+    [MenuItem("Game Jam/Setup Pause Menu", true)]
+    private static bool ValidateSetup()
+    {
+        // Scene editing through EditorSceneManager is not allowed while the game is running.
+        return !EditorApplication.isPlaying && !EditorApplication.isPlayingOrWillChangePlaymode;
+    }
+
     [MenuItem("Game Jam/Setup Pause Menu")]
     public static void Setup()
     {
+        if (EditorApplication.isPlaying || EditorApplication.isPlayingOrWillChangePlaymode)
+        {
+            EditorUtility.DisplayDialog(
+                "Pause Menu",
+                "Остановите Play Mode перед запуском Setup Pause Menu.",
+                "OK");
+            return;
+        }
+
         if (!EnsureMasterVolumeControlsInSettingsPrefab() || !WireMainMenuSettingsPrefab())
         {
             EditorUtility.DisplayDialog(
@@ -526,20 +542,25 @@ public static class PauseMenuSetup
     {
         GameObject root = new GameObject("UI_PausePanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         Stretch(root.GetComponent<RectTransform>());
-        root.GetComponent<Image>().color = new Color(0.015f, 0.025f, 0.035f, 0.88f);
+        // Match the main menu's deep navy backdrop and warm ember palette.
+        root.GetComponent<Image>().color = new Color(0.015f, 0.025f, 0.045f, 0.95f);
 
         GameObject card = CreateUIObject("PauseCard", root.transform, typeof(Image));
         RectTransform cardRect = card.GetComponent<RectTransform>();
         cardRect.anchorMin = cardRect.anchorMax = new Vector2(0.5f, 0.5f);
-        cardRect.sizeDelta = new Vector2(520f, 680f);
-        card.GetComponent<Image>().color = new Color(0.07f, 0.11f, 0.13f, 1f);
+        cardRect.sizeDelta = new Vector2(760f, 940f);
+        card.GetComponent<Image>().color = new Color(0.035f, 0.055f, 0.085f, 1f);
 
         CreateEmberArtwork(card.transform, emberFrames, emberController);
-        CreateText("ПАУЗА", card.transform, 42, new Vector2(0f, 145f), new Vector2(440f, 72f));
-        CreateButton("ПРОДОЛЖИТЬ", card.transform, new Vector2(0f, 40f));
-        CreateButton("НАСТРОЙКИ", card.transform, new Vector2(0f, -60f));
-        CreateButton("РЕСТАРТ", card.transform, new Vector2(0f, -160f));
-        CreateButton("ВЫЙТИ В МЕНЮ", card.transform, new Vector2(0f, -260f));
+        CreateText("ПАУЗА", card.transform, 58, new Vector2(0f, 220f), new Vector2(680f, 100f));
+        Text pauseTitle = card.GetComponentInChildren<Text>(true);
+        if (pauseTitle != null)
+            pauseTitle.color = new Color(1f, 0.77f, 0.38f, 1f);
+        // Spread the buttons vertically while keeping the full stack inside the card.
+        CreateButton("ПРОДОЛЖИТЬ", card.transform, new Vector2(0f, 0f));
+        CreateButton("НАСТРОЙКИ", card.transform, new Vector2(0f, -140f));
+        CreateButton("РЕСТАРТ", card.transform, new Vector2(0f, -280f));
+        CreateButton("ВЫЙТИ В МЕНЮ", card.transform, new Vector2(0f, -420f));
         return root;
     }
 
@@ -551,8 +572,8 @@ public static class PauseMenuSetup
 
         RectTransform rect = go.GetComponent<RectTransform>();
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = new Vector2(0f, 250f);
-        rect.sizeDelta = new Vector2(270f, 180f);
+        rect.anchoredPosition = new Vector2(0f, 350f);
+        rect.sizeDelta = new Vector2(360f, 240f);
 
         Image image = go.GetComponent<Image>();
         image.sprite = frames[0];
@@ -573,21 +594,24 @@ public static class PauseMenuSetup
         RectTransform rect = go.GetComponent<RectTransform>();
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.anchoredPosition = position;
-        rect.sizeDelta = new Vector2(360f, 76f);
+        rect.sizeDelta = new Vector2(480f, 78f);
 
         Image image = go.GetComponent<Image>();
-        image.color = new Color(0.16f, 0.27f, 0.29f, 1f);
+        image.color = new Color(0.95f, 0.55f, 0.16f, 1f);
 
         Button button = go.GetComponent<Button>();
         button.targetGraphic = image;
         ColorBlock colors = button.colors;
-        colors.normalColor = new Color(0.82f, 0.86f, 0.82f, 1f);
-        colors.highlightedColor = new Color(1f, 0.72f, 0.35f, 1f);
-        colors.pressedColor = new Color(0.78f, 0.42f, 0.18f, 1f);
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(1f, 0.72f, 0.28f, 1f);
+        colors.pressedColor = new Color(1f, 0.35f, 0.08f, 1f);
         button.colors = colors;
 
-        CreateText(label, go.transform, label == "ВЫЙТИ В МЕНЮ" ? 22 : 26,
-            Vector2.zero, new Vector2(340f, 66f));
+        CreateText(label, go.transform, label == "ВЫЙТИ В МЕНЮ" ? 32 : 36,
+            Vector2.zero, new Vector2(440f, 68f));
+        Text buttonLabel = go.GetComponentInChildren<Text>(true);
+        if (buttonLabel != null)
+            buttonLabel.color = new Color(0.08f, 0.06f, 0.04f, 1f);
         return go;
     }
 
