@@ -36,6 +36,7 @@ public static class GameFlowUISetup
             return;
         }
 
+        ConfigureMainMenuPrefab();
         EnsureResultMainMenuButton();
         WireResultButtons();
 
