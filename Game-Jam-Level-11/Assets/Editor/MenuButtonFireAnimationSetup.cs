@@ -267,9 +267,13 @@ public static class MenuButtonFireAnimationSetup
 
     private static float CalculateGlowAlpha(float x, float y)
     {
-        float distance = Mathf.Sqrt(x * x + y * y);
-        float falloff = Mathf.Clamp01(1f - distance);
-        return falloff * falloff * (1f - Mathf.SmoothStep(0.76f, 1f, distance));
+        // The target button occupies roughly 89% of the glow width and 66% of its height.
+        // A soft rectangular rim keeps the center of the button clear.
+        float normalizedEdge = Mathf.Max(
+            Mathf.Abs(x) / 0.89f,
+            Mathf.Abs(y) / 0.66f);
+        float distanceToRim = Mathf.Abs(normalizedEdge - 1f);
+        return Mathf.Clamp01(1f - distanceToRim / 0.28f) * 0.72f;
     }
 
     private static float CalculateSparkAlpha(float x, float y)
