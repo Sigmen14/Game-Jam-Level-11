@@ -21,7 +21,8 @@ public sealed class PlayerController : MonoBehaviour
 
     public bool IsProtecting { get; private set; }
     public bool IsInCover { get; private set; }
-    public bool IsWindSheltered => IsInCover || IsProtecting;
+    public bool IsInBeaconSafeZone { get; private set; }
+    public bool IsWindSheltered => IsInCover || IsProtecting || IsInBeaconSafeZone;
     public bool IsGameplayActive => gameplayActive;
 
     private InputActionMap playerMap;
@@ -151,6 +152,7 @@ public sealed class PlayerController : MonoBehaviour
 
         if (!isActive)
         {
+            IsInBeaconSafeZone = false;
             moveInput = Vector2.zero;
             IsProtecting = false;
             if (body != null)
@@ -168,11 +170,18 @@ public sealed class PlayerController : MonoBehaviour
         IsInCover = isInCover;
     }
 
+    /// <summary>Set by an activated beacon while the player overlaps its safe-area trigger.</summary>
+    public void SetInBeaconSafeZone(bool isInsideSafeZone)
+    {
+        IsInBeaconSafeZone = isInsideSafeZone;
+    }
+
     public void ResetPosition()
     {
         moveInput = Vector2.zero;
         IsProtecting = false;
         IsInCover = false;
+        IsInBeaconSafeZone = false;
 
         if (body != null)
         {
@@ -199,6 +208,7 @@ public sealed class PlayerController : MonoBehaviour
 
         gameplayActive = false;
         IsProtecting = false;
+        IsInBeaconSafeZone = false;
         moveInput = Vector2.zero;
         SetProtectionVisual(false);
     }
