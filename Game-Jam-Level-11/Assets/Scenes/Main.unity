@@ -537,9 +537,6 @@ Transform:
   - {fileID: 668537134}
   - {fileID: 774210933}
   - {fileID: 1854210197}
-  - {fileID: 2200100001}
-  - {fileID: 2200100011}
-  - {fileID: 2200100021}
   - {fileID: 7600000102}
   - {fileID: 7600000202}
   m_Father: {fileID: 0}
