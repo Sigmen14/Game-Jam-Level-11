@@ -97,6 +97,9 @@ public sealed class FlameVisualFeedback : MonoBehaviour
 
     private readonly HashSet<FuelPickup> subscribedPickups = new HashSet<FuelPickup>();
 
+    private ParticleSystem windStreakParticles;
+    private Camera windCamera;
+
     private Vector3 baseFlameScale;
     private Color baseFlameColor;
     private float baseLightIntensity = 1f;
@@ -355,7 +358,7 @@ public sealed class FlameVisualFeedback : MonoBehaviour
         colorOverLifetime.color = new ParticleSystem.MinMaxGradient(fade);
 
         ParticleSystemRenderer windRenderer = windStreakParticles.GetComponent<ParticleSystemRenderer>();
-        windRenderer.renderMode = ParticleSystemRenderMode.StretchedBillboard;
+        windRenderer.renderMode = ParticleSystemRenderMode.Stretch;
         windRenderer.velocityScale = 0.18f;
         windRenderer.lengthScale = 5f;
         ParticleSystemRenderer sparkRenderer = sparkParticles != null
