@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Reads the existing Player action map and moves the pre-placed Rigidbody2D.
-/// Holding Protect reduces movement speed; cover state is supplied by CoverZone.
+/// Reads the Player action map and moves the pre-placed Rigidbody2D.
+/// Holding Protect reduces movement speed; CoverZone supplies cover state.
 /// </summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Rigidbody2D))]
@@ -20,102 +20,97 @@ public sealed class PlayerController : MonoBehaviour
 
     public bool IsProtecting { get; private set; }
     public bool IsInCover { get; private set; }
-    public bool IsGameplayActive => _gameplayActive;
+    public bool IsGameplayActive => gameplayActive;
 
-    private InputActionMap _playerMap;
-    private InputAction _moveAction;
-    private InputAction _protectAction;
-    private Vector2 _moveInput;
-    private Vector3 _spawnPosition;
-    private bool _gameplayActive;
+    private InputActionMap playerMap;
+    private InputAction moveAction;
+    private InputAction protectAction;
+    private Vector2 moveInput;
+    private Vector3 spawnPosition;
+    private Quaternion spawnRotation;
+    private float spawnBodyRotation;
+    private bool gameplayActive;
 
     private void Awake()
     {
-        _spawnPosition = transform.position;
+        spawnPosition = transform.position;
+        spawnRotation = transform.rotation;
 
         if (body == null)
-        {
             body = GetComponent<Rigidbody2D>();
-        }
+
+        if (body != null)
+            spawnBodyRotation = body.rotation;
 
         if (inputActions == null)
         {
-            Debug.LogError("PlayerController: assign the InputSystem_Actions asset in the Inspector.", this);
+            Debug.LogError("PlayerController: assign InputSystem_Actions in the Inspector.", this);
             return;
         }
 
-        _playerMap = inputActions.FindActionMap("Player", false);
-        if (_playerMap == null)
+        playerMap = inputActions.FindActionMap("Player", false);
+        if (playerMap == null)
         {
-            Debug.LogError("PlayerController: the assigned Input Actions asset has no 'Player' map.", this);
+            Debug.LogError("PlayerController: the Input Actions asset has no Player map.", this);
             return;
         }
 
-        _moveAction = _playerMap.FindAction("Move", false);
-        _protectAction = _playerMap.FindAction("Protect", false);
-
-        if (_moveAction == null || _protectAction == null)
-        {
-            Debug.LogError("PlayerController: add Move and Protect actions to the Player map.", this);
-        }
+        moveAction = playerMap.FindAction("Move", false);
+        protectAction = playerMap.FindAction("Protect", false);
+        if (moveAction == null || protectAction == null)
+            Debug.LogError("PlayerController: Player map must contain Move and Protect actions.", this);
 
         SetGameplayActive(false);
     }
 
     private void Update()
     {
-        if (!_gameplayActive || _moveAction == null || _protectAction == null)
+        if (!gameplayActive || moveAction == null || protectAction == null)
         {
-            _moveInput = Vector2.zero;
+            moveInput = Vector2.zero;
+            IsProtecting = false;
             SetProtectionVisual(false);
             return;
         }
 
-        _moveInput = Vector2.ClampMagnitude(_moveAction.ReadValue<Vector2>(), 1f);
-        IsProtecting = _protectAction.IsPressed();
+        moveInput = Vector2.ClampMagnitude(moveAction.ReadValue<Vector2>(), 1f);
+        IsProtecting = protectAction.IsPressed();
         SetProtectionVisual(IsProtecting);
     }
 
     private void FixedUpdate()
     {
         if (body == null)
-        {
             return;
-        }
 
-        if (!_gameplayActive)
+        if (!gameplayActive)
         {
             body.linearVelocity = Vector2.zero;
             return;
         }
 
         float speed = movementSpeed * (IsProtecting ? protectionSpeedMultiplier : 1f);
-        body.linearVelocity = _moveInput * speed;
+        body.linearVelocity = moveInput * speed;
     }
 
     public void SetGameplayActive(bool isActive)
     {
-        _gameplayActive = isActive;
+        gameplayActive = isActive;
 
-        if (_playerMap != null)
+        if (playerMap != null)
         {
-            if (isActive)
-            {
-                _playerMap.Enable();
-            }
-            else
-            {
-                _playerMap.Disable();
-            }
+            if (isActive) playerMap.Enable();
+            else playerMap.Disable();
         }
 
         if (!isActive)
         {
-            _moveInput = Vector2.zero;
+            moveInput = Vector2.zero;
             IsProtecting = false;
             if (body != null)
             {
                 body.linearVelocity = Vector2.zero;
+                body.angularVelocity = 0f;
             }
         }
 
@@ -129,38 +124,36 @@ public sealed class PlayerController : MonoBehaviour
 
     public void ResetPosition()
     {
-        _moveInput = Vector2.zero;
+        moveInput = Vector2.zero;
         IsProtecting = false;
         IsInCover = false;
 
         if (body != null)
         {
             body.linearVelocity = Vector2.zero;
-            body.position = _spawnPosition;
+            body.angularVelocity = 0f;
+            body.position = spawnPosition;
+            body.rotation = spawnBodyRotation;
         }
 
-        transform.position = _spawnPosition;
+        transform.SetPositionAndRotation(spawnPosition, spawnRotation);
         SetProtectionVisual(false);
     }
 
     private void SetProtectionVisual(bool isVisible)
     {
         if (protectionVisual != null && protectionVisual.activeSelf != isVisible)
-        {
             protectionVisual.SetActive(isVisible);
-        }
     }
 
     private void OnDisable()
     {
-        if (_playerMap != null)
-        {
-            _playerMap.Disable();
-        }
+        if (playerMap != null)
+            playerMap.Disable();
 
-        _gameplayActive = false;
+        gameplayActive = false;
         IsProtecting = false;
-        _moveInput = Vector2.zero;
+        moveInput = Vector2.zero;
         SetProtectionVisual(false);
     }
 

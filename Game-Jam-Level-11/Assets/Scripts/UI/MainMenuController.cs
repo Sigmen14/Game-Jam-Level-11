@@ -1,30 +1,38 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Controls the dedicated Menu scene. All panels and buttons are pre-authored
-/// in UI_Menu.prefab and are only enabled/disabled here.
+/// Controls the pre-authored main-menu prefab in the gameplay scene.
+/// The GameManager owns state transitions; this component only switches menu panels.
 /// </summary>
 [DisallowMultipleComponent]
 public sealed class MainMenuController : MonoBehaviour
 {
-    [Header("Navigation")]
-    [SerializeField] private string gameplaySceneName = "Main";
-
-    [Header("Existing menu panels")]
+    [Header("References")]
+    [SerializeField] private GameManager gameManager;
     [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject settingsPanel;
 
     public void PlayGame()
     {
-        if (!Application.CanStreamedLevelBeLoaded(gameplaySceneName))
+        if (gameManager == null)
         {
-            Debug.LogError("MainMenuController: gameplay scene '" + gameplaySceneName +
-                "' is not in Build Settings. Add Assets/Scenes/" + gameplaySceneName + ".unity.");
+            Debug.LogError("MainMenuController: assign GameManager in the Inspector.", this);
             return;
         }
 
-        SceneManager.LoadScene(gameplaySceneName);
+        gameManager.StartGame();
+    }
+
+    public void ShowMainMenu()
+    {
+        SetPanel(settingsPanel, false);
+        SetPanel(mainMenuPanel, true);
+    }
+
+    public void HideMainMenu()
+    {
+        SetPanel(settingsPanel, false);
+        SetPanel(mainMenuPanel, false);
     }
 
     public void OpenSettings()
@@ -44,15 +52,13 @@ public sealed class MainMenuController : MonoBehaviour
         Application.Quit();
 
 #if UNITY_EDITOR
-        Debug.Log("Exit button pressed. Application.Quit closes a built player; Play Mode stays open.");
+        Debug.Log("Exit pressed. Application.Quit closes a built player; Play Mode stays open.", this);
 #endif
     }
 
     private static void SetPanel(GameObject panel, bool active)
     {
         if (panel != null && panel.activeSelf != active)
-        {
             panel.SetActive(active);
-        }
     }
 }
