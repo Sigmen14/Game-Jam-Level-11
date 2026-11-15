@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Owns the complete game flow and coordinates the pre-placed gameplay/UI objects.
@@ -237,6 +238,16 @@ public sealed class GameManager : MonoBehaviour
         if (pauseMenuController != null)
             pauseMenuController.HidePanels();
 
+        // Always return to the standalone Menu scene so pause/result navigation
+        // shows the same authored main menu used when the Web build first launches.
+        if (Application.CanStreamedLevelBeLoaded("Menu"))
+        {
+            SceneManager.LoadScene("Menu");
+            return;
+        }
+
+        // Keep the in-scene menu as a safe fallback for editor setups that have
+        // not yet added Menu.unity to Build Settings.
         if (hudView != null)
             hudView.ShowMainMenu();
 
