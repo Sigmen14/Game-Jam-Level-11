@@ -9,6 +9,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 /// <summary>
 /// Adds the flame feedback visuals to the existing Player prefab and wires the
