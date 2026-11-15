@@ -61,7 +61,7 @@ public sealed class WindController : MonoBehaviour
             if (IsWarning)
             {
                 return (IsStrongGust ? "СИЛЬНЫЙ ВЕТЕР ПОДНИМАЕТСЯ " : "ВЕТЕР ПОДНИМАЕТСЯ ") +
-                       DirectionArrow + " · ПРИГОТОВЬТЕСЬ";
+                       DirectionArrow + " · УКРОЙТЕСЬ ИЛИ ДЕРЖИТЕ SPACE";
             }
 
             if (IsWindActive)

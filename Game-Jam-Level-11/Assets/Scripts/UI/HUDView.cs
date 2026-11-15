@@ -30,6 +30,7 @@ public sealed class HUDView : MonoBehaviour
     private Vector3 windWarningBaseScale = Vector3.one;
     private Color windWarningBaseColor = Color.white;
     private Color windWarningBaseTextColor = Color.white;
+    private bool routeChoiceVisible;
 
     public void Bind(GameManager manager, FlameMeter meter, WindController wind)
     {
@@ -70,6 +71,7 @@ public sealed class HUDView : MonoBehaviour
         SetActive(resultPanel, false);
         SetActive(hudContentRoot, false);
         SetWindWarning(false);
+        SetRouteChoiceHint(false);
         SetTimer(gameManager != null ? gameManager.MatchDuration : 180f);
     }
 
@@ -78,6 +80,7 @@ public sealed class HUDView : MonoBehaviour
         SetActive(resultPanel, false);
         SetActive(hudContentRoot, true);
         SetWindWarning(false);
+        SetRouteChoiceHint(false);
     }
 
     public void HideForEnding()
@@ -85,6 +88,7 @@ public sealed class HUDView : MonoBehaviour
         SetActive(hudContentRoot, false);
         SetActive(resultPanel, false);
         SetWindWarning(false);
+        SetRouteChoiceHint(false);
     }
 
     public void ShowResult(bool didWin, float elapsedSeconds)
@@ -95,6 +99,7 @@ public sealed class HUDView : MonoBehaviour
         if (resultTimeText != null)
             resultTimeText.text = "Время выживания: " + FormatTime(elapsedSeconds);
         SetWindWarning(false);
+        SetRouteChoiceHint(false);
     }
 
     public void SetFlame(float current, float maximum)
@@ -119,12 +124,13 @@ public sealed class HUDView : MonoBehaviour
 
     public void SetWindWarning(bool isVisible)
     {
-        bool gustActive = windController != null && windController.IsWindActive;
-        bool shouldShow = isVisible || gustActive;
-        SetActive(windWarningRoot, shouldShow);
-        if (!shouldShow) RestoreWindWarningVisuals();
-        else if (windWarningText != null && windController != null)
-            windWarningText.text = windController.StatusMessage;
+        UpdateWindWarningVisuals();
+    }
+
+    public void SetRouteChoiceHint(bool isVisible)
+    {
+        routeChoiceVisible = isVisible;
+        UpdateWindWarningVisuals();
     }
 
     private void HandleWindStateChanged(bool state)
@@ -146,7 +152,8 @@ public sealed class HUDView : MonoBehaviour
         if (windWarningRoot == null || windController == null) return;
         bool warning = windController.IsWarning;
         bool gustActive = windController.IsWindActive;
-        bool visible = warning || gustActive;
+        bool routeHint = routeChoiceVisible && !warning && !gustActive;
+        bool visible = warning || gustActive || routeChoiceVisible;
         SetActive(windWarningRoot, visible);
         if (!visible)
         {
@@ -154,17 +161,26 @@ public sealed class HUDView : MonoBehaviour
             return;
         }
 
-        if (windWarningText != null) windWarningText.text = windController.StatusMessage;
-        float pulseRate = gustActive ? 8.5f : 4.2f;
+        if (windWarningText != null)
+        {
+            windWarningText.text = routeHint
+                ? "КОРОТКО: ЧЕРЕЗ ЖЕРЛА. ДОЛЬШЕ, НО БЕЗОПАСНЕЕ: ОБОЙДИ СВЕРХУ ЧЕРЕЗ УКРЫТИЕ."
+                : windController.StatusMessage;
+        }
+        float pulseRate = gustActive ? 8.5f : warning ? 4.2f : 2.6f;
         float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * pulseRate);
         if (windWarningBackground != null)
         {
-            Color darkWind = gustActive
-                ? new Color(0.025f, 0.032f, 0.04f, 0.96f)
-                : new Color(0.075f, 0.045f, 0.028f, 0.93f);
-            Color warmEdge = gustActive
-                ? new Color(0.12f, 0.075f, 0.045f, 0.98f)
-                : new Color(0.20f, 0.085f, 0.025f, 0.96f);
+            Color darkWind = routeHint
+                ? new Color(0.035f, 0.055f, 0.075f, 0.95f)
+                : gustActive
+                    ? new Color(0.025f, 0.032f, 0.04f, 0.96f)
+                    : new Color(0.075f, 0.045f, 0.028f, 0.93f);
+            Color warmEdge = routeHint
+                ? new Color(0.09f, 0.13f, 0.16f, 0.98f)
+                : gustActive
+                    ? new Color(0.12f, 0.075f, 0.045f, 0.98f)
+                    : new Color(0.20f, 0.085f, 0.025f, 0.96f);
             windWarningBackground.color = Color.Lerp(darkWind, warmEdge, pulse * 0.48f);
         }
         if (windWarningText != null)
@@ -175,7 +191,7 @@ public sealed class HUDView : MonoBehaviour
         }
         if (windWarningRect != null)
         {
-            float scalePulse = gustActive ? 0.035f : 0.016f;
+            float scalePulse = gustActive ? 0.035f : warning ? 0.016f : 0.009f;
             windWarningRect.localScale = windWarningBaseScale * (1f + pulse * scalePulse);
         }
     }

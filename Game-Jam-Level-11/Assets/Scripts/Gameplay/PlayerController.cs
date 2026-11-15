@@ -12,6 +12,7 @@ public sealed class PlayerController : MonoBehaviour
     [Header("Movement")]
     [SerializeField, Min(0f)] private float movementSpeed = 5.2f;
     [SerializeField, Range(0.05f, 1f)] private float protectionSpeedMultiplier = 0.45f;
+    [SerializeField, Min(0f)] private float gustDriftSpeed = 2.7f;
 
     [Header("References")]
     [SerializeField] private Rigidbody2D body;
@@ -31,6 +32,7 @@ public sealed class PlayerController : MonoBehaviour
     private Quaternion spawnRotation;
     private float spawnBodyRotation;
     private bool gameplayActive;
+    private WindController windController;
 
     private void Awake()
     {
@@ -120,7 +122,15 @@ public sealed class PlayerController : MonoBehaviour
         }
 
         float speed = movementSpeed * (IsProtecting ? protectionSpeedMultiplier : 1f);
-        body.linearVelocity = moveInput * speed;
+        Vector2 velocity = moveInput * speed;
+
+        // The announced gust physically pushes an exposed flame; WASD can counter-steer.
+        // Space and the existing CoverZones remove the push without changing movement rules.
+        if (windController != null && windController.IsWindActive && !IsWindSheltered)
+            velocity += windController.WindDirection *
+                        (gustDriftSpeed * windController.CurrentGustStrength);
+
+        body.linearVelocity = velocity;
     }
 
     public void SetGameplayActive(bool isActive)
@@ -145,6 +155,11 @@ public sealed class PlayerController : MonoBehaviour
         }
 
         SetProtectionVisual(isActive && IsProtecting);
+    }
+
+    public void BindWindController(WindController controller)
+    {
+        windController = controller;
     }
 
     public void SetInCover(bool isInCover)

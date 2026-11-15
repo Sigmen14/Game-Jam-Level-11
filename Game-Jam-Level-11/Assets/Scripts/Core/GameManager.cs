@@ -26,6 +26,7 @@ public sealed class GameManager : MonoBehaviour
     [SerializeField] private WindController windController;
     [SerializeField] private FuelPickup[] fuelPickups;
     [SerializeField] private CoverZone[] coverZones;
+    [SerializeField] private PulseHazard[] pulseHazards;
 
     [Header("UI references")]
     [SerializeField] private HUDView hudView;
@@ -71,6 +72,11 @@ public sealed class GameManager : MonoBehaviour
 
         if (hudView != null)
             hudView.Bind(this, flameMeter, windController);
+
+        if (flameMeter != null)
+            flameMeter.BindWindController(windController);
+        if (playerController != null)
+            playerController.BindWindController(windController);
 
         if (endingFlowController != null)
             endingFlowController.Bind(this);
@@ -127,6 +133,8 @@ public sealed class GameManager : MonoBehaviour
 
         if (windController != null)
             windController.SetRunning(true);
+
+        SetPulseHazardsRunning(true);
     }
 
     /// <summary>Restarts the round with all resources and world pickups restored.</summary>
@@ -203,6 +211,8 @@ public sealed class GameManager : MonoBehaviour
             windController.ResetCycle();
         }
 
+        SetPulseHazardsRunning(false);
+
         if (fuelPickups != null)
         {
             for (int i = 0; i < fuelPickups.Length; i++)
@@ -219,6 +229,18 @@ public sealed class GameManager : MonoBehaviour
                 if (coverZones[i] != null)
                     coverZones[i].ResetZone();
             }
+        }
+    }
+
+    private void SetPulseHazardsRunning(bool isRunning)
+    {
+        if (pulseHazards == null)
+            return;
+
+        for (int i = 0; i < pulseHazards.Length; i++)
+        {
+            if (pulseHazards[i] != null)
+                pulseHazards[i].SetRunning(isRunning);
         }
     }
 
@@ -242,6 +264,8 @@ public sealed class GameManager : MonoBehaviour
 
         if (windController != null)
             windController.SetRunning(false);
+
+        SetPulseHazardsRunning(false);
 
         if (pauseMenuController != null)
             pauseMenuController.HidePanels();
