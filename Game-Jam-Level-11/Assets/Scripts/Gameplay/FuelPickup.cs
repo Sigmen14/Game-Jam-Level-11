@@ -74,6 +74,8 @@ public sealed class FuelPickup : MonoBehaviour
             // FuelCollected event remains intact for StoryMemoryPickup and other listeners.
             flameMeter.RegisterSuccessfulFuelPickup();
             FuelCollected?.Invoke();
+            if (pickupAudio == null)
+                AudioManager.PlayFuelPickup();
         }
 
         if (pickupAudio != null)
