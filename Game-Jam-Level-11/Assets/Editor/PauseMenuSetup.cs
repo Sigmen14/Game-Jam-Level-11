@@ -532,18 +532,18 @@ public static class PauseMenuSetup
         GameObject card = CreateUIObject("PauseCard", root.transform, typeof(Image));
         RectTransform cardRect = card.GetComponent<RectTransform>();
         cardRect.anchorMin = cardRect.anchorMax = new Vector2(0.5f, 0.5f);
-        cardRect.sizeDelta = new Vector2(1040f, 1360f);
+        cardRect.sizeDelta = new Vector2(760f, 940f);
         card.GetComponent<Image>().color = new Color(0.035f, 0.055f, 0.085f, 1f);
 
         CreateEmberArtwork(card.transform, emberFrames, emberController);
-        CreateText("ПАУЗА", card.transform, 84, new Vector2(0f, 180f), new Vector2(880f, 144f));
+        CreateText("ПАУЗА", card.transform, 58, new Vector2(0f, 220f), new Vector2(680f, 100f));
         Text pauseTitle = card.GetComponentInChildren<Text>(true);
         if (pauseTitle != null)
             pauseTitle.color = new Color(1f, 0.77f, 0.38f, 1f);
-        CreateButton("ПРОДОЛЖИТЬ", card.transform, new Vector2(0f, 0f));
-        CreateButton("НАСТРОЙКИ", card.transform, new Vector2(0f, -180f));
-        CreateButton("РЕСТАРТ", card.transform, new Vector2(0f, -360f));
-        CreateButton("ВЫЙТИ В МЕНЮ", card.transform, new Vector2(0f, -540f));
+        CreateButton("ПРОДОЛЖИТЬ", card.transform, new Vector2(0f, -35f));
+        CreateButton("НАСТРОЙКИ", card.transform, new Vector2(0f, -155f));
+        CreateButton("РЕСТАРТ", card.transform, new Vector2(0f, -275f));
+        CreateButton("ВЫЙТИ В МЕНЮ", card.transform, new Vector2(0f, -395f));
         return root;
     }
 
@@ -555,8 +555,8 @@ public static class PauseMenuSetup
 
         RectTransform rect = go.GetComponent<RectTransform>();
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = new Vector2(0f, 500f);
-        rect.sizeDelta = new Vector2(540f, 360f);
+        rect.anchoredPosition = new Vector2(0f, 350f);
+        rect.sizeDelta = new Vector2(360f, 240f);
 
         Image image = go.GetComponent<Image>();
         image.sprite = frames[0];
@@ -577,7 +577,7 @@ public static class PauseMenuSetup
         RectTransform rect = go.GetComponent<RectTransform>();
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.anchoredPosition = position;
-        rect.sizeDelta = new Vector2(720f, 152f);
+        rect.sizeDelta = new Vector2(560f, 104f);
 
         Image image = go.GetComponent<Image>();
         image.color = new Color(0.95f, 0.55f, 0.16f, 1f);
@@ -590,8 +590,8 @@ public static class PauseMenuSetup
         colors.pressedColor = new Color(1f, 0.35f, 0.08f, 1f);
         button.colors = colors;
 
-        CreateText(label, go.transform, label == "ВЫЙТИ В МЕНЮ" ? 44 : 52,
-            Vector2.zero, new Vector2(680f, 132f));
+        CreateText(label, go.transform, label == "ВЫЙТИ В МЕНЮ" ? 32 : 36,
+            Vector2.zero, new Vector2(520f, 90f));
         Text buttonLabel = go.GetComponentInChildren<Text>(true);
         if (buttonLabel != null)
             buttonLabel.color = new Color(0.08f, 0.06f, 0.04f, 1f);
