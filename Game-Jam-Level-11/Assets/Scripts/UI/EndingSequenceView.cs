@@ -379,9 +379,6 @@ public sealed class EndingSequenceView : MonoBehaviour
             ? atmosphere.color
             : new Color(0.005f, 0.012f, 0.026f, 0.94f);
         coreHomeColor = beaconCore != null ? beaconCore.color : Color.white;
-        emberHomeColor = ember != null && ember.GetComponent<Image>() != null
-            ? ember.GetComponent<Image>().color
-            : Color.white;
         emberGlowHomeColor = emberGlow != null ? emberGlow.color : Color.white;
         referencesCached = true;
     }
