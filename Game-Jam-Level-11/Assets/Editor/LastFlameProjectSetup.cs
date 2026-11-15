@@ -1058,6 +1058,19 @@ public static class LastFlameProjectSetup
         return prefab;
     }
 
+    private static T FindInScene<T>(Scene scene) where T : Component
+    {
+        GameObject[] roots = scene.GetRootGameObjects();
+        for (int i = 0; i < roots.Length; i++)
+        {
+            T found = roots[i].GetComponentInChildren<T>(true);
+            if (found != null)
+                return found;
+        }
+
+        return null;
+    }
+
     private static void SetObjectReference(Object target, string propertyName, Object value)
     {
         if (target == null)
