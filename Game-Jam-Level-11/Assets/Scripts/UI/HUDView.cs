@@ -149,7 +149,14 @@ public sealed class HUDView : MonoBehaviour
         if (!shouldShow)
             RestoreWindWarningVisuals();
         else if (windWarningText != null)
-            windWarningText.text = windIsVisible ? windController.StatusMessage : challengeMessage;
+        {
+            string message = windIsVisible ? windController.StatusMessage : string.Empty;
+            if (challengeMessageVisible)
+                message = string.IsNullOrEmpty(message)
+                    ? challengeMessage
+                    : message + "\n" + challengeMessage;
+            windWarningText.text = message;
+        }
     }
 
     private void HandleWindStateChanged(bool state)
@@ -181,7 +188,14 @@ public sealed class HUDView : MonoBehaviour
         }
 
         if (windWarningText != null)
-            windWarningText.text = showWindStatus ? windController.StatusMessage : challengeMessage;
+        {
+            string message = showWindStatus ? windController.StatusMessage : string.Empty;
+            if (challengeMessageVisible)
+                message = string.IsNullOrEmpty(message)
+                    ? challengeMessage
+                    : message + "\n" + challengeMessage;
+            windWarningText.text = message;
+        }
         float pulseRate = gustActive ? 8.5f : (warning ? 4.2f : 2.8f);
         float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * pulseRate);
         if (windWarningBackground != null)
