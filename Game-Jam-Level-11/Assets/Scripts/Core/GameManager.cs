@@ -144,12 +144,39 @@ public sealed class GameManager : MonoBehaviour
         UpdateLivingSparks();
     }
 
+    /// <summary>
+    /// Repairs the essential Player hierarchy switches before a round starts.
+    /// This protects gameplay if the Player object, movement script, physics body,
+    /// or collider was accidentally disabled in the Inspector.
+    /// </summary>
+    private void EnsurePlayerMovementReady()
+    {
+        if (playerController == null)
+            return;
+
+        GameObject playerObject = playerController.gameObject;
+        if (!playerObject.activeSelf)
+            playerObject.SetActive(true);
+
+        if (!playerController.enabled)
+            playerController.enabled = true;
+
+        Rigidbody2D playerBody = playerObject.GetComponent<Rigidbody2D>();
+        if (playerBody != null)
+            playerBody.simulated = true;
+
+        Collider2D playerCollider = playerObject.GetComponent<Collider2D>();
+        if (playerCollider != null)
+            playerCollider.enabled = true;
+    }
+
     /// <summary>Starts a fresh 180-second session from the main menu or result screen.</summary>
     public void StartGame()
     {
         if (_state == GameState.Playing)
             return;
 
+        EnsurePlayerMovementReady();
         Time.timeScale = 1f;
         if (endingFlowController != null)
             endingFlowController.Hide();
