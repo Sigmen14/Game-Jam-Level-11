@@ -2,20 +2,23 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Applies the two settings sliders to pre-placed audio sources.
-/// Sources and UI widgets are assigned by the prefab/scene authoring workflow.
+/// Applies the saved master, music and SFX levels to the active audio listener
+/// and pre-placed category audio sources. UI and sources are assigned in the Editor.
 /// </summary>
 [DisallowMultipleComponent]
 public sealed class AudioSettingsController : MonoBehaviour
 {
+    private const string MasterPreferenceKey = "LastFlame.MasterVolume";
     private const string SfxPreferenceKey = "LastFlame.SFXVolume";
     private const string MusicPreferenceKey = "LastFlame.MusicVolume";
 
     [Header("Sliders")]
+    [SerializeField] private Slider masterSlider;
     [SerializeField] private Slider sfxSlider;
     [SerializeField] private Slider musicSlider;
 
     [Header("Value labels")]
+    [SerializeField] private Text masterValueText;
     [SerializeField] private Text sfxValueText;
     [SerializeField] private Text musicValueText;
 
@@ -24,138 +27,156 @@ public sealed class AudioSettingsController : MonoBehaviour
     [SerializeField] private AudioSource[] musicSources;
 
     [Header("Defaults")]
+    [SerializeField, Range(0f, 1f)] private float defaultMasterVolume = 1f;
     [SerializeField, Range(0f, 1f)] private float defaultSfxVolume = 0.8f;
     [SerializeField, Range(0f, 1f)] private float defaultMusicVolume = 0.65f;
     [SerializeField] private bool rememberSettings = true;
 
-    private float _sfxVolume;
-    private float _musicVolume;
+    private float masterVolume;
+    private float sfxVolume;
+    private float musicVolume;
 
     private void Awake()
     {
-        _sfxVolume = rememberSettings
-            ? PlayerPrefs.GetFloat(SfxPreferenceKey, defaultSfxVolume)
-            : defaultSfxVolume;
-        _musicVolume = rememberSettings
-            ? PlayerPrefs.GetFloat(MusicPreferenceKey, defaultMusicVolume)
-            : defaultMusicVolume;
+        masterVolume = LoadVolume(MasterPreferenceKey, defaultMasterVolume);
+        sfxVolume = LoadVolume(SfxPreferenceKey, defaultSfxVolume);
+        musicVolume = LoadVolume(MusicPreferenceKey, defaultMusicVolume);
 
-        _sfxVolume = Mathf.Clamp01(_sfxVolume);
-        _musicVolume = Mathf.Clamp01(_musicVolume);
+        if (masterSlider != null)
+            masterSlider.SetValueWithoutNotify(masterVolume);
 
         if (sfxSlider != null)
-        {
-            sfxSlider.SetValueWithoutNotify(_sfxVolume);
-        }
+            sfxSlider.SetValueWithoutNotify(sfxVolume);
 
         if (musicSlider != null)
-        {
-            musicSlider.SetValueWithoutNotify(_musicVolume);
-        }
+            musicSlider.SetValueWithoutNotify(musicVolume);
 
-        ApplySfxVolume();
-        ApplyMusicVolume();
+        ApplyAllVolumes();
         UpdateValueLabels();
     }
 
     private void Start()
     {
-        // If a music clip is assigned in the Inspector, it starts behind the menu.
-        // The source already exists in the scene; no audio objects are created here.
+        // Music sources already exist in the scene and are never created at runtime.
         if (musicSources == null)
-        {
             return;
-        }
 
         for (int i = 0; i < musicSources.Length; i++)
         {
             AudioSource source = musicSources[i];
             if (source != null && source.clip != null && !source.isPlaying)
-            {
                 source.Play();
-            }
         }
+    }
+
+    public void SetMasterVolume(float value)
+    {
+        masterVolume = Mathf.Clamp01(value);
+        ApplyAllVolumes();
+        UpdateValueLabels();
+        StoreVolume(MasterPreferenceKey, masterVolume);
     }
 
     public void SetSfxVolume(float value)
     {
-        _sfxVolume = Mathf.Clamp01(value);
+        sfxVolume = Mathf.Clamp01(value);
         ApplySfxVolume();
         UpdateValueLabels();
-
-        if (rememberSettings)
-        {
-            PlayerPrefs.SetFloat(SfxPreferenceKey, _sfxVolume);
-        }
+        StoreVolume(SfxPreferenceKey, sfxVolume);
     }
 
     public void SetMusicVolume(float value)
     {
-        _musicVolume = Mathf.Clamp01(value);
+        musicVolume = Mathf.Clamp01(value);
         ApplyMusicVolume();
         UpdateValueLabels();
+        StoreVolume(MusicPreferenceKey, musicVolume);
+    }
 
+    private float LoadVolume(string key, float defaultValue)
+    {
+        float value = rememberSettings ? PlayerPrefs.GetFloat(key, defaultValue) : defaultValue;
+        return Mathf.Clamp01(value);
+    }
+
+    private void StoreVolume(string key, float value)
+    {
         if (rememberSettings)
-        {
-            PlayerPrefs.SetFloat(MusicPreferenceKey, _musicVolume);
-        }
+            PlayerPrefs.SetFloat(key, value);
+    }
+
+    private void ApplyAllVolumes()
+    {
+        // Listener volume is global, so the master slider also affects sources
+        // that are added to gameplay later and are not in either category array.
+        AudioListener.volume = masterVolume;
+        ApplySfxVolume();
+        ApplyMusicVolume();
     }
 
     private void ApplySfxVolume()
     {
         if (sfxSources == null)
-        {
             return;
-        }
 
         for (int i = 0; i < sfxSources.Length; i++)
         {
             if (sfxSources[i] != null)
-            {
-                sfxSources[i].volume = _sfxVolume;
-            }
+                sfxSources[i].volume = sfxVolume;
         }
     }
 
     private void ApplyMusicVolume()
     {
         if (musicSources == null)
-        {
             return;
-        }
 
         for (int i = 0; i < musicSources.Length; i++)
         {
             if (musicSources[i] != null)
-            {
-                musicSources[i].volume = _musicVolume;
-            }
+                musicSources[i].volume = musicVolume;
         }
     }
 
     private void UpdateValueLabels()
     {
-        if (sfxValueText != null)
-        {
-            sfxValueText.text = Mathf.RoundToInt(_sfxVolume * 100f) + "%";
-        }
+        SetPercentage(masterValueText, masterVolume);
+        SetPercentage(sfxValueText, sfxVolume);
+        SetPercentage(musicValueText, musicVolume);
+    }
 
-        if (musicValueText != null)
-        {
-            musicValueText.text = Mathf.RoundToInt(_musicVolume * 100f) + "%";
-        }
+    private static void SetPercentage(Text label, float value)
+    {
+        if (label != null)
+            label.text = Mathf.RoundToInt(value * 100f) + "%";
+    }
+
+    private void OnApplicationPause(bool isPaused)
+    {
+        if (isPaused)
+            SaveSettings();
+    }
+
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+            SaveSettings();
     }
 
     private void OnApplicationQuit()
     {
+        SaveSettings();
+    }
+
+    private void SaveSettings()
+    {
         if (rememberSettings)
-        {
             PlayerPrefs.Save();
-        }
     }
 
     private void OnValidate()
     {
+        defaultMasterVolume = Mathf.Clamp01(defaultMasterVolume);
         defaultSfxVolume = Mathf.Clamp01(defaultSfxVolume);
         defaultMusicVolume = Mathf.Clamp01(defaultMusicVolume);
     }
