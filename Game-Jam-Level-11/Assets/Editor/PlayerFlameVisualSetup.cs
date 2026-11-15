@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Events;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -182,8 +183,9 @@ public static class PlayerFlameVisualSetup
             sparks = sparksObject.AddComponent<ParticleSystem>();
         }
 
+        // ParticleSystem is a Component, not a Behaviour: activate its GameObject
+        // and enable the Emission module instead of setting a nonexistent enabled property.
         sparksObject.SetActive(true);
-        sparks.enabled = true;
 
         ParticleSystem.MainModule main = sparks.main;
         main.loop = false;
@@ -390,12 +392,50 @@ public static class PlayerFlameVisualSetup
                 "GameManager.mainMenuController is not connected. Player input will remain inactive until StartGame is called.");
         }
 
+        SerializedProperty playerReference = managerObject.FindProperty("playerController");
+        if (playerReference == null || playerReference.objectReferenceValue != player)
+        {
+            throw new System.InvalidOperationException(
+                "GameManager.playerController does not reference the scene Player. StartGame cannot activate the intended player.");
+        }
+
         SerializedObject menuObject = new SerializedObject(menu);
         SerializedProperty menuManager = menuObject.FindProperty("gameManager");
         if (menuManager == null || menuManager.objectReferenceValue != manager)
         {
             throw new System.InvalidOperationException(
                 "UI_Menu.MainMenuController.gameManager is not connected to the scene GameManager.");
+        }
+
+        Button playButton = FindButtonInHierarchy(menu.transform, "PlayButton");
+        if (playButton == null)
+        {
+            throw new System.InvalidOperationException(
+                "UI_Menu has no PlayButton. The StartGame entry point cannot be reached.");
+        }
+
+        bool playIsWired = false;
+        for (int i = 0; i < playButton.onClick.GetPersistentEventCount(); i++)
+        {
+            if (playButton.onClick.GetPersistentTarget(i) == menu &&
+                playButton.onClick.GetPersistentMethodName(i) == nameof(MainMenuController.PlayGame))
+            {
+                playIsWired = true;
+                break;
+            }
+        }
+
+        if (!playIsWired)
+        {
+            for (int i = playButton.onClick.GetPersistentEventCount() - 1; i >= 0; i--)
+            {
+                UnityEventTools.RemovePersistentListener(playButton.onClick, i);
+            }
+
+            UnityEventTools.AddPersistentListener(playButton.onClick, menu.PlayGame);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(playButton);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
         }
 
         SerializedObject playerObject = new SerializedObject(player);
@@ -447,15 +487,15 @@ public static class PlayerFlameVisualSetup
             ? particlesProperty.objectReferenceValue as ParticleSystem
             : null;
 
-        if (particles == null || !particles.enabled || !particles.gameObject.activeSelf)
+        if (particles == null || !particles.gameObject.activeInHierarchy)
         {
             throw new System.InvalidOperationException(
-                "FlameSparks ParticleSystem is missing or disabled. The spark system must remain active.");
+                "FlameSparks ParticleSystem is missing or its GameObject is inactive. The spark object must remain active.");
         }
 
         ParticleSystemRenderer renderer = particles.GetComponent<ParticleSystemRenderer>();
         Shader expectedShader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
-        if (renderer == null || renderer.sharedMaterial == null ||
+        if (renderer == null || !renderer.enabled || renderer.sharedMaterial == null ||
             renderer.sharedMaterial.shader != expectedShader ||
             renderer.sharedMaterial.GetTexture("_BaseMap") == null ||
             renderer.renderMode != ParticleSystemRenderMode.StretchedBillboard)
@@ -469,6 +509,28 @@ public static class PlayerFlameVisualSetup
             throw new System.InvalidOperationException(
                 "FlameSparks emission module is disabled. Keep the ParticleSystem enabled.");
         }
+    }
+
+    private static Button FindButtonInHierarchy(Transform root, string buttonName)
+    {
+        if (root == null)
+            return null;
+
+        if (root.name == buttonName)
+        {
+            Button button = root.GetComponent<Button>();
+            if (button != null)
+                return button;
+        }
+
+        for (int i = 0; i < root.childCount; i++)
+        {
+            Button found = FindButtonInHierarchy(root.GetChild(i), buttonName);
+            if (found != null)
+                return found;
+        }
+
+        return null;
     }
 
     private static T FindInScene<T>(Scene scene) where T : Component

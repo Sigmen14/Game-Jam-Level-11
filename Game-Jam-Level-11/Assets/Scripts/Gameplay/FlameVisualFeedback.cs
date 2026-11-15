@@ -127,7 +127,7 @@ public sealed class FlameVisualFeedback : MonoBehaviour
             }
         }
 
-        if (sparkParticles != null && sparkParticles.enabled &&
+        if (sparkParticles != null &&
             sparkParticles.gameObject.activeInHierarchy && !sparkParticles.isPlaying)
         {
             sparkParticles.Play(true);
