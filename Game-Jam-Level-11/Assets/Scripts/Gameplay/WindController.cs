@@ -13,8 +13,16 @@ public sealed class WindController : MonoBehaviour
     [SerializeField, Min(0f)] private float warningDuration = 1.2f;
     [SerializeField, Min(0f)] private float gustDuration = 2f;
 
+    [Header("Wind direction (visual feedback)")]
+    [SerializeField] private Vector2 windDirection = Vector2.right;
+
     public bool IsWarning { get; private set; }
     public bool IsWindActive { get; private set; }
+
+    /// <summary>Normalized world-space direction in which the gust blows.</summary>
+    public Vector2 WindDirection => windDirection.sqrMagnitude > 0.0001f
+        ? windDirection.normalized
+        : Vector2.right;
 
     /// <summary>Invoked whenever the warning state changes.</summary>
     public event Action<bool> WarningStateChanged;
@@ -145,5 +153,13 @@ public sealed class WindController : MonoBehaviour
 
         IsWindActive = isWindActive;
         WindActiveStateChanged?.Invoke(IsWindActive);
+    }
+
+    private void OnValidate()
+    {
+        if (windDirection.sqrMagnitude < 0.0001f)
+        {
+            windDirection = Vector2.right;
+        }
     }
 }

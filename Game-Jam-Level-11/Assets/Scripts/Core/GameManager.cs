@@ -52,6 +52,22 @@ public sealed class GameManager : MonoBehaviour
 
     private void Start()
     {
+        if (mainMenuController == null)
+        {
+            Debug.LogError(
+                "GameManager: MainMenuController is not assigned in Main.unity. " +
+                "The game stays in MainMenu and PlayerController input remains inactive. " +
+                "Run Game Jam > Setup Player Flame Visual Feedback to wire the menu.",
+                this);
+        }
+
+        if (playerController == null)
+        {
+            Debug.LogError(
+                "GameManager: PlayerController is not assigned. The player cannot be activated for gameplay.",
+                this);
+        }
+
         if (hudView != null)
             hudView.Bind(this, flameMeter, windController);
 
