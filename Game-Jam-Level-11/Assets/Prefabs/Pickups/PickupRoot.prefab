@@ -235,8 +235,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e5c0ad08fa25f51b601b8652be7ef45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fuelAmount: 25
-  respawnDelay: 8
+  fuelAmount: 14
+  respawnDelay: 32
   flameMeter: {fileID: 0}
   pickupCollider: {fileID: 3138920064737259900}
   pickupVisual: {fileID: 2055530486822444497}
