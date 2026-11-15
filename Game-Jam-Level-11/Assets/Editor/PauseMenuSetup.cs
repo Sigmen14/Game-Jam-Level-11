@@ -27,9 +27,25 @@ public static class PauseMenuSetup
     private const int FrameWidth = 48;
     private const int FrameHeight = 32;
 
+    [MenuItem("Game Jam/Setup Pause Menu", true)]
+    private static bool ValidateSetup()
+    {
+        // Scene editing through EditorSceneManager is not allowed while the game is running.
+        return !EditorApplication.isPlaying && !EditorApplication.isPlayingOrWillChangePlaymode;
+    }
+
     [MenuItem("Game Jam/Setup Pause Menu")]
     public static void Setup()
     {
+        if (EditorApplication.isPlaying || EditorApplication.isPlayingOrWillChangePlaymode)
+        {
+            EditorUtility.DisplayDialog(
+                "Pause Menu",
+                "Остановите Play Mode перед запуском Setup Pause Menu.",
+                "OK");
+            return;
+        }
+
         if (!EnsureMasterVolumeControlsInSettingsPrefab() || !WireMainMenuSettingsPrefab())
         {
             EditorUtility.DisplayDialog(
