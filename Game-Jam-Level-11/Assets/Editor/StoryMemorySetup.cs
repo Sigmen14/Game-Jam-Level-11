@@ -525,10 +525,8 @@ public static class StoryMemorySetup
 
     private static Font GetBuiltinFont()
     {
-        Font font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-        if (font == null)
-            font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        return font;
+        // Unity 6 no longer exposes Arial.ttf as a built-in font.
+        return Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
     }
 
     private static void Stretch(RectTransform rect)
