@@ -187,6 +187,18 @@ public sealed class HUDView : MonoBehaviour
         if (windWarningRect != null) windWarningRect.localScale = windWarningBaseScale;
     }
 
+    public void OnRetryButtonClicked()
+    {
+        if (gameManager != null)
+            gameManager.Retry();
+    }
+
+    public void OnMainMenuButtonClicked()
+    {
+        if (gameManager != null)
+            gameManager.ReturnToMainMenu();
+    }
+
     private static string FormatTime(float seconds)
     {
         int totalSeconds = Mathf.Max(0, Mathf.CeilToInt(seconds));
