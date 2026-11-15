@@ -4,6 +4,7 @@ using UnityEngine;
 /// Builds a detailed, game-ready ember-forged trap sprite and a matching polygon collider.
 /// The sprite is generated once per prefab instance; no scene objects are spawned.
 /// </summary>
+[ExecuteAlways]
 [DisallowMultipleComponent]
 [RequireComponent(typeof(SpriteRenderer), typeof(PolygonCollider2D))]
 public sealed class EmberTrapVisual : MonoBehaviour
@@ -15,7 +16,8 @@ public sealed class EmberTrapVisual : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private PolygonCollider2D polygonCollider;
     private float pulseTime;
-    private Color baseTint = Color.white;
+    private Texture2D generatedTexture;
+    private Sprite generatedSprite;
 
     private static readonly Vector2[] Silhouette =
     {
@@ -35,23 +37,52 @@ public sealed class EmberTrapVisual : MonoBehaviour
 
     private void Awake()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        polygonCollider = GetComponent<PolygonCollider2D>();
-        BuildSprite();
-        BuildCollider();
-        baseTint = Color.white;
+        EnsureVisualBuilt();
+    }
+
+    private void OnEnable()
+    {
+        EnsureVisualBuilt();
+    }
+
+    private void EnsureVisualBuilt()
+    {
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+        if (polygonCollider == null) polygonCollider = GetComponent<PolygonCollider2D>();
+        if (spriteRenderer != null && spriteRenderer.sprite == null)
+            BuildSprite();
+        if (polygonCollider != null)
+            BuildCollider();
     }
 
     private void Update()
     {
+        if (!Application.isPlaying || spriteRenderer == null)
+            return;
+
         pulseTime += Time.deltaTime;
         float pulse = 0.94f + Mathf.Sin(pulseTime * 5.2f) * 0.045f;
         spriteRenderer.color = new Color(pulse, pulse * 0.985f, pulse * 0.96f, 1f);
     }
 
+    private void OnDestroy()
+    {
+        if (generatedSprite != null)
+        {
+            if (Application.isPlaying) Destroy(generatedSprite);
+            else DestroyImmediate(generatedSprite);
+        }
+        if (generatedTexture != null)
+        {
+            if (Application.isPlaying) Destroy(generatedTexture);
+            else DestroyImmediate(generatedTexture);
+        }
+    }
+
     private void BuildSprite()
     {
         Texture2D texture = new Texture2D(TextureWidth, TextureHeight, TextureFormat.RGBA32, false);
+        generatedTexture = texture;
         texture.name = "Generated_EmberForgedTrap";
         texture.filterMode = FilterMode.Bilinear;
         texture.wrapMode = TextureWrapMode.Clamp;
@@ -114,9 +145,10 @@ public sealed class EmberTrapVisual : MonoBehaviour
         texture.Apply(false, true);
         Sprite sprite = Sprite.Create(texture, new Rect(0, 0, TextureWidth, TextureHeight),
             new Vector2(0.5f, 0.5f), PixelsPerUnit, 0, SpriteMeshType.Tight);
+        generatedSprite = sprite;
         sprite.name = "SPR_EmberForgedRotatingTrap";
         spriteRenderer.sprite = sprite;
-        spriteRenderer.color = baseTint;
+        spriteRenderer.color = Color.white;
         spriteRenderer.sortingOrder = 40;
     }
 
