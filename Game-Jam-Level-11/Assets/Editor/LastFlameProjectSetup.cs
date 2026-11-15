@@ -81,13 +81,30 @@ public static class LastFlameProjectSetup
 
             BuildMenuScene(menuPrefab);
             BuildMainScene(playerPrefab, pickupPrefab, coverPrefab, hudPrefab);
-            EditorSceneManager.OpenScene(MenuScenePath, OpenSceneMode.Single);
+
+            // The current game flow keeps the menu and GameManager together in Main.unity.
+            // This wires MainMenuController.gameManager and the reverse GameManager reference.
+            GameFlowUISetup.Setup();
+
+            Scene mainScene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+            GameManager configuredManager = FindInScene<GameManager>(mainScene);
+            MainMenuController configuredMenu = FindInScene<MainMenuController>(mainScene);
+            if (configuredManager == null || configuredMenu == null)
+                throw new System.InvalidOperationException(
+                    "Game Flow UI setup did not create a MainMenuController and GameManager in Main.unity.");
+
+            SerializedObject menuControllerSerialized = new SerializedObject(configuredMenu);
+            SerializedProperty managerProperty = menuControllerSerialized.FindProperty("gameManager");
+            if (managerProperty == null || managerProperty.objectReferenceValue != configuredManager)
+                throw new System.InvalidOperationException(
+                    "MainMenuController.gameManager was not assigned in Main.unity.");
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
             EditorUtility.DisplayDialog(
                 "Last Flame",
-                "Menu and Main scenes plus their prefab assets have been authored. Menu.unity is the build entry point; press Play from the Menu scene.",
+                "Menu and Main scenes plus their prefab assets have been authored. Main.unity is configured as the game entry point; press Play from Main.",
                 "OK");
         }
         catch (System.Exception exception)
