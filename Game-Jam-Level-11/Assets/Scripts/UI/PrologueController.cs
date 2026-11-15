@@ -35,7 +35,6 @@ public sealed class PrologueController : MonoBehaviour
     [SerializeField] private Image[] emberParticles;
 
     [Header("Controls and ambience")]
-    [SerializeField] private Button skipButton;
     [SerializeField] private AudioSource windAudio;
     [SerializeField] private AudioSource fireAudio;
 
@@ -55,12 +54,10 @@ public sealed class PrologueController : MonoBehaviour
     private string _activeStoryLine;
     private float _elapsed;
     private bool _isPlaying;
+    private float _inputEnabledAt;
 
     private void Awake()
     {
-        if (skipButton != null)
-            skipButton.onClick.AddListener(Skip);
-
         _ashOrigins = CaptureParticleOrigins(ashParticles);
         _emberOrigins = CaptureParticleOrigins(emberParticles);
 
@@ -90,6 +87,7 @@ public sealed class PrologueController : MonoBehaviour
         _elapsed = 0f;
         _activeStoryLine = null;
         _isPlaying = true;
+        _inputEnabledAt = Time.unscaledTime + 0.25f;
 
         if (titleText != null)
             titleText.text = "Когда погас последний свет";
@@ -113,15 +111,42 @@ public sealed class PrologueController : MonoBehaviour
         if (!_isPlaying)
             return;
 
-        // Project Settings uses Both input handling, so legacy polling is available.
-        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+        // Ignore the mouse/key press that may have launched Play Mode or loaded the scene.
+        if (Time.unscaledTime >= _inputEnabledAt &&
+            (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)))
         {
-            Skip();
+            AdvanceScene();
             return;
         }
 
-        // Finish the story on its last frame and wait for an explicit player action.
+        // Keep the story moving until the final frame; it never completes by itself.
         _elapsed += Time.unscaledDeltaTime;
+        UpdateTimeline();
+    }
+
+    /// <summary>
+    /// Advances to the next authored story beat. Only an input on the final beat
+    /// completes the prologue and starts gameplay through the registered callback.
+    /// </summary>
+    private void AdvanceScene()
+    {
+        if (!_isPlaying)
+            return;
+
+        if (_elapsed < 1.6f)
+            _elapsed = 1.6f;       // Black screen -> ruined settlement.
+        else if (_elapsed < 7.1f)
+            _elapsed = 7.1f;       // Ruined settlement -> last living spark.
+        else if (_elapsed < 12.2f)
+            _elapsed = 12.2f;      // Last spark -> distant ancient beacon.
+        else if (_elapsed < 16.55f)
+            _elapsed = 16.55f;     // Ancient beacon -> final line.
+        else
+        {
+            Complete();            // Final line -> gameplay.
+            return;
+        }
+
         UpdateTimeline();
     }
 
@@ -250,12 +275,6 @@ public sealed class PrologueController : MonoBehaviour
         }
     }
 
-    public void Skip()
-    {
-        if (_isPlaying)
-            Complete();
-    }
-
     private void Complete()
     {
         if (!_isPlaying)
@@ -346,9 +365,6 @@ public sealed class PrologueController : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (skipButton != null)
-            skipButton.onClick.RemoveListener(Skip);
-
         StopAmbient(windAudio);
         StopAmbient(fireAudio);
     }

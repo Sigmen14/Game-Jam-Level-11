@@ -101,7 +101,7 @@ public static class StoryPrologueSetup
                 new Vector2(0.5f, 0.36f), new Vector2(1300f, 56f), 24,
                 new Color(0.88f, 0.86f, 0.81f, 0.92f));
 
-            Button skipButton = CreateSkipButton(overlay.transform, uiSprite);
+            CreateSkipButton(overlay.transform, uiSprite);
             AudioSource windSource = ConfigureAudioSource(overlay.AddComponent<AudioSource>(), windClip);
             AudioSource fireSource = ConfigureAudioSource(overlay.AddComponent<AudioSource>(), fireClip);
 
@@ -121,7 +121,6 @@ public static class StoryPrologueSetup
             SetReference(serialized, "flameGlow", flameGlow);
             SetReference(serialized, "flameCore", flameCore);
             SetReference(serialized, "beaconGlow", beaconGlow);
-            SetReference(serialized, "skipButton", skipButton);
             SetReference(serialized, "windAudio", windSource);
             SetReference(serialized, "fireAudio", fireSource);
             SetArray(serialized, "ashParticles", ashParticles);
