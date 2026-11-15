@@ -157,14 +157,14 @@ public sealed class WindController : MonoBehaviour
 
     private void PrepareNextGust()
     {
-        CurrentGustStrength = Random.Range(minimumGustStrength, maximumGustStrength);
+        CurrentGustStrength = UnityEngine.Random.Range(minimumGustStrength, maximumGustStrength);
         _plannedGustDuration = Mathf.Max(
             0.6f,
-            gustDuration + Random.Range(-gustDurationVariation, gustDurationVariation));
+            gustDuration + UnityEngine.Random.Range(-gustDurationVariation, gustDurationVariation));
 
         Vector2 baseDirection = GetBaseDirection();
         float angle = randomizeWindDirection
-            ? Random.Range(-directionVariationDegrees, directionVariationDegrees)
+            ? UnityEngine.Random.Range(-directionVariationDegrees, directionVariationDegrees)
             : 0f;
         _currentWindDirection =
             ((Vector2)(Quaternion.Euler(0f, 0f, angle) * baseDirection)).normalized;
@@ -174,7 +174,7 @@ public sealed class WindController : MonoBehaviour
     {
         return Mathf.Max(
             6f,
-            intervalBetweenGusts + Random.Range(-intervalVariation, intervalVariation));
+            intervalBetweenGusts + UnityEngine.Random.Range(-intervalVariation, intervalVariation));
     }
 
     private Vector2 GetBaseDirection()
