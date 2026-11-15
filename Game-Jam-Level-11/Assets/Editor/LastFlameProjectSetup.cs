@@ -455,18 +455,24 @@ public static class LastFlameProjectSetup
             new Color(1f, 0.77f, 0.38f, 1f), new Vector2(0f, 190f), new Vector2(1100f, 90f),
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
 
+        CreateText(root.transform, "MasterLabel", "ОБЩАЯ ГРОМКОСТЬ", 22, TextAnchor.MiddleLeft,
+            Color.white, new Vector2(-300f, 120f), new Vector2(420f, 44f),
+            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+
         CreateText(root.transform, "SfxLabel", "ЗВУКОВЫЕ ЭФФЕКТЫ (SFX)", 22, TextAnchor.MiddleLeft,
-            Color.white, new Vector2(-300f, 72f), new Vector2(420f, 44f),
+            Color.white, new Vector2(-300f, -5f), new Vector2(420f, 44f),
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
 
         CreateText(root.transform, "MusicLabel", "ГРОМКОСТЬ МУЗЫКИ", 22, TextAnchor.MiddleLeft,
-            Color.white, new Vector2(-300f, -65f), new Vector2(420f, 44f),
+            Color.white, new Vector2(-300f, -90f), new Vector2(420f, 44f),
             new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
 
+        CreateSettingsSlider(root.transform, "MasterSlider",
+            new Vector2(-10f, 75f), 1f, out _);
         CreateSettingsSlider(root.transform, "SfxSlider",
-            new Vector2(-10f, 25f), 0.8f, out _);
+            new Vector2(-10f, -45f), 0.8f, out _);
         CreateSettingsSlider(root.transform, "MusicSlider",
-            new Vector2(-10f, -112f), 0.65f, out _);
+            new Vector2(-10f, -130f), 0.65f, out _);
 
         CreateMenuButton(
             root.transform, "BackButton", "НАЗАД", new Vector2(0f, -245f), new Vector2(300f, 64f));
@@ -609,13 +615,17 @@ public static class LastFlameProjectSetup
         SetObjectReference(menuController, "mainMenuPanel", menuInstance);
         SetObjectReference(menuController, "settingsPanel", settingsInstance);
 
+        Slider masterSlider = settingsInstance.transform.Find("MasterSlider").GetComponent<Slider>();
         Slider sfxSlider = settingsInstance.transform.Find("SfxSlider").GetComponent<Slider>();
         Slider musicSlider = settingsInstance.transform.Find("MusicSlider").GetComponent<Slider>();
+        Text masterValueText = settingsInstance.transform.Find("MasterSliderValue").GetComponent<Text>();
         Text sfxValueText = settingsInstance.transform.Find("SfxSliderValue").GetComponent<Text>();
         Text musicValueText = settingsInstance.transform.Find("MusicSliderValue").GetComponent<Text>();
 
+        SetObjectReference(audioSettings, "masterSlider", masterSlider);
         SetObjectReference(audioSettings, "sfxSlider", sfxSlider);
         SetObjectReference(audioSettings, "musicSlider", musicSlider);
+        SetObjectReference(audioSettings, "masterValueText", masterValueText);
         SetObjectReference(audioSettings, "sfxValueText", sfxValueText);
         SetObjectReference(audioSettings, "musicValueText", musicValueText);
 
@@ -629,6 +639,7 @@ public static class LastFlameProjectSetup
         UnityEventTools.AddPersistentListener(settingsButton.onClick, menuController.OpenSettings);
         UnityEventTools.AddPersistentListener(exitButton.onClick, menuController.ExitGame);
         UnityEventTools.AddPersistentListener(backButton.onClick, menuController.CloseSettings);
+        UnityEventTools.AddPersistentListener(masterSlider.onValueChanged, audioSettings.SetMasterVolume);
         UnityEventTools.AddPersistentListener(sfxSlider.onValueChanged, audioSettings.SetSfxVolume);
         UnityEventTools.AddPersistentListener(musicSlider.onValueChanged, audioSettings.SetMusicVolume);
 
@@ -636,6 +647,7 @@ public static class LastFlameProjectSetup
         PrefabUtility.RecordPrefabInstancePropertyModifications(settingsButton);
         PrefabUtility.RecordPrefabInstancePropertyModifications(exitButton);
         PrefabUtility.RecordPrefabInstancePropertyModifications(backButton);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(masterSlider);
         PrefabUtility.RecordPrefabInstancePropertyModifications(sfxSlider);
         PrefabUtility.RecordPrefabInstancePropertyModifications(musicSlider);
 
