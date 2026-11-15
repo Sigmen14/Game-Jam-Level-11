@@ -113,7 +113,11 @@ public sealed class GameManager : MonoBehaviour
             routeDirector.Bind(playerController, flameMeter, hudView);
 
         ValidateChallengeSetup();
-        ReturnToMainMenu();
+
+        if (MainMenuController.ConsumeStartGameplayAfterMainLoads())
+            StartGame();
+        else
+            ReturnToMainMenu();
     }
 
     private void ValidateChallengeSetup()
