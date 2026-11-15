@@ -124,6 +124,7 @@ public sealed class FlameVisualFeedback : MonoBehaviour
         if (flameMeter != null)
         {
             flameMeter.ValueChanged += HandleFlameValueChanged;
+            flameMeter.GrowthStageChanged += HandleGrowthStageChanged;
             baseLightIntensity = flameLight != null ? flameLight.intensity : baseLightIntensity;
         }
 
@@ -496,11 +497,22 @@ public sealed class FlameVisualFeedback : MonoBehaviour
         }
     }
 
+    private void HandleGrowthStageChanged(FlameMeter.GrowthStage stage)
+    {
+        if (flameLight != null)
+        {
+            // A stage change can happen without a fuel-value change, so refresh
+            // the flicker baseline after FlameMeter applies its growth multiplier.
+            baseLightIntensity = flameLight.intensity;
+        }
+    }
+
     private void OnDisable()
     {
         if (flameMeter != null)
         {
             flameMeter.ValueChanged -= HandleFlameValueChanged;
+            flameMeter.GrowthStageChanged -= HandleGrowthStageChanged;
         }
 
         foreach (FuelPickup pickup in subscribedPickups)
