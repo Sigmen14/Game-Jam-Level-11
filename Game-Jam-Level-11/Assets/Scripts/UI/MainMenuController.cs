@@ -12,9 +12,37 @@ public sealed class MainMenuController : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private MainMenuFireAtmosphere fireAtmosphere;
     [SerializeField] private string gameplaySceneName = "Main";
 
+    private bool _playTransitionPending;
+
+    private void Awake()
+    {
+        if (fireAtmosphere == null)
+            fireAtmosphere = GetComponent<MainMenuFireAtmosphere>();
+    }
+
     public void PlayGame()
+    {
+        if (_playTransitionPending)
+            return;
+
+        if (fireAtmosphere != null)
+        {
+            _playTransitionPending = true;
+            fireAtmosphere.PlayStartFlash(() =>
+            {
+                _playTransitionPending = false;
+                StartGameImmediately();
+            });
+            return;
+        }
+
+        StartGameImmediately();
+    }
+
+    private void StartGameImmediately()
     {
         // The standalone Menu scene intentionally has no GameManager. Find one when
         // the menu is embedded in Main, otherwise transfer to the gameplay scene.
@@ -51,12 +79,18 @@ public sealed class MainMenuController : MonoBehaviour
     {
         SetPanel(settingsPanel, false);
         SetPanel(mainMenuPanel, true);
+
+        if (fireAtmosphere != null)
+            fireAtmosphere.SetAtmosphereVisible(true);
     }
 
     public void HideMainMenu()
     {
         SetPanel(settingsPanel, false);
         SetPanel(mainMenuPanel, false);
+
+        if (fireAtmosphere != null)
+            fireAtmosphere.SetAtmosphereVisible(false);
     }
 
     public void OpenSettings()
