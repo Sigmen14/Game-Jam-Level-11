@@ -612,7 +612,7 @@ GameObject:
   - component: {fileID: 240059732018346878}
   - component: {fileID: 7699853165574032527}
   - component: {fileID: 3579261786188797217}
-  - component: {fileID: 8200000000000000001}
+  - component: {fileID: 8200000000000001}
   m_Layer: 0
   m_Name: PauseEmbers
   m_TagString: Untagged
@@ -632,13 +632,13 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8100000000000000000}
-  - {fileID: 8100000000000000000}
-  - {fileID: 8100000000000000000}
-  - {fileID: 8100000000000000000}
-  - {fileID: 8100000000000000000}
-  - {fileID: 8100000000000000000}
-  - {fileID: 8100000000000000000}
+  - {fileID: 8100000000000001}
+  - {fileID: 8100000000000002}
+  - {fileID: 8100000000000003}
+  - {fileID: 8100000000000004}
+  - {fileID: 8100000000000005}
+  - {fileID: 8100000000000006}
+  - {fileID: 8100000000000007}
   m_Father: {fileID: 5640089051317648636}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -1142,7 +1142,7 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "\u041F\u0410\u0423\u0417\u0410"
---- !u!1 &8300000000000000000
+--- !u!1 &8300000000000001
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1150,9 +1150,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8100000000000000000}
-  - component: {fileID: 8400000000000000000}
-  - component: {fileID: 8500000000000000000}
+  - component: {fileID: 8100000000000001}
+  - component: {fileID: 8400000000000001}
+  - component: {fileID: 8500000000000001}
   m_Layer: 0
   m_Name: PauseFirefly_00
   m_TagString: Untagged
@@ -1160,13 +1160,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &8100000000000000000
+--- !u!224 &8100000000000001
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000001}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -1179,21 +1179,21 @@ RectTransform:
   m_AnchoredPosition: {x: -325, y: -42}
   m_SizeDelta: {x: 18, y: 18}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &8400000000000000000
+--- !u!222 &8400000000000001
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000001}
   m_CullTransparentMesh: 1
---- !u!114 &8500000000000000000
+--- !u!114 &8500000000000001
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000001}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -1217,7 +1217,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!1 &8300000000000000000
+--- !u!1 &8300000000000002
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1225,9 +1225,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8100000000000000000}
-  - component: {fileID: 8400000000000000000}
-  - component: {fileID: 8500000000000000000}
+  - component: {fileID: 8100000000000002}
+  - component: {fileID: 8400000000000002}
+  - component: {fileID: 8500000000000002}
   m_Layer: 0
   m_Name: PauseFirefly_01
   m_TagString: Untagged
@@ -1235,13 +1235,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &8100000000000000000
+--- !u!224 &8100000000000002
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000002}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -1254,21 +1254,21 @@ RectTransform:
   m_AnchoredPosition: {x: -255, y: 76}
   m_SizeDelta: {x: 14, y: 14}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &8400000000000000000
+--- !u!222 &8400000000000002
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000002}
   m_CullTransparentMesh: 1
---- !u!114 &8500000000000000000
+--- !u!114 &8500000000000002
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000002}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -1292,7 +1292,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!1 &8300000000000000000
+--- !u!1 &8300000000000003
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1300,9 +1300,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8100000000000000000}
-  - component: {fileID: 8400000000000000000}
-  - component: {fileID: 8500000000000000000}
+  - component: {fileID: 8100000000000003}
+  - component: {fileID: 8400000000000003}
+  - component: {fileID: 8500000000000003}
   m_Layer: 0
   m_Name: PauseFirefly_02
   m_TagString: Untagged
@@ -1310,13 +1310,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &8100000000000000000
+--- !u!224 &8100000000000003
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000003}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -1329,21 +1329,21 @@ RectTransform:
   m_AnchoredPosition: {x: -155, y: 112}
   m_SizeDelta: {x: 12, y: 12}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &8400000000000000000
+--- !u!222 &8400000000000003
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000003}
   m_CullTransparentMesh: 1
---- !u!114 &8500000000000000000
+--- !u!114 &8500000000000003
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000003}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -1367,7 +1367,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!1 &8300000000000000000
+--- !u!1 &8300000000000004
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1375,9 +1375,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8100000000000000000}
-  - component: {fileID: 8400000000000000000}
-  - component: {fileID: 8500000000000000000}
+  - component: {fileID: 8100000000000004}
+  - component: {fileID: 8400000000000004}
+  - component: {fileID: 8500000000000004}
   m_Layer: 0
   m_Name: PauseFirefly_03
   m_TagString: Untagged
@@ -1385,13 +1385,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &8100000000000000000
+--- !u!224 &8100000000000004
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000004}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -1404,21 +1404,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 118}
   m_SizeDelta: {x: 16, y: 16}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &8400000000000000000
+--- !u!222 &8400000000000004
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000004}
   m_CullTransparentMesh: 1
---- !u!114 &8500000000000000000
+--- !u!114 &8500000000000004
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000004}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -1442,7 +1442,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!1 &8300000000000000000
+--- !u!1 &8300000000000005
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1450,9 +1450,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8100000000000000000}
-  - component: {fileID: 8400000000000000000}
-  - component: {fileID: 8500000000000000000}
+  - component: {fileID: 8100000000000005}
+  - component: {fileID: 8400000000000005}
+  - component: {fileID: 8500000000000005}
   m_Layer: 0
   m_Name: PauseFirefly_04
   m_TagString: Untagged
@@ -1460,13 +1460,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &8100000000000000000
+--- !u!224 &8100000000000005
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000005}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -1479,21 +1479,21 @@ RectTransform:
   m_AnchoredPosition: {x: 155, y: 112}
   m_SizeDelta: {x: 13, y: 13}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &8400000000000000000
+--- !u!222 &8400000000000005
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000005}
   m_CullTransparentMesh: 1
---- !u!114 &8500000000000000000
+--- !u!114 &8500000000000005
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000005}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -1517,7 +1517,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!1 &8300000000000000000
+--- !u!1 &8300000000000006
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1525,9 +1525,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8100000000000000000}
-  - component: {fileID: 8400000000000000000}
-  - component: {fileID: 8500000000000000000}
+  - component: {fileID: 8100000000000006}
+  - component: {fileID: 8400000000000006}
+  - component: {fileID: 8500000000000006}
   m_Layer: 0
   m_Name: PauseFirefly_05
   m_TagString: Untagged
@@ -1535,13 +1535,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &8100000000000000000
+--- !u!224 &8100000000000006
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000006}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -1554,21 +1554,21 @@ RectTransform:
   m_AnchoredPosition: {x: 255, y: 76}
   m_SizeDelta: {x: 18, y: 18}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &8400000000000000000
+--- !u!222 &8400000000000006
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000006}
   m_CullTransparentMesh: 1
---- !u!114 &8500000000000000000
+--- !u!114 &8500000000000006
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000006}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -1592,7 +1592,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!1 &8300000000000000000
+--- !u!1 &8300000000000007
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1600,9 +1600,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8100000000000000000}
-  - component: {fileID: 8400000000000000000}
-  - component: {fileID: 8500000000000000000}
+  - component: {fileID: 8100000000000007}
+  - component: {fileID: 8400000000000007}
+  - component: {fileID: 8500000000000007}
   m_Layer: 0
   m_Name: PauseFirefly_06
   m_TagString: Untagged
@@ -1610,13 +1610,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &8100000000000000000
+--- !u!224 &8100000000000007
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000007}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -1629,21 +1629,21 @@ RectTransform:
   m_AnchoredPosition: {x: 325, y: -42}
   m_SizeDelta: {x: 14, y: 14}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &8400000000000000000
+--- !u!222 &8400000000000007
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000007}
   m_CullTransparentMesh: 1
---- !u!114 &8500000000000000000
+--- !u!114 &8500000000000007
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8300000000000000000}
+  m_GameObject: {fileID: 8300000000000007}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -1667,7 +1667,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8200000000000000001
+--- !u!114 &8200000000000001
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1680,13 +1680,13 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier:
   particles:
-  - {fileID: 8100000000000000000}
-  - {fileID: 8100000000000000000}
-  - {fileID: 8100000000000000000}
-  - {fileID: 8100000000000000000}
-  - {fileID: 8100000000000000000}
-  - {fileID: 8100000000000000000}
-  - {fileID: 8100000000000000000}
+  - {fileID: 8100000000000001}
+  - {fileID: 8100000000000002}
+  - {fileID: 8100000000000003}
+  - {fileID: 8100000000000004}
+  - {fileID: 8100000000000005}
+  - {fileID: 8100000000000006}
+  - {fileID: 8100000000000007}
   driftDistance: 7
   speed: 1
   minimumAlpha: 0.35
