@@ -391,6 +391,13 @@ public static class PlayerFlameVisualSetup
                 "GameManager.mainMenuController is not connected. Player input will remain inactive until StartGame is called.");
         }
 
+        SerializedProperty playerReference = managerObject.FindProperty("playerController");
+        if (playerReference == null || playerReference.objectReferenceValue != player)
+        {
+            throw new System.InvalidOperationException(
+                "GameManager.playerController does not reference the scene Player. StartGame cannot activate the intended player.");
+        }
+
         SerializedObject menuObject = new SerializedObject(menu);
         SerializedProperty menuManager = menuObject.FindProperty("gameManager");
         if (menuManager == null || menuManager.objectReferenceValue != manager)
