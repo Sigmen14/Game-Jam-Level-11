@@ -26,7 +26,6 @@ public sealed class GameManager : MonoBehaviour
     [SerializeField] private WindController windController;
     [SerializeField] private FuelPickup[] fuelPickups;
     [SerializeField] private CoverZone[] coverZones;
-    [SerializeField] private GameplayChallengeController[] rotatingObstacles;
     [SerializeField] private GameplayChallengeController routeDirector;
 
     [Header("Fuel pickup spawn area")]
@@ -50,6 +49,12 @@ public sealed class GameManager : MonoBehaviour
 
     private GameState _state = GameState.MainMenu;
     private float _remainingTime;
+    private LivingSparksPickup activeLivingSparks;
+    private float livingSparksSpawnCountdown;
+    private bool livingSparksWarningShown;
+
+    private const float LivingSparksFuelReward = 10f;
+    private const float LivingSparksLifetime = 12f;
 
     private void Awake()
     {
@@ -84,7 +89,7 @@ public sealed class GameManager : MonoBehaviour
             endingFlowController.Bind(this);
 
         if (playerController != null)
-            playerController.BindGameplaySystems(flameMeter, windController);
+            playerController.BindGameplaySystems(windController);
 
         if (flameMeter != null)
             flameMeter.BindGameplaySystems(playerController, windController);
@@ -103,45 +108,6 @@ public sealed class GameManager : MonoBehaviour
 
         if (routeDirector == null)
             Debug.LogError("GameManager: RouteDirector is not assigned; route choice cannot run.", this);
-        else if (!routeDirector.IsRouteDirector)
-            Debug.LogError("GameManager: routeDirector must use RouteDirector mode.", routeDirector);
-
-        if (rotatingObstacles == null || rotatingObstacles.Length == 0)
-        {
-            Debug.LogError("GameManager: no rotating obstacles are assigned.", this);
-            return;
-        }
-
-        for (int i = 0; i < rotatingObstacles.Length; i++)
-        {
-            GameplayChallengeController obstacle = rotatingObstacles[i];
-            if (obstacle == null)
-            {
-                Debug.LogError("GameManager: rotatingObstacles has a missing scene reference at index " + i + ".", this);
-                continue;
-            }
-
-            if (!obstacle.IsRotatingObstacle)
-                Debug.LogError("GameManager: a rotating obstacle reference is not in RotatingObstacle mode.", obstacle);
-
-            Rigidbody2D obstacleBody = obstacle.GetComponent<Rigidbody2D>();
-            if (obstacleBody == null || obstacleBody.bodyType != RigidbodyType2D.Kinematic)
-                Debug.LogError("GameManager: each rotating obstacle needs a root Kinematic Rigidbody2D.", obstacle);
-
-            Collider2D[] colliders = obstacle.GetComponentsInChildren<Collider2D>(true);
-            bool hasSolidCollider = false;
-            for (int c = 0; c < colliders.Length; c++)
-            {
-                if (colliders[c] != null && colliders[c].enabled && !colliders[c].isTrigger)
-                {
-                    hasSolidCollider = true;
-                    break;
-                }
-            }
-
-            if (!hasSolidCollider)
-                Debug.LogError("GameManager: each rotating obstacle needs an enabled solid Collider2D.", obstacle);
-        }
     }
 
     private void Update()
@@ -155,7 +121,12 @@ public sealed class GameManager : MonoBehaviour
             hudView.SetTimer(_remainingTime);
 
         if (_remainingTime <= 0f)
+        {
             FinishMatch(true);
+            return;
+        }
+
+        UpdateLivingSparks();
     }
 
     /// <summary>Starts a fresh 180-second session from the main menu or result screen.</summary>
@@ -172,6 +143,8 @@ public sealed class GameManager : MonoBehaviour
         ResetGameplayObjects();
 
         _remainingTime = matchDuration;
+        livingSparksSpawnCountdown = UnityEngine.Random.Range(25f, 35f);
+        livingSparksWarningShown = false;
         ChangeState(GameState.Playing);
 
         if (mainMenuController != null)
@@ -308,6 +281,9 @@ public sealed class GameManager : MonoBehaviour
 
     private void ResetGameplayObjects()
     {
+        ClearLivingSparks();
+        livingSparksSpawnCountdown = 0f;
+        livingSparksWarningShown = false;
         SetChallengeSystemsRunning(false);
         if (playerController != null)
         {
@@ -350,15 +326,65 @@ public sealed class GameManager : MonoBehaviour
     {
         if (routeDirector != null)
             routeDirector.SetRunning(isRunning);
+    }
 
-        if (rotatingObstacles == null)
+    private void UpdateLivingSparks()
+    {
+        if (livingSparksSpawnCountdown > 0f)
+        {
+            livingSparksSpawnCountdown -= Time.deltaTime;
+            if (!livingSparksWarningShown && livingSparksSpawnCountdown <= 2f)
+            {
+                livingSparksWarningShown = true;
+                if (hudView != null)
+                    hudView.ShowPickupNotification("ВПЕРЕДИ: ЖИВЫЕ ИСКРЫ", 2.5f);
+            }
+        }
+
+        // A missed group keeps the next event queued until it expires.
+        if (livingSparksSpawnCountdown > 0f || activeLivingSparks != null)
             return;
 
-        for (int i = 0; i < rotatingObstacles.Length; i++)
-        {
-            if (rotatingObstacles[i] != null)
-                rotatingObstacles[i].SetRunning(isRunning);
-        }
+        SpawnLivingSparks();
+        livingSparksSpawnCountdown = UnityEngine.Random.Range(35f, 45f);
+        livingSparksWarningShown = false;
+    }
+
+    private void SpawnLivingSparks()
+    {
+        if (playerController == null || flameMeter == null)
+            return;
+
+        Vector2 playerPosition = playerController.transform.position;
+        float forwardDistance = UnityEngine.Random.Range(2.4f, 3.8f);
+        float spawnX = playerPosition.x + forwardDistance;
+        if (spawnX > fuelSpawnMax.x - 0.2f)
+            spawnX = playerPosition.x - forwardDistance;
+
+        spawnX = Mathf.Clamp(spawnX, fuelSpawnMin.x + 0.35f, fuelSpawnMax.x - 0.35f);
+        float spawnY = Mathf.Clamp(
+            playerPosition.y + UnityEngine.Random.Range(-1.8f, 1.8f),
+            fuelSpawnMin.y + 0.35f,
+            fuelSpawnMax.y - 0.35f);
+
+        GameObject group = new GameObject("LivingSparks_Group");
+        group.transform.position = new Vector3(spawnX, spawnY, 0f);
+
+        CircleCollider2D trigger = group.AddComponent<CircleCollider2D>();
+        trigger.isTrigger = true;
+        trigger.radius = 0.92f;
+
+        activeLivingSparks = group.AddComponent<LivingSparksPickup>();
+        activeLivingSparks.Initialize(flameMeter, hudView, LivingSparksFuelReward, LivingSparksLifetime);
+        if (hudView != null)
+            hudView.ShowPickupNotification("ЖИВЫЕ ИСКРЫ ПОЯВИЛИСЬ — СОБЕРИ ИХ!", 2.5f);
+    }
+
+    private void ClearLivingSparks()
+    {
+        if (activeLivingSparks != null)
+            Destroy(activeLivingSparks.gameObject);
+        activeLivingSparks = null;
     }
 
     private void HandleFlameDepleted()
@@ -372,6 +398,7 @@ public sealed class GameManager : MonoBehaviour
             return;
 
         Time.timeScale = 1f;
+        ClearLivingSparks();
 
         if (playerController != null)
             playerController.SetGameplayActive(false);
@@ -417,6 +444,7 @@ public sealed class GameManager : MonoBehaviour
         if (flameMeter != null)
             flameMeter.FlameDepleted -= HandleFlameDepleted;
 
+        ClearLivingSparks();
         Time.timeScale = 1f;
     }
 
