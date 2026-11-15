@@ -125,6 +125,33 @@ public static class GameFlowUISetup
             "OK");
     }
 
+    private static void ConfigureMainMenuPrefab()
+    {
+        const string path = "Assets/Prefabs/UI/UI_StartPanel.prefab";
+        GameObject root = PrefabUtility.LoadPrefabContents(path);
+        try
+        {
+            SetText(root.transform, "Title", "LAST EMBER");
+            SetText(root.transform, "Detail",
+                "Продержись 180 секунд, собирай топливо и укрывайся от порывов ветра.");
+            PrefabUtility.SaveAsPrefabAsset(root, path);
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+    }
+
+    private static void SetText(Transform root, string childName, string value)
+    {
+        Transform child = FindChild(root, childName);
+        Text label = child != null ? child.GetComponentInChildren<Text>(true) : null;
+        if (label != null)
+            label.text = value;
+        else
+            Debug.LogWarning("GameFlowUISetup: Text component not found for " + childName + ".", root);
+    }
+
     private static void EnsureResultMainMenuButton()
     {
         GameObject root = PrefabUtility.LoadPrefabContents(ResultPrefabPath);
