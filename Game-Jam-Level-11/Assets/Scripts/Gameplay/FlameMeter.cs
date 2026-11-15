@@ -24,6 +24,7 @@ public sealed class FlameMeter : MonoBehaviour
     [Header("Wind damage")]
     [SerializeField, Min(0f)] private float windDamagePerSecond = 8f;
     [SerializeField, Min(0f)] private float protectedWindDamagePerSecond = 1.5f;
+    [SerializeField, Range(0f, 1f)] private float beaconSafeZoneWindDamageMultiplier = 0.35f;
 
     [Header("Flame growth")]
     [SerializeField, Min(1)] private int steadySparkPickupThreshold = 2;
@@ -89,9 +90,14 @@ public sealed class FlameMeter : MonoBehaviour
             bool protectedByPlayer = playerController != null && playerController.IsProtecting;
             // Keep the established Space protection value unchanged. Growth only
             // softens the exposed-wind penalty, so the Grey Wind remains dangerous.
-            drain += protectedByPlayer
+            float windDamage = protectedByPlayer
                 ? protectedWindDamagePerSecond
                 : windDamagePerSecond * WindDamageMultiplier;
+
+            if (playerController != null && playerController.IsInBeaconSafeZone)
+                windDamage *= beaconSafeZoneWindDamageMultiplier;
+
+            drain += windDamage;
         }
 
         ChangeFlame(-drain * Time.deltaTime);
@@ -129,6 +135,19 @@ public sealed class FlameMeter : MonoBehaviour
         }
 
         ChangeFlame(amount);
+    }
+
+    /// <summary>
+    /// Spends fuel only during an active match and never allows an interaction
+    /// to consume the final flame point. Returns false when the reserve is too low.
+    /// </summary>
+    public bool TrySpendFuel(float amount)
+    {
+        if (amount <= 0f || !_isRunning || Current <= amount)
+            return false;
+
+        ChangeFlame(-amount);
+        return true;
     }
 
     /// <summary>
@@ -216,6 +235,7 @@ public sealed class FlameMeter : MonoBehaviour
         lastFlamePickupThreshold = Mathf.Max(steadySparkPickupThreshold + 1, lastFlamePickupThreshold);
         steadySparkWindDamageMultiplier = Mathf.Clamp(steadySparkWindDamageMultiplier, 0.5f, 1f);
         lastFlameWindDamageMultiplier = Mathf.Clamp(lastFlameWindDamageMultiplier, 0.5f, steadySparkWindDamageMultiplier);
+        beaconSafeZoneWindDamageMultiplier = Mathf.Clamp01(beaconSafeZoneWindDamageMultiplier);
         steadySparkLightRadiusMultiplier = Mathf.Max(1f, steadySparkLightRadiusMultiplier);
         lastFlameLightRadiusMultiplier = Mathf.Max(steadySparkLightRadiusMultiplier, lastFlameLightRadiusMultiplier);
         steadySparkLightIntensityMultiplier = Mathf.Max(1f, steadySparkLightIntensityMultiplier);
