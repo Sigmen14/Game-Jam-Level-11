@@ -213,6 +213,30 @@ PrefabInstance:
       propertyPath: windController
       value: 
       objectReference: {fileID: 1650502799}
+    - target: {fileID: 4061782452729947881, guid: bda35e7355323d748ae801c835adc7b5, type: 3}
+      propertyPath: windController
+      value: 
+      objectReference: {fileID: 1650502799}
+    - target: {fileID: 4061782452729947881, guid: bda35e7355323d748ae801c835adc7b5, type: 3}
+      propertyPath: fuelPickups.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4061782452729947881, guid: bda35e7355323d748ae801c835adc7b5, type: 3}
+      propertyPath: 'fuelPickups.Array.data[0]'
+      value: 
+      objectReference: {fileID: 22518839}
+    - target: {fileID: 4061782452729947881, guid: bda35e7355323d748ae801c835adc7b5, type: 3}
+      propertyPath: 'fuelPickups.Array.data[1]'
+      value: 
+      objectReference: {fileID: 1860745406}
+    - target: {fileID: 4061782452729947881, guid: bda35e7355323d748ae801c835adc7b5, type: 3}
+      propertyPath: 'fuelPickups.Array.data[2]'
+      value: 
+      objectReference: {fileID: 1818529379}
+    - target: {fileID: 4061782452729947881, guid: bda35e7355323d748ae801c835adc7b5, type: 3}
+      propertyPath: 'fuelPickups.Array.data[3]'
+      value: 
+      objectReference: {fileID: 907271470}
     - target: {fileID: 4808726428383425378, guid: bda35e7355323d748ae801c835adc7b5, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -2120,6 +2144,7 @@ MonoBehaviour:
   intervalBetweenGusts: 12
   warningDuration: 1.2
   gustDuration: 2
+  windDirection: {x: 1, y: 0}
 --- !u!114 &1650502800
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2149,6 +2174,7 @@ MonoBehaviour:
   hudView: {fileID: 2127321610}
   mainMenuController: {fileID: 1711376673}
   pauseMenuController: {fileID: 1650502801}
+  endingFlowController: {fileID: 2127321613}
 --- !u!114 &1650502801
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2782,6 +2808,18 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3824952174922846521, guid: e2741c26b46c6dc43aefa8daf8c4f02f, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3824952174922846521, guid: e2741c26b46c6dc43aefa8daf8c4f02f, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3824952174922846521, guid: e2741c26b46c6dc43aefa8daf8c4f02f, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3824952174922846521, guid: e2741c26b46c6dc43aefa8daf8c4f02f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -2871,6 +2909,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 3824952174922846521, guid: e2741c26b46c6dc43aefa8daf8c4f02f, type: 3}
   m_PrefabInstance: {fileID: 2127321609}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2127321613 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1934798232304385206, guid: e2741c26b46c6dc43aefa8daf8c4f02f, type: 3}
+  m_PrefabInstance: {fileID: 2127321609}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c282a3f4d5e6478890a1b2c3d4e5f602, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
