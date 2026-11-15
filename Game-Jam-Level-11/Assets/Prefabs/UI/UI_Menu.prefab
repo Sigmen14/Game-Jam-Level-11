@@ -117,7 +117,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b927412c97bc4f8ba1d3cb4ebcb91f42, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameplaySceneName: Main
+  gameManager: {fileID: 0}
   mainMenuPanel: {fileID: 607592902570376614}
   settingsPanel: {fileID: 6471200837525043162}
 --- !u!114 &5218236606636810589
