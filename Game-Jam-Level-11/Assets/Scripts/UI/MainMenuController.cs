@@ -31,6 +31,7 @@ public sealed class MainMenuController : MonoBehaviour
         if (_playTransitionPending)
             return;
 
+        AudioManager.PlayUiConfirm();
         if (fireAtmosphere != null)
         {
             _playTransitionPending = true;

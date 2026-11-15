@@ -188,6 +188,8 @@ public sealed class WindController : MonoBehaviour
     {
         if (IsWarning == value) return;
         IsWarning = value;
+        if (IsWarning)
+            AudioManager.PlayWindWarning();
         WarningStateChanged?.Invoke(IsWarning);
     }
 
@@ -195,6 +197,8 @@ public sealed class WindController : MonoBehaviour
     {
         if (IsWindActive == value) return;
         IsWindActive = value;
+        if (IsWindActive)
+            AudioManager.PlayWindGust();
         WindActiveStateChanged?.Invoke(IsWindActive);
     }
 

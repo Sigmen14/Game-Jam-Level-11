@@ -132,6 +132,7 @@ public sealed class LivingSparksPickup : MonoBehaviour
 
         resolved = true;
         flameMeter.RegisterSuccessfulFuelPickup();
+        AudioManager.PlayLivingSparks();
         if (pickupTrigger != null)
             pickupTrigger.enabled = false;
         if (hudView != null)

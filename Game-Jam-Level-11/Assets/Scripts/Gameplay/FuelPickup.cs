@@ -76,10 +76,10 @@ public sealed class FuelPickup : MonoBehaviour
             FuelCollected?.Invoke();
         }
 
-        if (pickupAudio != null)
-        {
+        if (pickupAudio != null && pickupAudio.clip != null)
             pickupAudio.Play();
-        }
+        else
+            AudioManager.PlayFuelPickup();
 
         _isOnCooldown = true;
         _cooldownRemaining = respawnDelay;

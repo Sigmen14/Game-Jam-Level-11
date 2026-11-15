@@ -94,6 +94,7 @@ public sealed class BeaconController : MonoBehaviour
         _notEnoughFuel = false;
         _activationMessageTimer = 3.5f;
         ApplyVisualState(true);
+        AudioManager.PlayBeaconActivation();
         SetSafeZone(IsPlayerInsideSafeRadius());
     }
 
