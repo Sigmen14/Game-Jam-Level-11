@@ -312,15 +312,15 @@ public sealed class BeaconController : MonoBehaviour
 
         bool activatedMessage = _activationMessageTimer > 0f;
         string heading = activatedMessage
-            ? "МАЯК ЗАЖЖЁН"
+            ? "Маяк зажжён"
             : _notEnoughFuel
-                ? "НЕДОСТАТОЧНО ОГНЯ"
-                : "НАЖМИТЕ [E], ЧТОБЫ ЗАЖЕЧЬ МАЯК";
+                ? "Недостаточно огня"
+                : "Нажмите E, чтобы зажечь маяк";
         string detail = activatedMessage
-            ? "Золотой свет ослабляет Серый Ветер поблизости"
+            ? "Свет маяка ослабляет Серый Ветер поблизости"
             : _notEnoughFuel
-                ? "Найдите огонь — для зажигания нужно " + Mathf.CeilToInt(fuelCost) + " ед. огня"
-                : "Для зажигания нужно: " + Mathf.CeilToInt(fuelCost) + " ед. огня";
+                ? "Найдите огонь — чтобы зажечь маяк, нужно " + Mathf.CeilToInt(fuelCost) + " ед. огня"
+                : "Чтобы зажечь маяк, нужно: " + Mathf.CeilToInt(fuelCost) + " ед. огня";
 
         float panelWidth = Mathf.Min(500f, Screen.width - 28f);
         const float panelHeight = 76f;
