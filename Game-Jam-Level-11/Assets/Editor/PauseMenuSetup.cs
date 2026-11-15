@@ -535,11 +535,11 @@ public static class PauseMenuSetup
         card.GetComponent<Image>().color = new Color(0.07f, 0.11f, 0.13f, 1f);
 
         CreateEmberArtwork(card.transform, emberFrames, emberController);
-        CreateText("ПАУЗА", card.transform, 84, new Vector2(0f, 290f), new Vector2(880f, 144f));
-        CreateButton("ПРОДОЛЖИТЬ", card.transform, new Vector2(0f, 100f));
-        CreateButton("НАСТРОЙКИ", card.transform, new Vector2(0f, -100f));
-        CreateButton("РЕСТАРТ", card.transform, new Vector2(0f, -300f));
-        CreateButton("ВЫЙТИ В МЕНЮ", card.transform, new Vector2(0f, -500f));
+        CreateText("ПАУЗА", card.transform, 84, new Vector2(0f, 180f), new Vector2(880f, 144f));
+        CreateButton("ПРОДОЛЖИТЬ", card.transform, new Vector2(0f, 0f));
+        CreateButton("НАСТРОЙКИ", card.transform, new Vector2(0f, -180f));
+        CreateButton("РЕСТАРТ", card.transform, new Vector2(0f, -360f));
+        CreateButton("ВЫЙТИ В МЕНЮ", card.transform, new Vector2(0f, -540f));
         return root;
     }
 
