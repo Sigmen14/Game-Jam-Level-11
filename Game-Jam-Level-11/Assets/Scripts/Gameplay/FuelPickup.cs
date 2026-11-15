@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -16,6 +17,9 @@ public sealed class FuelPickup : MonoBehaviour
     [SerializeField] private Collider2D pickupCollider;
     [SerializeField] private SpriteRenderer pickupVisual;
     [SerializeField] private AudioSource pickupAudio;
+
+    /// <summary>Raised only when this pickup actually increases the player's fuel.</summary>
+    public event Action FuelCollected;
 
     public bool IsAvailable => !_isOnCooldown;
     private bool _isOnCooldown;
@@ -62,7 +66,13 @@ public sealed class FuelPickup : MonoBehaviour
             return;
         }
 
+        float previousFuel = flameMeter.Current;
         flameMeter.AddFuel(fuelAmount);
+        if (flameMeter.Current > previousFuel)
+        {
+            FuelCollected?.Invoke();
+        }
+
         if (pickupAudio != null)
         {
             pickupAudio.Play();
