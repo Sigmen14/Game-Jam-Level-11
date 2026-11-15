@@ -209,6 +209,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2776760985363972216, guid: bda35e7355323d748ae801c835adc7b5, type: 3}
+      propertyPath: windController
+      value: 
+      objectReference: {fileID: 1650502799}
+    - target: {fileID: 2776760985363972216, guid: bda35e7355323d748ae801c835adc7b5, type: 3}
+      propertyPath: fuelPickups.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2776760985363972216, guid: bda35e7355323d748ae801c835adc7b5, type: 3}
+      propertyPath: 'fuelPickups.Array.data[0]'
+      value: 
+      objectReference: {fileID: 22518839}
+    - target: {fileID: 2776760985363972216, guid: bda35e7355323d748ae801c835adc7b5, type: 3}
+      propertyPath: 'fuelPickups.Array.data[1]'
+      value: 
+      objectReference: {fileID: 1860745406}
+    - target: {fileID: 2776760985363972216, guid: bda35e7355323d748ae801c835adc7b5, type: 3}
+      propertyPath: 'fuelPickups.Array.data[2]'
+      value: 
+      objectReference: {fileID: 1818529379}
+    - target: {fileID: 2776760985363972216, guid: bda35e7355323d748ae801c835adc7b5, type: 3}
+      propertyPath: 'fuelPickups.Array.data[3]'
+      value: 
+      objectReference: {fileID: 907271470}
     - target: {fileID: 3769385507394412096, guid: bda35e7355323d748ae801c835adc7b5, type: 3}
       propertyPath: windController
       value: 
@@ -2120,6 +2144,7 @@ MonoBehaviour:
   intervalBetweenGusts: 12
   warningDuration: 1.2
   gustDuration: 2
+  windDirection: {x: 1, y: 0}
 --- !u!114 &1650502800
 MonoBehaviour:
   m_ObjectHideFlags: 0
