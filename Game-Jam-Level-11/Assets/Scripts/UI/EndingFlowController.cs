@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Coordinates the outcome prelude, post-victory choice and the selected ending.
@@ -37,9 +38,26 @@ public sealed class EndingFlowController : MonoBehaviour
         if (!outcomePreludeActive || Time.unscaledTime < skipInputEnabledAt)
             return;
 
-        // The prelude can be skipped with the same inputs as the opening prologue.
-        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+        // Keep skip input compatible with both Unity input backends.
+        if (WasAdvancePressedThisFrame())
             SkipOutcomePrelude();
+    }
+
+    private static bool WasAdvancePressedThisFrame()
+    {
+        Keyboard keyboard = Keyboard.current;
+        Mouse mouse = Mouse.current;
+
+        bool pressedByNewInputSystem =
+            (keyboard != null && keyboard.spaceKey.wasPressedThisFrame) ||
+            (mouse != null && mouse.leftButton.wasPressedThisFrame);
+
+#if ENABLE_LEGACY_INPUT_MANAGER
+        bool pressedByLegacyInput = Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space);
+        return pressedByNewInputSystem || pressedByLegacyInput;
+#else
+        return pressedByNewInputSystem;
+#endif
     }
 
     public void Bind(GameManager manager)
