@@ -384,23 +384,23 @@ public static class StoryMemorySetup
 
         GameObject toast = CreatePanel(
             "MemoryToast", root.transform, new Vector2(0.5f, 0.79f), new Vector2(0.5f, 0.5f),
-            Vector2.zero, new Vector2(700f, 176f), new Color(0.055f, 0.045f, 0.04f, 0.94f));
+            Vector2.zero, new Vector2(1000f, 280f), new Color(0.055f, 0.045f, 0.04f, 0.94f));
         CanvasGroup toastGroup = toast.AddComponent<CanvasGroup>();
         toastGroup.alpha = 0f;
         toastGroup.interactable = false;
         toastGroup.blocksRaycasts = false;
 
         CreateText("Symbol", toast.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(-286f, 0f), new Vector2(110f, 112f), "✦", 72,
+            new Vector2(-400f, 0f), new Vector2(180f, 180f), "✦", 144,
             new Color(1f, 0.72f, 0.28f, 1f), TextAnchor.MiddleCenter, FontStyle.Normal);
         CreateText("Overline", toast.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(82f, 57f), new Vector2(500f, 28f), "ОСКОЛОК ПАМЯТИ", 14,
+            new Vector2(110f, 92f), new Vector2(760f, 48f), "ОСКОЛОК ПАМЯТИ", 28,
             new Color(1f, 0.66f, 0.28f, 1f), TextAnchor.MiddleLeft, FontStyle.Bold);
         CreateText("Title", toast.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(82f, 25f), new Vector2(500f, 38f), "ТЁПЛЫЙ МИР", 24,
+            new Vector2(110f, 30f), new Vector2(760f, 68f), "ТЁПЛЫЙ МИР", 48,
             new Color(1f, 0.91f, 0.74f, 1f), TextAnchor.MiddleLeft, FontStyle.Bold);
         CreateText("Body", toast.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(82f, -35f), new Vector2(500f, 88f), string.Empty, 18,
+            new Vector2(110f, -70f), new Vector2(760f, 120f), string.Empty, 36,
             new Color(0.91f, 0.88f, 0.82f, 1f), TextAnchor.MiddleLeft, FontStyle.Normal);
 
         GameObject journal = CreatePanel(
@@ -422,7 +422,7 @@ public static class StoryMemorySetup
         journalContent.alignment = TextAnchor.UpperLeft;
 
         CreateButton("CloseButton", journal.transform, new Vector2(1f, 1f), new Vector2(1f, 1f),
-            new Vector2(-22f, -20f), new Vector2(48f, 42f), "×", 28,
+            new Vector2(-32f, -28f), new Vector2(88f, 78f), "×", 56,
             new Color(0.22f, 0.13f, 0.08f, 0.98f));
 
         GameObject badge = CreateButton("MemoryJournalButton", root.transform,
