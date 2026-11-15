@@ -65,7 +65,7 @@ public sealed class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (!gameplayActive || moveAction == null || protectAction == null)
+        if (!gameplayActive)
         {
             moveInput = Vector2.zero;
             IsProtecting = false;
@@ -73,9 +73,38 @@ public sealed class PlayerController : MonoBehaviour
             return;
         }
 
-        moveInput = Vector2.ClampMagnitude(moveAction.ReadValue<Vector2>(), 1f);
-        IsProtecting = protectAction.IsPressed();
+        // Movement must not depend on the optional Protect action being present.
+        Vector2 actionInput = moveAction != null && moveAction.enabled
+            ? moveAction.ReadValue<Vector2>()
+            : Vector2.zero;
+
+        // Keep keyboard movement reliable even if an action map/binding was not enabled
+        // by the active scene or its Input Actions asset is out of sync.
+        if (actionInput.sqrMagnitude < 0.0001f)
+        {
+            actionInput = ReadKeyboardMovement();
+        }
+
+        moveInput = Vector2.ClampMagnitude(actionInput, 1f);
+        IsProtecting = protectAction != null && protectAction.enabled &&
+                       protectAction.IsPressed();
         SetProtectionVisual(IsProtecting);
+    }
+
+    private static Vector2 ReadKeyboardMovement()
+    {
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null)
+        {
+            return Vector2.zero;
+        }
+
+        float horizontal = (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed ? 1f : 0f) -
+                           (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed ? 1f : 0f);
+        float vertical = (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed ? 1f : 0f) -
+                         (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed ? 1f : 0f);
+
+        return Vector2.ClampMagnitude(new Vector2(horizontal, vertical), 1f);
     }
 
     private void FixedUpdate()
