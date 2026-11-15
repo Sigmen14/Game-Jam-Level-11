@@ -5277,7 +5277,6 @@ MonoBehaviour:
   inputActions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   protectionVisual: {fileID: 6320857378673596893}
   windPushSpeed: 3.2
-  obstacleKnockbackRecovery: 12
 --- !u!114 &3769385507394412096
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5292,9 +5291,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxFlame: 100
   startingFlame: 75
-  passiveDrainPerSecond: 0.35
+  passiveDrainPerSecond: 0.58
   windDamagePerSecond: 8
-  protectedWindDamagePerSecond: 1.5
+  protectedWindDamagePerSecond: 0.9
   steadySparkPickupThreshold: 2
   lastFlamePickupThreshold: 4
   steadySparkWindDamageMultiplier: 0.9
