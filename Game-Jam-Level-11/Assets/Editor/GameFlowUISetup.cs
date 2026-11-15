@@ -138,6 +138,7 @@ public static class GameFlowUISetup
             // Enlarge the title, subtitle, control hint below Exit, and all menu labels.
             foreach (Text label in root.GetComponentsInChildren<Text>(true))
             {
+                bool enlargeTextRect = label.fontSize == 54 || label.fontSize == 24 || label.fontSize == 18;
                 if (label.fontSize == 54)
                     label.fontSize = 108;
                 else if (label.fontSize == 24)
@@ -146,8 +147,7 @@ public static class GameFlowUISetup
                     label.fontSize = 36;
 
                 RectTransform textRect = label.GetComponent<RectTransform>();
-                if (textRect != null && textRect.sizeDelta.sqrMagnitude > 0f &&
-                    textRect.sizeDelta.x < 1000f && textRect.sizeDelta.y < 500f)
+                if (enlargeTextRect && textRect != null && textRect.sizeDelta.sqrMagnitude > 0f)
                     textRect.sizeDelta *= 2f;
             }
 
