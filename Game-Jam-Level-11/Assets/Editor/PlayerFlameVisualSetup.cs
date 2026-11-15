@@ -183,8 +183,9 @@ public static class PlayerFlameVisualSetup
             sparks = sparksObject.AddComponent<ParticleSystem>();
         }
 
+        // ParticleSystem is a Component, not a Behaviour: activate its GameObject
+        // and enable the Emission module instead of setting a nonexistent enabled property.
         sparksObject.SetActive(true);
-        sparks.enabled = true;
 
         ParticleSystem.MainModule main = sparks.main;
         main.loop = false;
@@ -486,15 +487,15 @@ public static class PlayerFlameVisualSetup
             ? particlesProperty.objectReferenceValue as ParticleSystem
             : null;
 
-        if (particles == null || !particles.enabled || !particles.gameObject.activeSelf)
+        if (particles == null || !particles.gameObject.activeInHierarchy)
         {
             throw new System.InvalidOperationException(
-                "FlameSparks ParticleSystem is missing or disabled. The spark system must remain active.");
+                "FlameSparks ParticleSystem is missing or its GameObject is inactive. The spark object must remain active.");
         }
 
         ParticleSystemRenderer renderer = particles.GetComponent<ParticleSystemRenderer>();
         Shader expectedShader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
-        if (renderer == null || renderer.sharedMaterial == null ||
+        if (renderer == null || !renderer.enabled || renderer.sharedMaterial == null ||
             renderer.sharedMaterial.shader != expectedShader ||
             renderer.sharedMaterial.GetTexture("_BaseMap") == null ||
             renderer.renderMode != ParticleSystemRenderMode.StretchedBillboard)
