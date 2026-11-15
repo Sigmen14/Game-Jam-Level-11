@@ -2454,7 +2454,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "WASD \u2014 \u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435     SPACE
+  m_Text: "WASD \u2014 \u0434\u0432\u0438\u0436\u0435\u043D\u0438\u0435     \u041F\u0420\u041E\u0411\u0415\u041B
     \u2014 \u0437\u0430\u0449\u0438\u0442\u0430 (\u043C\u0435\u0434\u043B\u0435\u043D\u043D\u0435\u0435)"
 --- !u!1 &8564383858760816767
 GameObject:

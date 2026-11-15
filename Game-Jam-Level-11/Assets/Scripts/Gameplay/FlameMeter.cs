@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -19,11 +20,11 @@ public sealed class FlameMeter : MonoBehaviour
     [Header("Flame")]
     [SerializeField, Min(1f)] private float maxFlame = 100f;
     [SerializeField, Min(0f)] private float startingFlame = 75f;
-    [SerializeField, Min(0f)] private float passiveDrainPerSecond = 0.35f;
+    [SerializeField, Min(0f)] private float passiveDrainPerSecond = 0.58f;
 
     [Header("Wind damage")]
     [SerializeField, Min(0f)] private float windDamagePerSecond = 8f;
-    [SerializeField, Min(0f)] private float protectedWindDamagePerSecond = 1.5f;
+    [SerializeField, Min(0f)] private float protectedWindDamagePerSecond = 0.9f;
 
     [Header("Flame growth")]
     [SerializeField, Min(1)] private int steadySparkPickupThreshold = 2;
@@ -56,6 +57,7 @@ public sealed class FlameMeter : MonoBehaviour
     public float Maximum => maxFlame;
     public float NormalizedValue => maxFlame > 0f ? Current / maxFlame : 0f;
     public bool IsRunning => _isRunning;
+    public bool IsInsideBeaconShelter => _beaconShelters.Count > 0;
     public int SuccessfulFuelPickupCount { get; private set; }
     public GrowthStage CurrentGrowthStage { get; private set; } = GrowthStage.SmallSpark;
 
@@ -68,6 +70,7 @@ public sealed class FlameMeter : MonoBehaviour
 
     private bool _isRunning;
     private bool _depletionReported;
+    private readonly HashSet<BeaconController> _beaconShelters = new HashSet<BeaconController>();
 
     private void Awake()
     {
@@ -89,10 +92,14 @@ public sealed class FlameMeter : MonoBehaviour
             bool protectedByPlayer = playerController != null && playerController.IsProtecting;
             // Keep the established Space protection value unchanged. Growth only
             // softens the exposed-wind penalty, so the Grey Wind remains dangerous.
-            float gustIntensity = Mathf.Max(1f, windController.CurrentGustStrength);
-            drain += protectedByPlayer
-                ? protectedWindDamagePerSecond
-                : windDamagePerSecond * gustIntensity * WindDamageMultiplier;
+            // An active beacon blocks Grey Wind damage while its shelter covers the player.
+            // The ordinary passive flame drain above remains unchanged.
+            if (!IsInsideBeaconShelter)
+            {
+                drain += protectedByPlayer
+                    ? protectedWindDamagePerSecond
+                    : windDamagePerSecond * WindDamageMultiplier;
+            }
         }
 
         ChangeFlame(-drain * Time.deltaTime);
@@ -120,12 +127,35 @@ public sealed class FlameMeter : MonoBehaviour
         CurrentGrowthStage = GrowthStage.SmallSpark;
         _isRunning = false;
         _depletionReported = false;
+        _beaconShelters.Clear();
         Current = Mathf.Clamp(startingFlame, 0f, maxFlame);
         UpdateLight();
         ValueChanged?.Invoke(Current, maxFlame);
 
         if (previousStage != CurrentGrowthStage)
             GrowthStageChanged?.Invoke(CurrentGrowthStage);
+    }
+
+    /// <summary>Spends fuel only when the full beacon activation cost is available.</summary>
+    public bool TryConsumeFuel(float amount)
+    {
+        if (amount <= 0f || Current < amount || Current <= 0f)
+            return false;
+
+        ChangeFlame(-amount);
+        return true;
+    }
+
+    /// <summary>Tracks active beacon shelters, including overlapping shelter areas.</summary>
+    public void SetBeaconShelter(BeaconController beacon, bool isInside)
+    {
+        if (beacon == null)
+            return;
+
+        if (isInside)
+            _beaconShelters.Add(beacon);
+        else
+            _beaconShelters.Remove(beacon);
     }
 
     public void ApplyDamage(float amount)

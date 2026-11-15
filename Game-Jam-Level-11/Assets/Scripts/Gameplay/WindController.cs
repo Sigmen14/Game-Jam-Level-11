@@ -67,7 +67,7 @@ public sealed class WindController : MonoBehaviour
             if (IsWindActive)
             {
                 string label = IsStrongGust ? "СИЛЬНЫЙ ПОРЫВ" : "ПОРЫВ СЕРОГО ВЕТРА";
-                return label + " " + DirectionArrow + " · УКРОЙТЕСЬ ИЛИ УДЕРЖИВАЙТЕ SPACE";
+                return label + " " + DirectionArrow + " · УКРОЙТЕСЬ ИЛИ УДЕРЖИВАЙТЕ ПРОБЕЛ";
             }
 
             return string.Empty;

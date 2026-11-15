@@ -1,31 +1,41 @@
 using UnityEngine;
 
-/// <summary>One temporary, one-use group of living embers that restores fuel.</summary>
+/// <summary>Five visible living embers, collected once or removed after a short lifetime.</summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(CircleCollider2D))]
 public sealed class LivingSparksPickup : MonoBehaviour
 {
-    private static Sprite sharedSparkSprite;
+    private sealed class SparkVisual
+    {
+        public Transform Root;
+        public SpriteRenderer Glow;
+        public SpriteRenderer Core;
+        public Vector3 BaseScale;
+        public float Phase;
+    }
+
     private static readonly Vector2[] SparkOffsets =
     {
-        new Vector2(-0.34f, -0.03f), new Vector2(-0.17f, 0.22f),
-        new Vector2(0.02f, -0.15f), new Vector2(0.20f, 0.17f),
-        new Vector2(0.37f, -0.01f)
+        new Vector2(-0.78f, -0.14f),
+        new Vector2(-0.40f, 0.48f),
+        new Vector2(0.00f, -0.30f),
+        new Vector2(0.40f, 0.42f),
+        new Vector2(0.80f, -0.04f)
     };
-    private static readonly float[] SparkScales = { 0.34f, 0.28f, 0.39f, 0.30f, 0.25f };
-    private static readonly Color[] SparkTints =
+    private static readonly float[] SparkScales = { 1.05f, 0.98f, 1.12f, 1.02f, 0.94f };
+    private static readonly Color[] SparkColors =
     {
-        new Color(1f, 0.45f, 0.08f, 1f), new Color(1f, 0.78f, 0.26f, 1f),
-        new Color(1f, 0.57f, 0.10f, 1f), new Color(1f, 0.88f, 0.48f, 1f),
-        new Color(1f, 0.36f, 0.045f, 1f)
+        new Color(1f, 0.38f, 0.055f, 1f),
+        new Color(1f, 0.72f, 0.16f, 1f),
+        new Color(1f, 0.50f, 0.075f, 1f),
+        new Color(1f, 0.86f, 0.35f, 1f),
+        new Color(0.96f, 0.18f, 0.035f, 1f)
     };
 
-    private readonly Transform[] sparkTransforms = new Transform[5];
-    private readonly SpriteRenderer[] sparkRenderers = new SpriteRenderer[5];
-    private readonly Vector3[] baseScales = new Vector3[5];
+    private readonly SparkVisual[] visuals = new SparkVisual[5];
     private FlameMeter flameMeter;
     private HUDView hudView;
-    private CircleCollider2D trigger;
+    private CircleCollider2D pickupTrigger;
     private float fuelReward;
     private float remainingLifetime;
     private bool initialized;
@@ -33,18 +43,29 @@ public sealed class LivingSparksPickup : MonoBehaviour
 
     private void Awake()
     {
-        trigger = GetComponent<CircleCollider2D>();
-        trigger.isTrigger = true;
-        trigger.radius = 0.92f;
-        BuildVisuals();
+        pickupTrigger = GetComponent<CircleCollider2D>();
+        pickupTrigger.enabled = true;
+        pickupTrigger.isTrigger = true;
+        pickupTrigger.radius = 1.85f;
     }
 
-    public void Initialize(FlameMeter meter, HUDView hud, float reward, float lifetime)
+    public void Initialize(
+        FlameMeter meter, HUDView hud, float reward, float lifetime,
+        Sprite glowSprite, Sprite coreSprite, Material sparkMaterial)
     {
         flameMeter = meter;
         hudView = hud;
         fuelReward = Mathf.Max(0f, reward);
         remainingLifetime = Mathf.Max(1f, lifetime);
+
+        if (glowSprite == null || coreSprite == null || sparkMaterial == null)
+        {
+            Debug.LogError("LivingSparksPickup: required Last Ember spark art references are missing.", this);
+            Destroy(gameObject);
+            return;
+        }
+
+        BuildVisuals(glowSprite, coreSprite, sparkMaterial);
         initialized = true;
     }
 
@@ -62,116 +83,113 @@ public sealed class LivingSparksPickup : MonoBehaviour
         }
 
         float time = Time.time;
-        for (int i = 0; i < sparkTransforms.Length; i++)
+        for (int i = 0; i < visuals.Length; i++)
         {
-            float phase = i * 1.63f;
-            float pulse = 0.88f + 0.14f * Mathf.Sin(time * (4.1f + i * 0.37f) + phase);
+            SparkVisual visual = visuals[i];
+            if (visual == null || visual.Root == null)
+                continue;
+
+            float pulse = 0.88f + 0.16f * Mathf.Sin(time * (4.4f + i * 0.31f) + visual.Phase);
+            float flicker = 0.82f + 0.18f * Mathf.Sin(time * (8.3f + i * 0.47f) + visual.Phase * 1.7f);
             Vector2 drift = new Vector2(
-                Mathf.Sin(time * 1.8f + phase) * 0.075f,
-                Mathf.Sin(time * 2.35f + phase) * 0.12f);
-            sparkTransforms[i].localPosition = SparkOffsets[i] + drift;
-            sparkTransforms[i].localScale = baseScales[i] * pulse;
-            sparkRenderers[i].color = Color.Lerp(SparkTints[i], Color.white, pulse * 0.18f);
+                Mathf.Sin(time * 1.7f + visual.Phase) * 0.10f,
+                Mathf.Sin(time * 2.15f + visual.Phase) * 0.15f);
+
+            visual.Root.localPosition = SparkOffsets[i] + drift;
+            visual.Root.localScale = visual.BaseScale * pulse;
+            visual.Glow.color = new Color(
+                SparkColors[i].r, SparkColors[i].g, SparkColors[i].b,
+                Mathf.Lerp(0.60f, 0.92f, flicker));
+            visual.Core.color = Color.Lerp(SparkColors[i], Color.white, 0.18f + flicker * 0.22f);
         }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!initialized || resolved || flameMeter == null)
+        TryCollect(other);
+    }
+
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        // Full fuel must not consume a group. Stay allows collection once fuel is spent.
+        TryCollect(other);
+    }
+
+    private void TryCollect(Collider2D other)
+    {
+        if (!initialized || resolved || flameMeter == null || other == null)
             return;
 
         PlayerController player = other.GetComponentInParent<PlayerController>();
         if (player == null || !player.IsGameplayActive || flameMeter.Current >= flameMeter.Maximum)
             return;
 
-        resolved = true;
         float fuelBefore = flameMeter.Current;
         flameMeter.AddFuel(fuelReward);
         float fuelGained = flameMeter.Current - fuelBefore;
-        if (fuelGained > 0.01f)
-        {
-            flameMeter.RegisterSuccessfulFuelPickup();
-            if (hudView != null)
-                hudView.ShowPickupNotification(
-                    "+" + Mathf.RoundToInt(fuelGained) + " ТОПЛИВА · ИСКРЫ СОБРАНЫ", 3f);
-        }
+        if (fuelGained <= 0.01f)
+            return;
 
-        if (trigger != null)
-            trigger.enabled = false;
+        resolved = true;
+        flameMeter.RegisterSuccessfulFuelPickup();
+        if (pickupTrigger != null)
+            pickupTrigger.enabled = false;
+        if (hudView != null)
+            hudView.ShowPickupNotification(
+                "+" + Mathf.RoundToInt(fuelGained) + " ТОПЛИВА · ЖИВЫЕ ИСКРЫ СОБРАНЫ", 3f);
         Destroy(gameObject);
     }
 
-    private void BuildVisuals()
+    private void BuildVisuals(Sprite glowSprite, Sprite coreSprite, Material sparkMaterial)
     {
-        Sprite sprite = GetSharedSparkSprite();
-        for (int i = 0; i < sparkTransforms.Length; i++)
+        const float glowScale = 2.55f;
+        const float coreScale = 1.55f;
+        for (int i = 0; i < visuals.Length; i++)
         {
-            GameObject spark = new GameObject("LivingSpark_" + (i + 1), typeof(SpriteRenderer));
-            Transform sparkTransform = spark.transform;
-            sparkTransform.SetParent(transform, false);
-            sparkTransform.localPosition = SparkOffsets[i];
-            float scale = SparkScales[i];
-            baseScales[i] = new Vector3(scale, scale * 1.15f, 1f);
-            sparkTransform.localScale = baseScales[i];
+            GameObject sparkRoot = new GameObject("LivingSpark_" + (i + 1));
+            Transform root = sparkRoot.transform;
+            root.SetParent(transform, false);
+            root.localPosition = SparkOffsets[i];
 
-            SpriteRenderer renderer = spark.GetComponent<SpriteRenderer>();
-            renderer.sprite = sprite;
-            renderer.color = SparkTints[i];
-            renderer.sortingOrder = 8;
-            sparkTransforms[i] = sparkTransform;
-            sparkRenderers[i] = renderer;
+            float size = SparkScales[i];
+            root.localScale = new Vector3(size, size, 1f);
+
+            SpriteRenderer glow = CreateSpriteRenderer(
+                "Glow", root, glowSprite, sparkMaterial, SparkColors[i], 48);
+            glow.transform.localScale = new Vector3(glowScale, glowScale, 1f);
+            // The existing UI sprite's pivot is bottom-left; centre it under the flame core.
+            glow.transform.localPosition = new Vector3(-0.32f * glowScale, -0.28f * glowScale, 0f);
+
+            SpriteRenderer core = CreateSpriteRenderer(
+                "Flame", root, coreSprite, sparkMaterial, SparkColors[i], 49);
+            core.transform.localScale = new Vector3(coreScale, coreScale, 1f);
+            core.transform.localPosition = new Vector3(-0.28f * coreScale, -0.28f * coreScale, -0.01f);
+
+            visuals[i] = new SparkVisual
+            {
+                Root = root,
+                Glow = glow,
+                Core = core,
+                BaseScale = root.localScale,
+                Phase = i * 1.47f
+            };
         }
     }
 
-    private static Sprite GetSharedSparkSprite()
+    private static SpriteRenderer CreateSpriteRenderer(
+        string objectName, Transform parent, Sprite sprite, Material material, Color tint, int sortingOrder)
     {
-        if (sharedSparkSprite != null)
-            return sharedSparkSprite;
+        GameObject child = new GameObject(objectName, typeof(SpriteRenderer));
+        Transform childTransform = child.transform;
+        childTransform.SetParent(parent, false);
 
-        const int size = 64;
-        Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
-        texture.name = "Generated_LivingSparkGlow";
-        texture.filterMode = FilterMode.Bilinear;
-        texture.wrapMode = TextureWrapMode.Clamp;
-        Color[] pixels = new Color[size * size];
-
-        for (int y = 0; y < size; y++)
-        {
-            float vertical = y / (float)(size - 1);
-            float halfWidth = Mathf.Lerp(0.34f, 0.018f, vertical);
-            float center = 0.5f + 0.055f * Mathf.Sin(vertical * 3.1f);
-            float topFade = Mathf.Clamp01((1f - vertical) / 0.16f);
-            float bottomFade = Mathf.Clamp01(vertical / 0.12f);
-            for (int x = 0; x < size; x++)
-            {
-                float horizontal = x / (float)(size - 1);
-                float distance = Mathf.Abs(horizontal - center);
-                float body = Mathf.Clamp01(1f - distance / Mathf.Max(0.001f, halfWidth));
-                body = Mathf.Clamp01(body * 5.5f) * topFade * bottomFade;
-                float glowX = Mathf.Exp(-Mathf.Pow(distance / (halfWidth * 2.5f + 0.035f), 2f) * 1.4f);
-                float glowY = Mathf.Exp(-Mathf.Pow((vertical - 0.46f) * 1.45f, 2f));
-                float glow = glowX * glowY * 0.26f;
-                float alpha = Mathf.Clamp01(glow + body);
-                Color color = new Color(1f, 0.22f + 0.45f * vertical, 0.025f, alpha);
-                if (body > 0f)
-                {
-                    Color core = Color.Lerp(
-                        new Color(1f, 0.48f, 0.055f, alpha),
-                        new Color(1f, 0.94f, 0.63f, alpha),
-                        Mathf.Clamp01((1f - distance / Mathf.Max(0.001f, halfWidth)) * 1.45f));
-                    color = Color.Lerp(color, core, body);
-                    color.a = alpha;
-                }
-                pixels[y * size + x] = color;
-            }
-        }
-
-        texture.SetPixels(pixels);
-        texture.Apply(false, true);
-        sharedSparkSprite = Sprite.Create(
-            texture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.42f), 64f, 0,
-            SpriteMeshType.Tight);
-        sharedSparkSprite.name = "SPR_LivingEmber";
-        return sharedSparkSprite;
+        SpriteRenderer renderer = child.GetComponent<SpriteRenderer>();
+        renderer.sprite = sprite;
+        renderer.sharedMaterial = material;
+        renderer.color = tint;
+        renderer.sortingLayerName = "Default";
+        renderer.sortingOrder = sortingOrder;
+        renderer.maskInteraction = SpriteMaskInteraction.None;
+        return renderer;
     }
 }

@@ -34,6 +34,11 @@ public sealed class GameManager : MonoBehaviour
     [SerializeField, Min(0f)] private float minimumPickupSpacing = 2.1f;
     [SerializeField, Min(0f)] private float playerSpawnClearance = 2.4f;
 
+    [Header("Living sparks visuals")]
+    [SerializeField] private Sprite livingSparksGlowSprite;
+    [SerializeField] private Sprite livingSparksCoreSprite;
+    [SerializeField] private Material livingSparksMaterial;
+
     [Header("UI references")]
     [SerializeField] private HUDView hudView;
     [SerializeField] private MainMenuController mainMenuController;
@@ -355,29 +360,88 @@ public sealed class GameManager : MonoBehaviour
         if (playerController == null || flameMeter == null)
             return;
 
-        Vector2 playerPosition = playerController.transform.position;
-        float forwardDistance = UnityEngine.Random.Range(2.4f, 3.8f);
-        float spawnX = playerPosition.x + forwardDistance;
-        if (spawnX > fuelSpawnMax.x - 0.2f)
-            spawnX = playerPosition.x - forwardDistance;
+        if (livingSparksGlowSprite == null || livingSparksCoreSprite == null || livingSparksMaterial == null)
+        {
+            Debug.LogError("GameManager: assign the existing Last Ember spark sprites and FlameSparkUnlit material.", this);
+            return;
+        }
 
-        spawnX = Mathf.Clamp(spawnX, fuelSpawnMin.x + 0.35f, fuelSpawnMax.x - 0.35f);
-        float spawnY = Mathf.Clamp(
-            playerPosition.y + UnityEngine.Random.Range(-1.8f, 1.8f),
-            fuelSpawnMin.y + 0.35f,
-            fuelSpawnMax.y - 0.35f);
+        if (!TryGetVisibleLivingSparksPosition(out Vector3 spawnPosition))
+        {
+            Debug.LogWarning("GameManager: could not find a visible camera position for Living Sparks.", this);
+            return;
+        }
 
         GameObject group = new GameObject("LivingSparks_Group");
-        group.transform.position = new Vector3(spawnX, spawnY, 0f);
+        group.transform.position = spawnPosition;
 
         CircleCollider2D trigger = group.AddComponent<CircleCollider2D>();
         trigger.isTrigger = true;
-        trigger.radius = 0.92f;
+        trigger.radius = 1.85f;
 
         activeLivingSparks = group.AddComponent<LivingSparksPickup>();
-        activeLivingSparks.Initialize(flameMeter, hudView, LivingSparksFuelReward, LivingSparksLifetime);
+        activeLivingSparks.Initialize(
+            flameMeter, hudView, LivingSparksFuelReward, LivingSparksLifetime,
+            livingSparksGlowSprite, livingSparksCoreSprite, livingSparksMaterial);
         if (hudView != null)
             hudView.ShowPickupNotification("ЖИВЫЕ ИСКРЫ ПОЯВИЛИСЬ — СОБЕРИ ИХ!", 2.5f);
+    }
+
+    private bool TryGetVisibleLivingSparksPosition(out Vector3 position)
+    {
+        position = Vector3.zero;
+        Camera gameplayCamera = Camera.main;
+        if (gameplayCamera == null)
+            return false;
+
+        float cameraDepth = Mathf.Abs(gameplayCamera.transform.position.z);
+        Vector3 bottomLeft = gameplayCamera.ViewportToWorldPoint(
+            new Vector3(0.10f, 0.12f, cameraDepth));
+        Vector3 topRight = gameplayCamera.ViewportToWorldPoint(
+            new Vector3(0.90f, 0.88f, cameraDepth));
+
+        const float edgePadding = 1.05f;
+        float minX = bottomLeft.x + edgePadding;
+        float maxX = topRight.x - edgePadding;
+        float minY = bottomLeft.y + edgePadding;
+        float maxY = topRight.y - edgePadding;
+        if (maxX <= minX || maxY <= minY)
+            return false;
+
+        Vector2 playerPosition = playerController.transform.position;
+        const float preferredForwardGap = 2.6f;
+        const float minimumPlayerGap = 1.55f;
+
+        float spawnX = playerPosition.x + preferredForwardGap;
+        if (spawnX > maxX)
+            spawnX = playerPosition.x - preferredForwardGap;
+
+        spawnX = Mathf.Clamp(spawnX, minX, maxX);
+        if (Mathf.Abs(spawnX - playerPosition.x) < minimumPlayerGap)
+        {
+            if (playerPosition.x + minimumPlayerGap <= maxX)
+                spawnX = playerPosition.x + minimumPlayerGap;
+            else if (playerPosition.x - minimumPlayerGap >= minX)
+                spawnX = playerPosition.x - minimumPlayerGap;
+        }
+
+        float spawnY = Mathf.Clamp(
+            playerPosition.y + UnityEngine.Random.Range(-0.9f, 0.9f),
+            minY,
+            maxY);
+
+        if (Vector2.Distance(playerPosition, new Vector2(spawnX, spawnY)) < minimumPlayerGap)
+        {
+            float upperY = playerPosition.y + minimumPlayerGap;
+            float lowerY = playerPosition.y - minimumPlayerGap;
+            if (upperY <= maxY)
+                spawnY = upperY;
+            else if (lowerY >= minY)
+                spawnY = lowerY;
+        }
+
+        position = new Vector3(spawnX, spawnY, 0f);
+        return true;
     }
 
     private void ClearLivingSparks()

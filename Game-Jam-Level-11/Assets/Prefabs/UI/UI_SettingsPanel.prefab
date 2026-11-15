@@ -2039,7 +2039,7 @@ MonoBehaviour:
     m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: "\u0417\u0412\u0423\u041A\u041E\u0412\u042B\u0415 \u042D\u0424\u0424\u0415\u041A\u0422\u042B
-    (SFX)"
+    "
 --- !u!1 &7564375366862047494
 GameObject:
   m_ObjectHideFlags: 0
