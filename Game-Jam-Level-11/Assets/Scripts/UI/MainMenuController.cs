@@ -15,12 +15,15 @@ public sealed class MainMenuController : MonoBehaviour
     [SerializeField] private MainMenuFireAtmosphere fireAtmosphere;
     [SerializeField] private string gameplaySceneName = "Main";
 
+    private PrologueController prologueController;
     private bool _playTransitionPending;
 
     private void Awake()
     {
         if (fireAtmosphere == null)
             fireAtmosphere = GetComponent<MainMenuFireAtmosphere>();
+
+        prologueController = GetComponentInChildren<PrologueController>(true);
     }
 
     public void PlayGame()
@@ -76,6 +79,20 @@ public sealed class MainMenuController : MonoBehaviour
     }
 
     public void ShowMainMenu()
+    {
+        SetPanel(settingsPanel, false);
+        SetPanel(mainMenuPanel, false);
+
+        if (prologueController == null)
+            prologueController = GetComponentInChildren<PrologueController>(true);
+
+        if (prologueController != null && prologueController.TryPlay(StartGameImmediately))
+            return;
+
+        ShowMainMenuPanels();
+    }
+
+    private void ShowMainMenuPanels()
     {
         SetPanel(settingsPanel, false);
         SetPanel(mainMenuPanel, true);
