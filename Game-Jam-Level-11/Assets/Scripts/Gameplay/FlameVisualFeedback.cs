@@ -53,6 +53,8 @@ public sealed class FlameVisualFeedback : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float shelterMotionMultiplier = 0.38f;
     [SerializeField, Min(0f)] private float windSparkInfluence = 1.25f;
     [SerializeField, Min(1f)] private float gustSparkSpeedMultiplier = 1.35f;
+    [SerializeField, Min(0f)] private float warningSparkInfluence = 0.55f;
+    [SerializeField, Min(0f)] private float warningFlickerBoost = 0.07f;
 
     [Header("Ambient sparks")]
     [SerializeField, Min(0.05f)] private float highFuelSparkInterval = 0.48f;
@@ -145,19 +147,26 @@ public sealed class FlameVisualFeedback : MonoBehaviour
 
         float fuel = Mathf.Clamp01(flameMeter.NormalizedValue);
         bool windActive = windController != null && windController.IsWindActive;
-        bool sheltered = playerController != null &&
-                         (playerController.IsInCover || playerController.IsProtecting);
+        bool windWarning = windController != null && windController.IsWarning;
+        float windStrength = windController != null ? windController.CurrentGustStrength : 0f;
+        bool sheltered = playerController != null && playerController.IsWindSheltered;
 
         float lowFuelBlend = 1f - Mathf.Clamp01(
             fuel / Mathf.Max(0.01f, lowFuelThreshold));
 
         float noiseFrequency = flickerNoiseFrequency *
-                               (windActive ? windNoiseFrequencyMultiplier : 1f);
+                               (windActive ? windNoiseFrequencyMultiplier :
+                                (windWarning ? 1.35f : 1f));
         float noise = Mathf.PerlinNoise(Time.time * noiseFrequency, noiseSeed) * 2f - 1f;
         float flickerStrength = Mathf.Lerp(highFuelFlicker, lowFuelFlicker, 1f - fuel);
         if (windActive)
         {
-            flickerStrength = Mathf.Max(flickerStrength, 0.12f);
+            float gustFlicker = 0.12f + Mathf.Clamp01((windStrength - 1f) / 0.85f) * 0.07f;
+            flickerStrength = Mathf.Max(flickerStrength, gustFlicker);
+        }
+        else if (windWarning)
+        {
+            flickerStrength = Mathf.Max(flickerStrength, warningFlickerBoost);
         }
 
         float flicker = Mathf.Clamp(
@@ -171,14 +180,15 @@ public sealed class FlameVisualFeedback : MonoBehaviour
                        calmMultiplier;
 
         float windLean = 0f;
-        if (windActive && windController != null)
+        if ((windActive || windWarning) && windController != null)
         {
             Vector3 localWind = transform.InverseTransformDirection(
                 new Vector3(windController.WindDirection.x,
                     windController.WindDirection.y, 0f));
             float shelterFactor = sheltered ? shelterWindMultiplier : 1f;
+            float visualStrength = windActive ? Mathf.Max(1f, windStrength) : warningSparkInfluence;
             windLean = -Mathf.Clamp(localWind.x, -1f, 1f) *
-                       maximumWindLeanAngle * shelterFactor;
+                       maximumWindLeanAngle * visualStrength * shelterFactor;
         }
 
         float fuelScale = GetFuelScale(fuel);
@@ -276,7 +286,15 @@ public sealed class FlameVisualFeedback : MonoBehaviour
 
         if (windActive)
         {
-            interval *= 0.78f;
+            float strengthBoost = Mathf.Lerp(
+                1f, 1.2f,
+                Mathf.Clamp01((windController.CurrentGustStrength - 1f) / 0.85f));
+            interval *= 0.78f / strengthBoost;
+        }
+        else if (windController != null && windController.IsWarning)
+        {
+            // A brief increase in warm sparks gives the player a readable pre-gust cue.
+            interval *= 0.72f;
         }
 
         if (sheltered)
@@ -308,13 +326,14 @@ public sealed class FlameVisualFeedback : MonoBehaviour
         }
 
         Vector2 wind = Vector2.zero;
-        if (windActive && windController != null)
+        bool windWarning = windController != null && windController.IsWarning;
+        float windPower = windActive && windController != null
+            ? Mathf.Max(1f, windController.CurrentGustStrength)
+            : (windWarning ? warningSparkInfluence : 0f);
+        if (windPower > 0f && windController != null)
         {
-            wind = windController.WindDirection * windSparkInfluence;
-            if (sheltered)
-            {
-                wind *= shelterWindMultiplier;
-            }
+            wind = windController.WindDirection * windSparkInfluence * windPower;
+            if (sheltered) wind *= shelterWindMultiplier;
         }
 
         Vector2 flameUp = flameRenderer != null
@@ -346,7 +365,11 @@ public sealed class FlameVisualFeedback : MonoBehaviour
 
             if (windActive && !sheltered)
             {
-                speed *= gustSparkSpeedMultiplier;
+                speed *= gustSparkSpeedMultiplier * windPower;
+            }
+            else if (windWarning && !sheltered)
+            {
+                speed *= 1.12f;
             }
 
             float sizeVariation = Random.Range(0.62f, 1.38f);

@@ -58,9 +58,10 @@ public sealed class FlameMeter : MonoBehaviour
             (playerController == null || !playerController.IsInCover))
         {
             bool protectedByPlayer = playerController != null && playerController.IsProtecting;
-            drain += protectedByPlayer
+            float damagePerSecond = protectedByPlayer
                 ? protectedWindDamagePerSecond
                 : windDamagePerSecond;
+            drain += damagePerSecond * Mathf.Max(1f, windController.CurrentGustStrength);
         }
 
         ChangeFlame(-drain * Time.deltaTime);

@@ -5343,6 +5343,8 @@ MonoBehaviour:
   shelterMotionMultiplier: 0.38
   windSparkInfluence: 1.25
   gustSparkSpeedMultiplier: 1.35
+  warningSparkInfluence: 0.55
+  warningFlickerBoost: 0.07
   highFuelSparkInterval: 0.48
   mediumFuelSparkInterval: 1.15
   lowFuelSparkInterval: 2.7
