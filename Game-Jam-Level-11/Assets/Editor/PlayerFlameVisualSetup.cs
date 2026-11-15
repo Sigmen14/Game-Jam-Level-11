@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Events;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -398,6 +399,37 @@ public static class PlayerFlameVisualSetup
                 "UI_Menu.MainMenuController.gameManager is not connected to the scene GameManager.");
         }
 
+        Button playButton = FindButtonInHierarchy(menu.transform, "PlayButton");
+        if (playButton == null)
+        {
+            throw new System.InvalidOperationException(
+                "UI_Menu has no PlayButton. The StartGame entry point cannot be reached.");
+        }
+
+        bool playIsWired = false;
+        for (int i = 0; i < playButton.onClick.GetPersistentEventCount(); i++)
+        {
+            if (playButton.onClick.GetPersistentTarget(i) == menu &&
+                playButton.onClick.GetPersistentMethodName(i) == nameof(MainMenuController.PlayGame))
+            {
+                playIsWired = true;
+                break;
+            }
+        }
+
+        if (!playIsWired)
+        {
+            for (int i = playButton.onClick.GetPersistentEventCount() - 1; i >= 0; i--)
+            {
+                UnityEventTools.RemovePersistentListener(playButton.onClick, i);
+            }
+
+            UnityEventTools.AddPersistentListener(playButton.onClick, menu.PlayGame);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(playButton);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+        }
+
         SerializedObject playerObject = new SerializedObject(player);
         SerializedProperty actionsProperty = playerObject.FindProperty("inputActions");
         InputActionAsset actions = actionsProperty != null
@@ -469,6 +501,28 @@ public static class PlayerFlameVisualSetup
             throw new System.InvalidOperationException(
                 "FlameSparks emission module is disabled. Keep the ParticleSystem enabled.");
         }
+    }
+
+    private static Button FindButtonInHierarchy(Transform root, string buttonName)
+    {
+        if (root == null)
+            return null;
+
+        if (root.name == buttonName)
+        {
+            Button button = root.GetComponent<Button>();
+            if (button != null)
+                return button;
+        }
+
+        for (int i = 0; i < root.childCount; i++)
+        {
+            Button found = FindButtonInHierarchy(root.GetChild(i), buttonName);
+            if (found != null)
+                return found;
+        }
+
+        return null;
     }
 
     private static T FindInScene<T>(Scene scene) where T : Component
