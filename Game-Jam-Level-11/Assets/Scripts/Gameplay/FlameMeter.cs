@@ -116,6 +116,19 @@ public sealed class FlameMeter : MonoBehaviour
         _isRunning = isRunning;
     }
 
+    public void BindWindController(WindController controller)
+    {
+        windController = controller;
+    }
+
+    public void ApplyHazardDamage(float amount)
+    {
+        if (!_isRunning || amount <= 0f || Current <= 0f)
+            return;
+
+        ChangeFlame(-amount);
+    }
+
     /// <summary>
     /// A new meter/session starts as a small spark. GameManager already calls this
     /// during StartGame/Retry, so the session counter resets with the flame resource.
