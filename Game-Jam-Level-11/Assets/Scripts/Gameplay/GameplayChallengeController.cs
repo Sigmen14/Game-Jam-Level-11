@@ -254,7 +254,13 @@ public sealed class GameplayChallengeController : MonoBehaviour
     {
         routeState = RouteState.Waiting;
         resultMessageTime = 0f;
-        if (hudView != null)
+
+        if (hudView == null)
+            return;
+
+        if (isRunning)
+            ShowMessage("ВЫБЕРИ МАРШРУТ: ИДИ ВПРАВО К РАЗВИЛКЕ · W/↑ — КОРОТКИЙ ОПАСНЫЙ · S/↓ — ДЛИННЫЙ БЕЗОПАСНЫЙ");
+        else
             hudView.HideChallengeMessage();
     }
 
