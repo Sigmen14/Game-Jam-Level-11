@@ -124,14 +124,14 @@ public sealed class EndingFlowController : MonoBehaviour
             return;
         }
 
-        outcomeRoutine = StartCoroutine(PlayOutcomePreludeRoutine(didWin, survivedSeconds));
+        outcomeRoutine = StartCoroutine(PlayOutcomePreludeRoutine(didWin));
     }
 
-    private IEnumerator PlayOutcomePreludeRoutine(bool didWin, float survivedSeconds)
+    private IEnumerator PlayOutcomePreludeRoutine(bool didWin)
     {
         bool sequenceCompleted = false;
         outcomePlaybackRoutine = StartCoroutine(
-            RunOutcomeView(didWin, survivedSeconds, () => sequenceCompleted = true));
+            RunOutcomeView(didWin, () => sequenceCompleted = true));
 
         // A failsafe keeps the player from being trapped if a missing view reference
         // or an interrupted nested animation prevents its normal completion.
@@ -163,9 +163,9 @@ public sealed class EndingFlowController : MonoBehaviour
         CompleteOutcomePrelude();
     }
 
-    private IEnumerator RunOutcomeView(bool didWin, float survivedSeconds, Action onCompleted)
+    private IEnumerator RunOutcomeView(bool didWin, Action onCompleted)
     {
-        yield return sequenceView.PlayOutcomePrelude(didWin, survivedSeconds);
+        yield return sequenceView.PlayOutcomePrelude(didWin);
         onCompleted?.Invoke();
     }
 
