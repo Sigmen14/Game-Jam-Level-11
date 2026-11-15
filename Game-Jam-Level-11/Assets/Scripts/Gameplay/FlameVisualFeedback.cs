@@ -358,12 +358,16 @@ public sealed class FlameVisualFeedback : MonoBehaviour
         windRenderer.renderMode = ParticleSystemRenderMode.StretchedBillboard;
         windRenderer.velocityScale = 0.18f;
         windRenderer.lengthScale = 5f;
-        windRenderer.sortingLayerName = "Default";
-        windRenderer.sortingOrder = 80;
-
         ParticleSystemRenderer sparkRenderer = sparkParticles != null
             ? sparkParticles.GetComponent<ParticleSystemRenderer>()
             : null;
+        windRenderer.sortingLayerName = sparkRenderer != null
+            ? sparkRenderer.sortingLayerName
+            : "Default";
+        windRenderer.sortingOrder = sparkRenderer != null
+            ? sparkRenderer.sortingOrder + 10
+            : 80;
+
         if (sparkRenderer != null && sparkRenderer.sharedMaterial != null)
         {
             windRenderer.sharedMaterial = sparkRenderer.sharedMaterial;
