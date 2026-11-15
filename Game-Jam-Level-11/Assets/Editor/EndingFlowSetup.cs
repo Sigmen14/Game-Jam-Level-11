@@ -15,6 +15,8 @@ public static class EndingFlowSetup
     private const string HudPrefabPath = "Assets/Prefabs/UI/UI_HUD.prefab";
     private const string GlowSpritePath = "Assets/Art/LastFlame/MenuButtonGlow.png";
     private const string SparkSpritePath = "Assets/Art/LastFlame/MenuButtonSpark.png";
+    private const string WindAudioPath = "Assets/Audio/SFX/Prologue_Wind.wav";
+    private const string FireAudioPath = "Assets/Audio/SFX/Prologue_Fire.wav";
     private const int ButtonSparkCount = 6;
 
     [MenuItem("Game Jam/Setup Last Ember Story Endings")]
@@ -95,6 +97,8 @@ public static class EndingFlowSetup
                 sparkSprite = glowSprite;
 
             Font font = LoadBuiltinFont();
+            AudioSource windAudio = GetOrCreateAudioSource(root, WindAudioPath, 0.28f);
+            AudioSource fireAudio = GetOrCreateAudioSource(root, FireAudioPath, 0.24f);
 
             GameObject choiceRoot = GetOrCreatePanel(
                 root.transform,
@@ -141,6 +145,8 @@ public static class EndingFlowSetup
             SetObjectReference(sequenceView, "endingTitleText", sequence.endingTitleText);
             SetObjectReference(sequenceView, "endingBodyText", sequence.endingBodyText);
             SetObjectReference(sequenceView, "statisticsText", sequence.statisticsText);
+            SetObjectReference(sequenceView, "windAudio", windAudio);
+            SetObjectReference(sequenceView, "fireAudio", fireAudio);
 
             choiceRoot.SetActive(false);
             sequenceRoot.SetActive(false);
@@ -155,6 +161,38 @@ public static class EndingFlowSetup
         {
             PrefabUtility.UnloadPrefabContents(root);
         }
+    }
+
+    private static AudioSource GetOrCreateAudioSource(
+        GameObject root, string clipPath, float volume)
+    {
+        AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(clipPath);
+        if (clip == null)
+            throw new System.InvalidOperationException("Не найден аудиофайл " + clipPath + ".");
+
+        AudioSource source = null;
+        AudioSource[] existingSources = root.GetComponents<AudioSource>();
+        for (int i = 0; i < existingSources.Length; i++)
+        {
+            if (existingSources[i] != null && existingSources[i].clip == clip)
+            {
+                source = existingSources[i];
+                break;
+            }
+        }
+
+        if (source == null)
+            source = root.AddComponent<AudioSource>();
+
+        source.clip = clip;
+        source.playOnAwake = false;
+        source.loop = true;
+        source.volume = volume;
+        source.pitch = 1f;
+        source.spatialBlend = 0f;
+        source.mute = false;
+        EditorUtility.SetDirty(source);
+        return source;
     }
 
     private struct ChoiceReferences
