@@ -118,9 +118,17 @@ public sealed class GameplayChallengeController : MonoBehaviour
         isRunning = running;
 
         if (IsRotatingObstacle)
+        {
             ResetMotion();
+        }
         else
+        {
             ResetRoute();
+            if (running)
+            {
+                ShowMessage("ДОЙДИ ДО РАЗВИЛКИ ВПРАВО: ВВЕРХ — КОРОТКИЙ ОПАСНЫЙ ПУТЬ; ВНИЗ — ДЛИННЫЙ БЕЗОПАСНЫЙ");
+            }
+        }
     }
 
     private void Update()
