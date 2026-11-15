@@ -39,16 +39,6 @@ public sealed class BeaconController : MonoBehaviour
     private Vector3 _baseGlowScale = Vector3.one;
     private Vector3 _baseFlameScale = Vector3.one;
 
-    private void Awake()
-    {
-        if (glowRenderer != null)
-            _baseGlowScale = glowRenderer.transform.localScale;
-        if (flameRenderer != null)
-            _baseFlameScale = flameRenderer.transform.localScale;
-
-        ApplyVisualState(false);
-    }
-
     /// <summary>Called by the scene GameManager so this prefab uses the active game systems.</summary>
     public void Bind(PlayerController player, FlameMeter flame, GameManager gameManager)
     {
@@ -121,6 +111,132 @@ public sealed class BeaconController : MonoBehaviour
         _insideSafeZone = isInside;
         if (_flameMeter != null)
             _flameMeter.SetBeaconShelter(this, isInside);
+    }
+
+    private void Awake()
+    {
+        EnsureFallbackVisuals();
+
+        if (glowRenderer != null)
+            _baseGlowScale = glowRenderer.transform.localScale;
+        if (flameRenderer != null)
+            _baseFlameScale = flameRenderer.transform.localScale;
+
+        ApplyVisualState(false);
+    }
+
+    /// <summary>
+    /// The original prefab referenced sprite GUIDs that are not present in the
+    /// repository. Build simple pixel-art sprites at runtime when those assets
+    /// are missing so the beacon is visible in a clean checkout.
+    /// </summary>
+    private void EnsureFallbackVisuals()
+    {
+        if (towerRenderer != null && towerRenderer.sprite == null)
+        {
+            const int width = 64;
+            const int height = 96;
+            Color32[] pixels = new Color32[width * height];
+            Color32 stone = new Color32(190, 181, 157, 255);
+            Color32 lightStone = new Color32(224, 211, 178, 255);
+            Color32 red = new Color32(139, 60, 49, 255);
+            Color32 dark = new Color32(48, 43, 42, 255);
+            Color32 glass = new Color32(255, 190, 91, 255);
+
+            for (int y = 5; y < 72; y++)
+            {
+                float t = (y - 5f) / 67f;
+                int halfWidth = Mathf.RoundToInt(Mathf.Lerp(17f, 11f, t));
+                int center = width / 2;
+                for (int x = center - halfWidth; x <= center + halfWidth; x++)
+                {
+                    bool stripe = (y >= 23 && y <= 29) || (y >= 49 && y <= 54);
+                    pixels[y * width + x] = stripe ? red : (x < center ? stone : lightStone);
+                }
+            }
+
+            // Red roof and a narrow lantern room.
+            for (int y = 72; y < 86; y++)
+            {
+                int halfWidth = Mathf.RoundToInt((86 - y) * 0.78f);
+                for (int x = 32 - halfWidth; x <= 32 + halfWidth; x++)
+                    pixels[y * width + x] = red;
+            }
+            for (int y = 57; y < 72; y++)
+                for (int x = 25; x <= 38; x++)
+                    pixels[y * width + x] = dark;
+            for (int y = 60; y < 69; y++)
+                for (int x = 28; x <= 35; x++)
+                    pixels[y * width + x] = glass;
+
+            // Door and small side windows.
+            for (int y = 5; y < 21; y++)
+                for (int x = 28; x <= 35; x++)
+                    pixels[y * width + x] = dark;
+            for (int y = 36; y < 44; y++)
+                for (int x = 22; x <= 26; x++)
+                    pixels[y * width + x] = dark;
+            for (int y = 36; y < 44; y++)
+                for (int x = 38; x <= 42; x++)
+                    pixels[y * width + x] = dark;
+
+            towerRenderer.sprite = CreateRuntimeSprite("OldBeacon_Tower", width, height, pixels, new Vector2(0.5f, 0.04f), 64f);
+            towerRenderer.sortingOrder = Mathf.Max(towerRenderer.sortingOrder, 5);
+        }
+
+        if (glowRenderer != null && glowRenderer.sprite == null)
+        {
+            const int size = 64;
+            Color32[] pixels = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float dx = (x - 31.5f) / 31.5f;
+                float dy = (y - 31.5f) / 31.5f;
+                float distance = Mathf.Sqrt(dx * dx + dy * dy);
+                byte alpha = (byte)(Mathf.Clamp01(1f - distance) * 180f);
+                pixels[y * size + x] = new Color32(255, 151, 65, alpha);
+            }
+            glowRenderer.sprite = CreateRuntimeSprite("OldBeacon_Glow", size, size, pixels, new Vector2(0.5f, 0.5f), 32f);
+            glowRenderer.sortingOrder = 4;
+        }
+
+        if (flameRenderer != null && flameRenderer.sprite == null)
+        {
+            const int width = 32;
+            const int height = 48;
+            Color32[] pixels = new Color32[width * height];
+            Color32 outer = new Color32(242, 91, 31, 255);
+            Color32 inner = new Color32(255, 202, 83, 255);
+            for (int y = 0; y < height; y++)
+            {
+                float t = y / (float)height;
+                int halfWidth = Mathf.RoundToInt(Mathf.Sin(t * Mathf.PI) * 12f);
+                for (int x = width / 2 - halfWidth; x <= width / 2 + halfWidth; x++)
+                    pixels[y * width + x] = outer;
+            }
+            for (int y = 0; y < 27; y++)
+            {
+                int halfWidth = Mathf.RoundToInt(Mathf.Sin((y / 27f) * Mathf.PI) * 5f);
+                for (int x = width / 2 - halfWidth; x <= width / 2 + halfWidth; x++)
+                    pixels[y * width + x] = inner;
+            }
+            flameRenderer.sprite = CreateRuntimeSprite("OldBeacon_Flame", width, height, pixels, new Vector2(0.5f, 0.08f), 32f);
+            flameRenderer.sortingOrder = 7;
+        }
+    }
+
+    private static Sprite CreateRuntimeSprite(string spriteName, int width, int height, Color32[] pixels, Vector2 pivot, float pixelsPerUnit)
+    {
+        Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        texture.name = spriteName + "_Texture";
+        texture.filterMode = FilterMode.Point;
+        texture.wrapMode = TextureWrapMode.Clamp;
+        texture.SetPixels32(pixels);
+        texture.Apply(false, true);
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, width, height), pivot, pixelsPerUnit, 0, SpriteMeshType.FullRect);
+        sprite.name = spriteName;
+        return sprite;
     }
 
     private void ApplyVisualState(bool isLit)
