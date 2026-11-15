@@ -556,10 +556,11 @@ public static class PauseMenuSetup
         Text pauseTitle = card.GetComponentInChildren<Text>(true);
         if (pauseTitle != null)
             pauseTitle.color = new Color(1f, 0.77f, 0.38f, 1f);
-        CreateButton("ПРОДОЛЖИТЬ", card.transform, new Vector2(0f, -35f));
-        CreateButton("НАСТРОЙКИ", card.transform, new Vector2(0f, -155f));
-        CreateButton("РЕСТАРТ", card.transform, new Vector2(0f, -275f));
-        CreateButton("ВЫЙТИ В МЕНЮ", card.transform, new Vector2(0f, -395f));
+        // Spread the buttons vertically while keeping the full stack inside the card.
+        CreateButton("ПРОДОЛЖИТЬ", card.transform, new Vector2(0f, 0f));
+        CreateButton("НАСТРОЙКИ", card.transform, new Vector2(0f, -140f));
+        CreateButton("РЕСТАРТ", card.transform, new Vector2(0f, -280f));
+        CreateButton("ВЫЙТИ В МЕНЮ", card.transform, new Vector2(0f, -420f));
         return root;
     }
 
