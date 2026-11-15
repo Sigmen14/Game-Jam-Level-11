@@ -54,17 +54,36 @@ public static class MainMenuFireAtmosphereSetup
                 return;
             }
 
-            Transform previousAtmosphere = prefabContents.transform.Find("FireAtmosphere");
-            if (previousAtmosphere != null)
-                Object.DestroyImmediate(previousAtmosphere.gameObject);
+            // The atmosphere must sit above the opaque panel background but below
+            // its labels and buttons. Parenting it to the Canvas root made the
+            // 95%-opaque menu panel hide almost all particles.
+            SerializedObject controllerSerialized = new SerializedObject(controller);
+            SerializedProperty panelProperty = controllerSerialized.FindProperty("mainMenuPanel");
+            GameObject mainMenuPanel = panelProperty != null
+                ? panelProperty.objectReferenceValue as GameObject
+                : null;
+            RectTransform panelRect = mainMenuPanel != null
+                ? mainMenuPanel.GetComponent<RectTransform>()
+                : null;
 
-            Transform previousFlash = prefabContents.transform.Find("FireTransitionFlash");
-            if (previousFlash != null)
-                Object.DestroyImmediate(previousFlash.gameObject);
+            if (panelRect == null)
+            {
+                EditorUtility.DisplayDialog(
+                    "Main Menu Fire Atmosphere",
+                    "У существующего MainMenuController не назначена mainMenuPanel с RectTransform.",
+                    "OK");
+                return;
+            }
+
+            RemoveNamedChildren(prefabContents.transform, "FireAtmosphere");
+            RemoveNamedChildren(prefabContents.transform, "FireTransitionFlash");
+            RemoveNamedChildren(canvas.transform, "FireAtmosphere");
+            RemoveNamedChildren(canvas.transform, "FireTransitionFlash");
+            RemoveNamedChildren(panelRect.transform, "FireAtmosphere");
 
             GameObject atmosphereObject = new GameObject("FireAtmosphere", typeof(RectTransform));
             RectTransform atmosphereRect = atmosphereObject.GetComponent<RectTransform>();
-            atmosphereRect.SetParent(prefabContents.transform, false);
+            atmosphereRect.SetParent(panelRect, false);
             Stretch(atmosphereRect);
             atmosphereRect.SetAsFirstSibling();
 
@@ -72,19 +91,19 @@ public static class MainMenuFireAtmosphereSetup
                 "DistantHearthGlow",
                 atmosphereRect,
                 softCircle,
-                new Color(1f, 0.25f, 0.055f, 0.2f),
-                new Vector2(1120f, 570f),
+                new Color(1f, 0.54f, 0.13f, 0.10f),
+                new Vector2(820f, 420f),
                 new Vector2(0.5f, 0f),
-                new Vector2(0f, 105f));
+                new Vector2(0f, 92f));
 
             CreateGlow(
                 "HearthCoreGlow",
                 atmosphereRect,
                 softCircle,
-                new Color(1f, 0.48f, 0.12f, 0.15f),
-                new Vector2(560f, 260f),
+                new Color(1f, 0.74f, 0.26f, 0.13f),
+                new Vector2(430f, 220f),
                 new Vector2(0.5f, 0f),
-                new Vector2(0f, 105f));
+                new Vector2(0f, 92f));
 
             List<Image> floatingLights = new List<Image>();
             for (int i = 0; i < 24; i++)
@@ -137,20 +156,30 @@ public static class MainMenuFireAtmosphereSetup
                 typeof(CanvasRenderer),
                 typeof(Image));
             RectTransform flashRect = flashObject.GetComponent<RectTransform>();
-            flashRect.SetParent(prefabContents.transform, false);
-            Stretch(flashRect);
+            flashRect.SetParent(canvas.transform, false);
+            flashRect.anchorMin = new Vector2(0.5f, 0.5f);
+            flashRect.anchorMax = new Vector2(0.5f, 0.5f);
+            flashRect.pivot = new Vector2(0.5f, 0.5f);
+            flashRect.sizeDelta = new Vector2(500f, 500f);
+            flashRect.anchoredPosition = new Vector2(0f, -360f);
+            flashRect.localScale = Vector3.one;
             flashRect.SetAsLastSibling();
 
             Image transitionFlash = flashObject.GetComponent<Image>();
-            transitionFlash.sprite = null;
-            transitionFlash.color = new Color(1f, 0.31f, 0.07f, 0f);
+            transitionFlash.sprite = softCircle;
+            transitionFlash.type = Image.Type.Simple;
+            transitionFlash.material = null;
+            transitionFlash.color = new Color(1f, 0.62f, 0.16f, 0f);
             transitionFlash.raycastTarget = false;
             transitionFlash.maskable = false;
+            transitionFlash.enabled = false;
 
+            // Keep the animation component on the same GameObject as the controller:
+            // MainMenuController resolves it with GetComponent in Awake.
             MainMenuFireAtmosphere atmosphere =
-                prefabContents.GetComponent<MainMenuFireAtmosphere>();
+                controller.GetComponent<MainMenuFireAtmosphere>();
             if (atmosphere == null)
-                atmosphere = prefabContents.AddComponent<MainMenuFireAtmosphere>();
+                atmosphere = controller.gameObject.AddComponent<MainMenuFireAtmosphere>();
 
             SerializedObject atmosphereObjectSerialized = new SerializedObject(atmosphere);
             SetObject(atmosphereObjectSerialized, "atmosphereRoot", atmosphereRect);
@@ -169,10 +198,9 @@ public static class MainMenuFireAtmosphereSetup
             atmosphereObjectSerialized.FindProperty("brightnessMultiplier").floatValue = 1f;
             atmosphereObjectSerialized.FindProperty("glowStrength").floatValue = 1f;
             atmosphereObjectSerialized.FindProperty("transitionDuration").floatValue = 0.72f;
-            atmosphereObjectSerialized.FindProperty("flashPeakAlpha").floatValue = 0.32f;
+            atmosphereObjectSerialized.FindProperty("flashPeakAlpha").floatValue = 0.24f;
             atmosphereObjectSerialized.ApplyModifiedPropertiesWithoutUndo();
 
-            SerializedObject controllerSerialized = new SerializedObject(controller);
             SerializedProperty atmosphereProperty = controllerSerialized.FindProperty("fireAtmosphere");
             if (atmosphereProperty != null)
             {
@@ -182,14 +210,15 @@ public static class MainMenuFireAtmosphereSetup
 
             EditorUtility.SetDirty(atmosphere);
             EditorUtility.SetDirty(controller);
+            EditorUtility.SetDirty(controller.gameObject);
             PrefabUtility.SaveAsPrefabAsset(prefabContents, MenuPrefabPath);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
             EditorUtility.DisplayDialog(
                 "Main Menu Fire Atmosphere",
-                "Готово! Атмосфера добавлена в существующий UI_Menu.prefab. " +
-                "Частицы находятся под панелями меню, а вспышка — поверх UI и не блокирует нажатия.",
+                "Готово! Атмосфера добавлена внутрь существующей панели меню: поверх её фона, " +
+                "но под текстом и кнопками. Вспышка локальная, золотистая и не блокирует нажатия.",
                 "OK");
         }
         finally
@@ -238,10 +267,27 @@ public static class MainMenuFireAtmosphereSetup
         Image image = particleObject.GetComponent<Image>();
         image.sprite = sprite;
         image.type = Image.Type.Simple;
+        image.material = null; // Use Unity's default UI shader; no custom Sprite-Lit material.
         image.color = color;
         image.raycastTarget = false;
         image.maskable = false;
+        image.enabled = true;
         return image;
+    }
+
+    private static void RemoveNamedChildren(Transform root, string objectName)
+    {
+        if (root == null)
+            return;
+
+        for (int i = root.childCount - 1; i >= 0; i--)
+        {
+            Transform child = root.GetChild(i);
+            if (child.name == objectName)
+                Object.DestroyImmediate(child.gameObject);
+            else
+                RemoveNamedChildren(child, objectName);
+        }
     }
 
     private static Image FindImage(Transform parent, string childName)
