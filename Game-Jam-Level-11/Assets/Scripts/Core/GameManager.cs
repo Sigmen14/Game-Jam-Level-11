@@ -80,6 +80,9 @@ public sealed class GameManager : MonoBehaviour
         if (playerController != null)
             playerController.BindGameplaySystems(flameMeter, windController);
 
+        if (flameMeter != null)
+            flameMeter.BindGameplaySystems(playerController, windController);
+
         if (routeDirector != null)
             routeDirector.Bind(playerController, flameMeter, hudView);
 
